@@ -108,3 +108,10 @@ dist
 
 # OpenRCT saves
 .save
+
+.editorconfig
+.eslintignore
+.eslintrc.json
+.nvmrc
+.nodemon.json
+rollup.*

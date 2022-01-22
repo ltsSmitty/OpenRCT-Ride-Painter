@@ -1,7 +1,4 @@
-# 🎢 openrct2-typescript-mod-template
-[![Dependabot](https://badgen.net/badge/Dependabot/enabled/green?icon=dependabot)](https://dependabot.com/)
-
-Template repository for OpenRCT2 mods written in TypeScript.
+# 🎢 Theme Editor
 
 ## Table of contents
   * [About](#about)
@@ -17,46 +14,9 @@ Template repository for OpenRCT2 mods written in TypeScript.
 
 This repository was created to serve as a template TypeScript mod repository for OpenRCT2.
 
-I wanted to leverage [OpenRCT2 hot reload feature](https://github.com/OpenRCT2/OpenRCT2/blob/master/distribution/scripting.md#writing-scripts) to make it even more painless to write and debug mods in real time.
-
-This template repository comes with [Nodemon](https://nodemon.io/), [ESLint](https://eslint.org/) and [TypeScript](https://www.typescriptlang.org/) on board.
-
-The idea was to use Nodemon to start a local server that will be watching your mod files, then on each save make it build `.ts` files to ES5 `.js` files, place them inside OpenRCT2 `plugin` directory, and let hot reload feature do the rest (i.e. reload the mod in-game).
-
 ## Installation
 
-1. Install latest versions of [Node](https://nodejs.org/en/) and [npm](https://www.npmjs.com/get-npm)
-2. [Create your own repository using this one as a template](https://docs.github.com/en/free-pro-team@latest/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template) and clone it anywhere to your PC
-3. `cd` into it and run `npm install`
-4. Find `openrct2.d.ts` TypeScript API declaration file in OpenRCT2 files and copy it to `lib` folder (this file can usually be found in `C:\Users\<USER>\Documents\OpenRCT2\bin` or `C:\Program Files\OpenRCT2\openrct2.d.ts`)
-    - alternatively, you can make a symbolic link instead of copying the file, which will keep the file up to date whenever you install new versions of OpenRCT2. To do this on Windows:
-      - run command prompt as administrator
-      - `cd` into your repo (wherever you cloned it)
-      - run `mklink ./lib/openrct2.d.ts <path to openrct2.d.ts>`
-5. Edit `./config.json`:
-    - `modName` - will be used in `./src/registerPlugin.ts`, `./rollup.config.dev.js` and `./rollup.config.prod.js`
-    - `modURL` - will be used in `./src/registerPlugin.ts` and `package.json`
-      - use the URL created as a result of step 2 (link to your mod repo) - it should look like `https://github.com/<author>/<repository>`
-    - `gamePath` - will be used in `./rollup.config.dev.js`
-      - make sure this path uses `/` instead of `\`
-      - this path is the one that holds the `plugin` folder, not the installation path
-      - typically `C:\Users\<USER>\Documents\OpenRCT2`
-6. Run `npm run init` - it will replace all the data and then commit the results
-7. You can start modding :)
-
-Of course it's a template, so you can edit anything you like.
-
-If you want to alter plugin data, refer to [OpenRCT2 scripting guide](https://github.com/OpenRCT2/OpenRCT2/blob/master/distribution/scripting.md).
-
 ## Usage
-
-1. Make sure you've enabled [OpenRCT2 hot reload feature](https://github.com/OpenRCT2/OpenRCT2/blob/master/distribution/scripting.md#writing-scripts) by setting `enable_hot_reloading = true` in your `/OpenRCT2/config.ini`
-2. `cd` into repo
-3. run `npm start` (this will place compiled and minified mod inside `PATH_TO_OPENRCT2/plugin/` directory)
-4. Open `./src/main.ts` in your code editor
-5. [Start OpenRCT2 with console](https://github.com/OpenRCT2/OpenRCT2/blob/master/distribution/scripting.md#writing-scripts) and load save/start new game
-6. Each time you save any of the files in `./src/`, the server will compile `./src/registerPlugin.ts` and place compiled file inside `PATH_TO_OPENRCT2/plugin/` directory as `MOD_NAME.js`
-7. OpenRCT2 will notice file changes and it will reload the mods
 
 ### How it works
 
