@@ -113,5 +113,5 @@ dist
 .eslintignore
 .eslintrc.json
 .nvmrc
-.nodemon.json
 rollup.*
+nodemon.json
