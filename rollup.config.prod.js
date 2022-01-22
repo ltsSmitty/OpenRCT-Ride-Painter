@@ -4,7 +4,7 @@ import { terser } from 'rollup-plugin-terser';
 export default {
   input: './src/registerPlugin.ts',
   output: {
-    file: './dist/AUTO_COLOR_RIDES.js',
+    file: './dist/Theme_Manager.js',
     format: 'iife',
   },
   plugins: [
@@ -13,7 +13,6 @@ export default {
       format: {
         quote_style: 1,
         wrap_iife: true,
-        preamble: '// Mod powered by https://github.com/wisnia74/openrct2-typescript-mod-template - MIT license',
       },
     }),
   ],

@@ -1,5 +1,5 @@
 {
-  "name": "openrct2-typescript-smitty",
+  "name": "thememanagerltssmitty",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thesm17/openrct2-typescript-smitty.git"
+    "url": "git+https://github.com/thesm17/scaling-octo-spoon"
   },
   "author": "thesm17",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/thesm17/openrct2-typescript-smitty/issues"
+    "url": "https://github.com/thesm17/scaling-octo-spoon/issues"
   },
-  "homepage": "https://github.com/thesm17/openrct2-typescript-smitty#readme",
+  "homepage": "https://github.com/thesm17/scaling-octo-spoon#readme",
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.2.0",
     "@typescript-eslint/eslint-plugin": "^4.0.0",
