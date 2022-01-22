@@ -1,13 +1,5 @@
 {
-  "env": {
-    "browser": true,
-    "es6": true,
-    "node": true
-  },
-  "extends": [
-    "airbnb",
-    "prettier"
-  ],
+  "extends": ["airbnb", "prettier"],
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
@@ -18,14 +10,13 @@
     "sourceType": "module"
   },
   "plugins": [
-    "@typescript-eslint",
     "prettier"
   ],
   "rules": {
     // "spaced-comment": 0,
     // "max-len": ["error", { "code": 120 }],
     // "linebreak-style": 0,
-    // "@typescript-eslint/triple-slash-reference": 0,
+    "@typescript-eslint/triple-slash-reference": 2,
     // "no-console": 0,
     "prettier/prettier": ["error"],
     "import/extensions": ["error", "always", { "js": "never", "ts": "never" }],
