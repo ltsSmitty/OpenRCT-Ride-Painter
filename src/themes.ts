@@ -90,7 +90,7 @@ export const getThemeNames = ():string[] => {
   return t;
 };
 
-export const getThemeByName = (name: String):Theme => {
+export const getThemeByName = (name: string):Theme => {
   const themeAttempt = themes.filter((t:Theme) => t.name === name);
   // TODO: catch if themeAttempt is not found, and return a default theme
   return themeAttempt[0];

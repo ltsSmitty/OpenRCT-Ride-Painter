@@ -1,18 +1,16 @@
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Theme, getThemeNames, getThemeByName } from './themes';
 
-/* eslint-disable no-console */
 /// <reference path="../lib/openrct2.d.ts" />
 
 import ColourChange from './ColourChange';
 import { getRides } from './helpers';
 
-/* eslint-disable no-unused-vars */
 const namespace = 'random_ride_colours';
 const changeRideColourKey = `${namespace}.changeRideColour`;
 const themeEnabledKey = `${namespace}.themeEnabled`;
 
-const themeEnabled:boolean = true;
+const themeEnabled = true;
 
 // Retrieve given key from sharedStorage, returns defaultValue if not found.
 export const getConfig = (key, defaultValue) => context.sharedStorage.get(key, defaultValue);
@@ -32,6 +30,7 @@ const chooseRideColorsFromTheme = (theme: Theme):number[] => {
 
   const completedCars = theme.colours.rideColours;
 
+  // eslint-disable-next-line no-console
   console.log(`Theme name: ${theme.name}.
   Possible combinations: ${possibleCombinations}.
   Completed cars: ${completedCars.length}`);
