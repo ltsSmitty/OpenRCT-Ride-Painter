@@ -82,12 +82,15 @@ export default class ColourChange {
 
   public static setRandomTrackColour = (ride:Ride): void => {
     ColourChange.setRideColourTracks(ride,
-       context.getRandom(0, 31), context.getRandom(0, 31),
-       context.getRandom(0, 31));
+      context.getRandom(0, 31), context.getRandom(0, 31),
+      context.getRandom(0, 31));
   };
 
   public static setRandomVehicleColour = (ride:Ride): void => {
-    ColourChange.setRideColourVehicle(ride, context.getRandom(0, 31), context.getRandom(0, 31), context.getRandom(0, 31));
+    ColourChange.setRideColourVehicle(ride,
+      context.getRandom(0, 31),
+      context.getRandom(0, 31),
+      context.getRandom(0, 31));
   };
 
   public static setRideStationStyle = (ride:Ride, stationStyle: number) => {
