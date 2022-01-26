@@ -1,7 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Theme, getThemeNames, getThemeByName } from './themes';
-
 /// <reference path="../lib/openrct2.d.ts" />
+import { Theme, getThemeNames, getThemeByName } from './themes';
 
 import ColourChange from './ColourChange';
 import { getRides } from './helpers';
@@ -19,7 +17,7 @@ export const getConfig = (key, defaultValue) => context.sharedStorage.get(key, d
 export const setConfig = (key, value) => context.sharedStorage.set(key, value);
 
 const chooseRideColorsFromTheme = (theme: Theme):number[] => {
-  //it might use one of the given acceptable schemes, or might assign a static option
+  // it might use one of the given acceptable schemes, or might assign a static option
   const parts = theme.colours.partColours;
   const possibleCombinations = parts.VehicleColourBody.length
     + parts.VehicleColourTernary.length
@@ -35,19 +33,19 @@ const chooseRideColorsFromTheme = (theme: Theme):number[] => {
   Possible combinations: ${possibleCombinations}.
   Completed cars: ${completedCars.length}`);
 
-  //choose one from each and plop it into an array?
+  // choose one from each and plop it into an array?
   const finalColours:number[] = [];
-  //if it goes the random route
-  //main = random choice from main list
+  // if it goes the random route
+  // main = random choice from main list
   // trim = random choice from trim list, etc
   return finalColours;
 };
 
 const setRideColourAccordingToTheme = (ride:Ride) => {
   let newRideColours;
-//check that a theme is set
-//randomly choose an acceptable 6 colors
-//ColourChange.setRideColour(ride,...newRideColours);
+// check that a theme is set
+// randomly choose an acceptable 6 colors
+// ColourChange.setRideColour(ride,...newRideColours);
 };
 
 const rideDayHook = () => {
@@ -86,7 +84,9 @@ const showWindow = () => {
         tooltip: '',
         text: 'Change Ride Colour daily',
         isChecked: getConfig(changeRideColourKey, false),
-        onChange: (params) => { setConfig(changeRideColourKey, params); },
+        onChange: (params) => {
+          setConfig(changeRideColourKey, params);
+        },
       },
       // {
       //   type: 'button',

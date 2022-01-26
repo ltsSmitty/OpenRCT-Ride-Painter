@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const namespace = 'random_ride_colours';
 const changeRideColourKey = `${namespace}.changeRideColour`;
 
