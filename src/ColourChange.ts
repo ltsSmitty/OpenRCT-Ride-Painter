@@ -39,12 +39,12 @@ export default class ColourChange {
  */
   public static setRideColour = (
     ride: Ride,
-    mainColour:number,
-    additionalColour: number,
-    supportsColour: number,
-    vehicleBodyColour: number,
-    vehicleTrimColour: number,
-    vehicleTernaryColour: number,
+    mainColour:number = -1,
+    additionalColour: number = -1,
+    supportsColour: number = -1,
+    vehicleBodyColour: number = -1,
+    vehicleTrimColour: number = -1,
+    vehicleTernaryColour: number = -1,
   ) => {
     ColourChange.setRideColourPart(ride, 0, mainColour);
     ColourChange.setRideColourPart(ride, 1, additionalColour);

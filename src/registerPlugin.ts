@@ -1,6 +1,5 @@
 /// <reference path="../lib/openrct2.d.ts" />
-
-import main from './main';
+import themeChooser from './window';
 
 registerPlugin({
   name: 'Random Ride Colours',
@@ -8,5 +7,7 @@ registerPlugin({
   authors: ['ltsSmitty'],
   type: 'remote',
   licence: 'GPL-3.0',
-  main,
+  main: () => {
+    ui.registerMenuItem("Theme Manager", () => themeChooser.open())
+  }
 });

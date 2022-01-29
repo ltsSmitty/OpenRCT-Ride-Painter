@@ -1,134 +1,214 @@
-/// <reference path="../lib/openrct2.d.ts" />
-import { Theme, getThemeNames, getThemeByName } from './themes';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable consistent-return */
 
+import { box, button, dropdown, dropdownSpinner, horizontal, label, spinner, toggle,
+          // eslint-disable-next-line import/no-unresolved
+          vertical, viewport, window } from "openrct2-flexui";
+
+import { themes,  Mode, ModeToggle, ModeFunctions, getThemeByName} from './themes';
 import ColourChange from './ColourChange';
-import { getRides } from './helpers';
+import {getConfig, setConfig} from './helperFunctions';
+import { debug } from "./helpers/logger";
+
+/// <reference path="../lib/openrct2.d.ts" />
 
 const namespace = 'random_ride_colours';
-const changeRideColourKey = `${namespace}.changeRideColour`;
-const themeEnabledKey = `${namespace}.themeEnabled`;
+const themeKey = `${namespace}.themeName`;
+const modeKey = `${namespace}.mode`
 
-const themeEnabled = true;
+const toggleMode = (modeValue: Mode, t: boolean) => {
+  const activeModes: ModeToggle | false = getConfig(modeKey, false);
+  if (!activeModes) {
+    debug(`not sure if it ever gets here.`);
+    setConfig(modeKey,{modeValue:{active:t}});
+    return t;
+  }
+   if (modeValue in activeModes) {
+    activeModes[modeValue].active = t
+  }
+  else {
+    activeModes[modeValue] = {active:t}
+  }
+  setConfig(modeKey,activeModes);
+  return activeModes[`${modeValue}`].active
 
-// Retrieve given key from sharedStorage, returns defaultValue if not found.
-export const getConfig = (key, defaultValue) => context.sharedStorage.get(key, defaultValue);
+}
 
-// Stores given value under given key in sharedStorage.
-export const setConfig = (key, value) => context.sharedStorage.set(key, value);
+const filterActiveModes = (modes: ModeToggle) => {
+  const modeKeys = Object.keys(modes);
+  const activeValues: Mode[] = [];
+  modeKeys.forEach((key) => {
+    if (modes[key as Mode].active === true) activeValues.push(key as Mode)
+  })
+  return activeValues;
+}
+const changeRideColoursNow = (rides?:Ride[], exclusions: Ride[]=[]) => {
+  const themeName: string = getConfig(themeKey, "All Colors Baby");
+  const themeValues = getThemeByName(themeName);
+  const modes: ModeToggle = getConfig(modeKey, false)// colourModes.LightAndDarkMode)
+  const ridesToTheme = map.rides.filter((ride) => ride.classification === "ride" );
+  // TODO handle if an exclusion list is provided
+  // remove any exclusions from the ride list
+  // if (exclusions.length>0){ridesToTheme = rides.filter(ride => !exclusions.includes(ride));}
 
-const chooseRideColorsFromTheme = (theme: Theme):number[] => {
-  // it might use one of the given acceptable schemes, or might assign a static option
-  const parts = theme.colours.partColours;
-  const possibleCombinations = parts.VehicleColourBody.length
-    + parts.VehicleColourTernary.length
-    + parts.VehicleColourTrim.length
-    + parts.trackColourAdditional.length
-    + parts.trackColourMain.length
-    + parts.trackColourSupports.length;
+  // Filter the theme modes to return the ones which are currently active
+  const activeModes=filterActiveModes(modes);
 
-  const completedCars = theme.colours.rideColours;
+  // loop through remaining rides and choose a mode to colour them with
+  ridesToTheme.forEach((ride) => {
+    debug(`Ride to set colour: ${ride.name}`);
 
-  // eslint-disable-next-line no-console
-  console.log(`Theme name: ${theme.name}.
-  Possible combinations: ${possibleCombinations}.
-  Completed cars: ${completedCars.length}`);
+    const colours = ModeFunctions(activeModes[Math.floor(Math.random()*activeModes.length)])(themeValues)
+    // const colourFunction = ModeFunctions(activeModes[Math.floor(Math.random()*activeModes.length)])
+    // debug(`colourFunction: ${JSON.stringify(colourFunction)}`);
+    // const colours = colourFunction(themes.themeName);
+    // set the ride colours
+    if (colours)  ColourChange.setRideColour(ride, ...colours);
+  })
+}
 
-  // choose one from each and plop it into an array?
-  const finalColours:number[] = [];
-  // if it goes the random route
-  // main = random choice from main list
-  // trim = random choice from trim list, etc
-  return finalColours;
-};
+const getThemeIndex = () => {
+  const themeName: string = getConfig(themeKey, "All Colors Baby");
+  const index = Object.keys(themes).indexOf(themeName)
+  debug(`theme index: ${index}`);
+  return index;
+}
 
-const setRideColourAccordingToTheme = (ride:Ride) => {
-  let newRideColours;
-// check that a theme is set
-// randomly choose an acceptable 6 colors
-// ColourChange.setRideColour(ride,...newRideColours);
-};
+const getToggled = (mode:string) => {
+  const activeModes = getConfig(modeKey, false);
+  if (activeModes)
+  return activeModes[mode].active || false;
+  }
+
+const setThemeKey = (themeName: string) => {
+  setConfig(themeKey,themeName )
+}
+
+
 
 const rideDayHook = () => {
-  console.log(`Getting themes: ${getThemeNames().toString()}`);
-  const currentTheme: Theme = getThemeByName('Dazzling Colors');
-  chooseRideColorsFromTheme(currentTheme);
+  // Get ride colors from a theme
+  // const currentTheme: Theme = getThemeByName('All Colors Baby');
 
-  if (getConfig(changeRideColourKey, false)) {
-    getRides().forEach((ride:Ride) => {
-      ColourChange.setRandomTrackColour(ride);
-      // ColourChange.setRandomVehicleColour(ride);
-    });
-  }
+  // if (getConfig(changeRideColourKey, false)) {
+  //   getRides().forEach((ride:Ride) => {
+  //     // const colorByPart = ColourByPartMode(currentTheme);
+  //     //const mode = getConfig(modeNameKey,)
+  //     //const mono = MonochromaticMode(currentTheme);
+  //     if (mono) {
+  //       ColourChange.setRideColour(ride, ...mono);
+  //     }
+  //     // ColourChange.setRandomVehicleColour(ride);
+  //   });
+  // }
+
+  // chooseRideColorsFromTheme(currentTheme);
 };
 
-// Configuration window
-const showWindow = () => {
-  const window = ui.getWindow(namespace);
-  if (window) {
-    window.bringToFront();
-    return;
-  }
 
-  ui.openWindow({
-    classification: namespace,
-    width: 240,
-    height: 102,
-    title: 'Random Ride Colours',
-    widgets: [
-      {
-        type: 'checkbox',
-        x: 5,
-        y: 20,
-        width: 210,
-        height: 10,
-        tooltip: '',
-        text: 'Change Ride Colour daily',
-        isChecked: getConfig(changeRideColourKey, false),
-        onChange: (params) => {
-          setConfig(changeRideColourKey, params);
-        },
-      },
-      // {
-      //   type: 'button',
-      //   x: 5,
-      //   y: 35,
-      //   width: 230,
-      //   height: 21,
-      //   text: "Change Stall Balloon Colour once",
-      //   tooltip: "",
-      //   isPressed: false,
-      //   onClick: changeStallBalloonColour,
-      // },
-      // {
-      //   type: 'checkbox',
-      //   x: 5,
-      //   y: 61,
-      //   width: 210,
-      //   height: 10,
-      //   tooltip: "",
-      //   text: "Change Peep Balloon Colour daily",
-      //   isChecked: getConfig(changePeepBalloonColourKey, false),
-      //   onChange: function (params) { setConfig(changePeepBalloonColourKey, params);}
-      // },
-      // {
-      //   type: 'button',
-      //   x: 5,
-      //   y: 76,
-      //   width: 230,
-      //   height: 21,
-      //   text: "Change Peep Balloon Colour once",
-      //   tooltip: "",
-      //   isPressed: false,
-      //   onClick: changePeepBalloonColour,
-      // }
-    ],
-  });
-};
 
-// Main function registering menu and hook.
-export default function changeRideColors() {
-  ui.registerMenuItem('Random Ride Colours', () => {
-    showWindow();
-  });
-  context.subscribe('interval.day', rideDayHook);
-}
+const existingThemes = Object.keys(themes);
+
+const themeChooser = window({
+  title: "Theme Colour Manager",
+	width: 200, minWidth: 75, maxWidth: 10000,
+	height: 300, minHeight: 75, maxHeight: 10000,
+	padding: 5,
+  content: [
+      box({
+      text: 'Current Theme',
+      padding: 5,
+      content: vertical([
+        dropdown({
+        // selectedIndex: getThemeIndex(),
+        items: [...existingThemes],
+        onChange: (index:number) => setThemeKey(existingThemes[index])
+      }),
+      label({
+        text: "__ Colour pickers __",
+      }),
+    ])
+    }),
+    label({
+      text: 'Choose colour modes.'
+    }),
+    vertical([
+      toggle({
+        text: "Colour by part",
+			  height: "28px",
+        isPressed: getToggled('ColourByPartMode'),
+			  onChange: (isPressed: boolean) => toggleMode(Mode.ColourByPartMode,isPressed)
+      }),
+      toggle({
+        text: "Monochromatic",
+			  height: "28px",
+        isPressed: getToggled('MonochromaticMode'),
+			  onChange: (isPressed: boolean) => toggleMode(Mode.MonochromaticMode,isPressed)
+      }),
+      toggle({
+        text: "Two-tone",
+			  height: "28px",
+        isPressed: getToggled('LightAndDarkMode'),
+			  onChange: (isPressed: boolean) => toggleMode(Mode.makeTwoTone,isPressed)
+      }),
+      toggle({
+        text: "Preferred Colours",
+			  height: "28px",
+        isPressed: getToggled('ChoosePreferredRideColoursMode'),
+        tooltip: "Apply pre-selected favorites",
+			  onChange: (isPressed: boolean) => toggleMode(Mode.ChoosePreferredRideColoursMode,isPressed),
+      }),
+  //     ColourByPartMode,
+  // MonochromaticMode,
+  // LightAndDarkMode,
+  // ChoosePreferredRideColoursMode
+    ]),
+    button({
+      text: "Change all ride colours now",
+      height: "10px",
+      onClick: () => changeRideColoursNow()
+    }),
+  ]
+})
+
+// // Configuration window
+// const showWindow = () => {
+//   const window = ui.getWindow(namespace);
+//   if (window) {
+//     window.bringToFront();
+//     return;
+//   }
+
+//   ui.openWindow({
+//     classification: namespace,
+//     width: 240,
+//     height: 102,
+//     title: 'Random Ride Colours',
+//     widgets: [
+//       {
+//         type: 'checkbox',
+//         x: 5,
+//         y: 20,
+//         width: 210,
+//         height: 10,
+//         tooltip: '',
+//         text: 'Change Ride Colour daily',
+//         isChecked: helpers.getConfig(changeRideColourKey, false),
+//         onChange: (params) => {
+//           helpers.setConfig(changeRideColourKey, params);
+//         },
+//       },
+//     ],
+//   });
+// };
+
+// // Main function registering menu and hook.
+// export default function changeRideColors() {
+//   ui.registerMenuItem('Random Ride Colours', () => {
+//     showWindow();
+//   });
+//   context.subscribe('interval.day', rideDayHook);
+// }
+
+
+export default themeChooser;
