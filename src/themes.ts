@@ -139,8 +139,10 @@ export const themes:{[key: string]:Theme} = {
 export const enum Mode {
   ColourByPartMode = "ColourByPartMode",
   MonochromaticMode = "MonochromaticMode",
-  makeTwoTone = "makeTwoTone",
-  ChoosePreferredRideColoursMode = "ChoosePreferredRideColoursMode"}
+  MakeTwoTone = "MakeTwoTone",
+  ChoosePreferredRideColoursMode = "ChoosePreferredRideColoursMode",
+  RandomMode = "RandomMode"
+}
 
 export type ModeToggle = {
   [k in Mode]: {
@@ -190,6 +192,19 @@ const makeMonochromaticMode = (theme: Theme) => {
   }
 }
 
+const makeRandomMode = (theme:Theme) => {
+  if (theme.colours.themeColours) {
+    const colours = [
+      getRandomColour(theme.colours.themeColours),
+      getRandomColour(theme.colours.themeColours),
+      getRandomColour(theme.colours.themeColours),
+      getRandomColour(theme.colours.themeColours),
+      getRandomColour(theme.colours.themeColours),
+      getRandomColour(theme.colours.themeColours)];
+      debug(`debug RandomMode: ${colours}`)
+      return colours
+}}
+
 const makeTwoTone = (theme:Theme) => {
   // Uses two colors for whole ride. trackMain, trackSupports, carAdditional, and carTertiary all match
   // and then trackAdditional and carMain match
@@ -229,8 +244,9 @@ export const ModeFunctions = (mode:Mode) => {
   switch (mode) {
     case "ColourByPartMode": return makeColourByPartMode;
     case "MonochromaticMode": return makeMonochromaticMode;
-    case "makeTwoTone": return makeTwoTone;
-    case "ChoosePreferredRideColoursMode": return makeChoosePreferredRideColoursMode
-    default: return makeTwoTone
+    case "MakeTwoTone": return makeTwoTone;
+    case "ChoosePreferredRideColoursMode": return makeChoosePreferredRideColoursMode;
+    case "RandomMode": return makeRandomMode
+    default: return makeMonochromaticMode
   }
 }

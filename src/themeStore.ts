@@ -1,23 +1,18 @@
-import { themes, Theme } from './themes';
-import store
+import { store, compute } from 'openrct2-flexui'
+import { setConfig, getConfig } from "./helperFunctions"
+import { debug } from "./helpers/logger";
 
-const uniqueParkHash = "abc123";
 
-interface ThemeState {
-  theme: string | undefined
+const uniqueParkHash = "abc123"
+
+type ThemeState = {
+  theme: string
 }
-
 const initialThemeState: ThemeState = {
-  theme: undefined
+  theme: "none"
 }
 
-interface ModeState {
-  modes: {
-    [mode:string] : boolean
-  }
-}
-
-const initialModeState: ModeState = {
+const initialModeState = {
   modes: {
     twoTone: false,
     monochromatic: false,
@@ -27,28 +22,27 @@ const initialModeState: ModeState = {
   }
 }
 
-interface LockedRides {
-  [rideId:string] : boolean
-}
+const initialLockedRidesState = {}
 
-const initialLockedRidesState: LockedRides = {};
-
-interface ParkThemeState {
-  currentTheme: ThemeState,
-  modes: ModeState
-  lockedRides: LockedRides,
-  uniqueParkHash: string
-}
-
-const initialParkThemeState: ParkThemeState = {
+const initialParkThemeState = {
   currentTheme: initialThemeState,
   modes: initialModeState,
   lockedRides: initialLockedRidesState,
   uniqueParkHash
 }
 
-function updateTheme(state = initialState, action: {type: string}) {
-  return {...state, theme: state.theme}
-}
+export const initThemeStore = () => setConfig("themeStore",store(initialThemeState));
 
-const parkThemeStore = store()
+export const yodawg = () => {
+  const themeStore = store(getConfig("themeStore", false));
+  const workingTheme = compute(themeStore, t => t.theme);
+  debug(`current theme: ${workingTheme.get()}`);
+  themeStore.set({
+    theme: "new theme baby."
+  });
+  debug(`new theme value: ${workingTheme.get()}`);
+};
+
+export class ThemeStore {
+
+}

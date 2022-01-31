@@ -114,3 +114,4 @@ dist
 .nvmrc
 rollup.*
 nodemon.json
+.DS_Store
