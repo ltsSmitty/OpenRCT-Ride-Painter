@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable consistent-return */
 
-import { box, button, dropdown, dropdownSpinner, horizontal, label, spinner, toggle,
-          // eslint-disable-next-line import/no-unresolved
-          vertical, viewport, window } from "openrct2-flexui";
-
-import { themes,  Mode, ModeToggle, ModeFunctions, getThemeByName} from './themes';
+import { box, button, dropdown,  label, store, toggle, vertical, window } from "openrct2-flexui";
+import { themes, Mode, ModeToggle, ModeFunctions, getThemeByName} from './themes';
 import ColourChange from './ColourChange';
 import {getConfig, setConfig} from './helperFunctions';
 import { debug } from "./helpers/logger";
@@ -35,6 +32,7 @@ const toggleMode = (modeValue: Mode, t: boolean) => {
 }
 
 const filterActiveModes = (modes: ModeToggle) => {
+  debug(`Debug: current mode status: ${JSON.stringify(modes)} `)
   const modeKeys = Object.keys(modes);
   const activeValues: Mode[] = [];
   modeKeys.forEach((key) => {
@@ -76,9 +74,11 @@ const getThemeIndex = () => {
 
 const getToggled = (mode:string) => {
   const activeModes = getConfig(modeKey, false);
-  if (activeModes)
-  return activeModes[mode].active || false;
+  if (activeModes && activeModes[mode]) {
+    return activeModes[mode].active;
   }
+  return false;
+}
 
 const setThemeKey = (themeName: string) => {
   setConfig(themeKey,themeName )
@@ -106,7 +106,6 @@ const rideDayHook = () => {
 };
 
 
-
 const existingThemes = Object.keys(themes);
 
 const themeChooser = window({
@@ -115,59 +114,67 @@ const themeChooser = window({
 	height: 300, minHeight: 75, maxHeight: 10000,
 	padding: 5,
   content: [
-      box({
+    box({
       text: 'Current Theme',
-      padding: 5,
-      content: vertical([
-        dropdown({
-        // selectedIndex: getThemeIndex(),
-        items: [...existingThemes],
-        onChange: (index:number) => setThemeKey(existingThemes[index])
+      content:
+        vertical([
+          dropdown({
+            // selectedIndex: getThemeIndex(),
+            items: [...existingThemes],
+            onChange: (index:number) => setThemeKey(existingThemes[index])
       }),
       label({
         text: "__ Colour pickers __",
       }),
     ])
     }),
-    label({
-      text: 'Choose colour modes.'
-    }),
     vertical([
-      toggle({
-        text: "Colour by part",
-			  height: "28px",
-        isPressed: getToggled('ColourByPartMode'),
-			  onChange: (isPressed: boolean) => toggleMode(Mode.ColourByPartMode,isPressed)
-      }),
-      toggle({
-        text: "Monochromatic",
-			  height: "28px",
-        isPressed: getToggled('MonochromaticMode'),
-			  onChange: (isPressed: boolean) => toggleMode(Mode.MonochromaticMode,isPressed)
-      }),
-      toggle({
-        text: "Two-tone",
-			  height: "28px",
-        isPressed: getToggled('LightAndDarkMode'),
-			  onChange: (isPressed: boolean) => toggleMode(Mode.makeTwoTone,isPressed)
-      }),
-      toggle({
-        text: "Preferred Colours",
-			  height: "28px",
-        isPressed: getToggled('ChoosePreferredRideColoursMode'),
-        tooltip: "Apply pre-selected favorites",
-			  onChange: (isPressed: boolean) => toggleMode(Mode.ChoosePreferredRideColoursMode,isPressed),
-      }),
-  //     ColourByPartMode,
-  // MonochromaticMode,
-  // LightAndDarkMode,
-  // ChoosePreferredRideColoursMode
-    ]),
+    box({
+      padding: {top: 10},
+      text: 'Choose colour modes.',
+      content:
+        vertical([
+          toggle({
+            text: "Colour by part",
+            height: "28px",
+            isPressed: getToggled('ColourByPartMode'),
+            onChange: (isPressed: boolean) => toggleMode(Mode.ColourByPartMode,isPressed),
+          }),
+          toggle({
+            text: "Monochromatic",
+            height: "28px",
+            isPressed: getToggled('MonochromaticMode'),
+            onChange: (isPressed: boolean) => toggleMode( Mode.MonochromaticMode,isPressed)
+          }),
+          toggle(
+            {
+                        
+            text: "Two-tone",
+            height: "28px",
+            isPressed: getToggled('MakeTwoTone'),
+            onChange: (isPressed: boolean) => toggleMode(Mode.MakeTwoTone,isPressed)
+          }),
+          toggle({
+            text: "Preferred Colours",
+            height: "28px",
+            isPressed: getToggled('ChoosePreferredRideColoursMode'),
+            tooltip: "Apply pre-selected favorites",
+            onChange: (isPressed: boolean) => toggleMode(Mode.ChoosePreferredRideColoursMode,isPressed),
+          }),
+          toggle({
+            text: "All Parts Random",
+            height: "28px",
+            isPressed: getToggled('RandomMode'),
+            tooltip: "Randomize all pieces",
+            onChange: (isPressed: boolean) => toggleMode(Mode.RandomMode,isPressed),
+          }),
+        ])}),
     button({
+      padding: {top: 10},
       text: "Change all ride colours now",
-      height: "10px",
+      height: "30px",
       onClick: () => changeRideColoursNow()
-    }),
+    })])
   ]
 })
 
