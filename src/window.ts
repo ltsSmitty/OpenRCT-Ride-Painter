@@ -31,6 +31,9 @@ const toggleMode = (modeValue: Mode, t: boolean) => {
 
 }
 
+
+
+
 const filterActiveModes = (modes: ModeToggle) => {
   debug(`Debug: current mode status: ${JSON.stringify(modes)} `)
   const modeKeys = Object.keys(modes);
@@ -57,9 +60,6 @@ const changeRideColoursNow = (rides?:Ride[], exclusions: Ride[]=[]) => {
     debug(`Ride to set colour: ${ride.name}`);
 
     const colours = ModeFunctions(activeModes[Math.floor(Math.random()*activeModes.length)])(themeValues)
-    // const colourFunction = ModeFunctions(activeModes[Math.floor(Math.random()*activeModes.length)])
-    // debug(`colourFunction: ${JSON.stringify(colourFunction)}`);
-    // const colours = colourFunction(themes.themeName);
     // set the ride colours
     if (colours)  ColourChange.setRideColour(ride, ...colours);
   })
@@ -84,7 +84,10 @@ const setThemeKey = (themeName: string) => {
   setConfig(themeKey,themeName )
 }
 
-
+const setButtonText = () => {
+  const buttonStore = store("smitty");
+  buttonStore.subscribe(b => console.log(`subscribed!`))
+}
 
 const rideDayHook = () => {
   // Get ride colors from a theme
@@ -104,6 +107,8 @@ const rideDayHook = () => {
 
   // chooseRideColorsFromTheme(currentTheme);
 };
+
+
 
 
 const existingThemes = Object.keys(themes);
@@ -148,7 +153,6 @@ const themeChooser = window({
           }),
           toggle(
             {
-                        
             text: "Two-tone",
             height: "28px",
             isPressed: getToggled('MakeTwoTone'),
@@ -171,10 +175,11 @@ const themeChooser = window({
         ])}),
     button({
       padding: {top: 10},
-      text: "Change all ride colours now",
+      text: ,
       height: "30px",
       onClick: () => changeRideColoursNow()
-    })])
+    }),
+  ])
   ]
 })
 
