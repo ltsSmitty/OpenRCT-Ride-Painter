@@ -112,6 +112,5 @@ dist
 .editorconfig
 .eslintignore
 .nvmrc
-rollup.*
 nodemon.json
 .DS_Store
