@@ -1,3 +1,4 @@
+import { themeWindow } from './window2';
 /// <reference path="../lib/openrct2.d.ts" />
 import themeChooser from './window';
 
@@ -8,6 +9,6 @@ registerPlugin({
   type: 'remote',
   licence: 'GPL-3.0',
   main: () => {
-    ui.registerMenuItem("Theme Manager", () => themeChooser.open())
+    ui.registerMenuItem("Theme Manager", () => themeWindow.open())
   }
 });
