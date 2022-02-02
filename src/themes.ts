@@ -57,89 +57,90 @@ export interface Theme {
       VehicleColourTrim: number[],
       VehicleColourTernary: number[],
     },
-  }
+  };
   allowDuplicates: boolean,
 }
 
-export const themes:{[key: string]:Theme} = {
-  "allBlack":  {
-    name: 'All Black',
-    description: 'All parts of all rides are black.',
-    colours: {
-      themeColours: [0],
-      partColours: {
-        trackColourMain: [0],
-        trackColourAdditional: [0],
-        trackColourSupports: [0],
-        VehicleColourBody: [0],
-        VehicleColourTrim: [0],
-        VehicleColourTernary: [0],
-      }
-    },
-    allowDuplicates: true,
+
+const allBlack: Theme = {
+  name: 'All Black',
+  description: 'All parts of all rides are black.',
+  colours: {
+    themeColours: [0],
+    partColours: {
+      trackColourMain: [0],
+      trackColourAdditional: [0],
+      trackColourSupports: [0],
+      VehicleColourBody: [0],
+      VehicleColourTrim: [0],
+      VehicleColourTernary: [0],
+    }
   },
-  "1013":  {
-    name: '10-13',
-    description: 'All parts between 10 and 13.',
-    colours: {
-      themeColours: [10, 11, 12, 13]
-    },
-    allowDuplicates: true,
+  allowDuplicates: true,
+}
+
+const tenThirteen: Theme =  {
+  name: '10-13',
+  description: 'All parts between 10 and 13.',
+  colours: {
+    themeColours: [10, 11, 12, 13]
   },
-  "Dazzling Colors":  {
-    name: 'Dazzling Colors',
-    description: 'Color scheme qualifies park for the "Most Dazzling Ride Colors" award.',
-    colours: {
-      themeColours: [5, 14, 20, 30],
-      partColours: {
-        trackColourMain: [5, 14, 20, 30],
-        trackColourAdditional: [5, 14, 20, 30],
-        trackColourSupports: [5, 14, 20, 30],
-        VehicleColourBody: [5, 14, 20, 30],
-        VehicleColourTrim: [5, 14, 20, 30],
-        VehicleColourTernary: [5, 14, 20, 30],
-      },
-      preferredRideColours: [
-        [5, 30, 5, 30, 5, 5],
-        [14, 14, 20, 20, 20, 20]
-      ],
-    },
-    allowDuplicates: true,
-  },
-  "Pdog Special":  {
-    name: 'Pdog Special',
-    description: 'One that I like',
-    colours: {
-      themeColours: [29,30,31],
-      partColours: {
-        trackColourMain: [1, 2, 3, 4],
-        trackColourAdditional: [5, 6, 7, 8],
-        trackColourSupports: [9, 10, 11, 12],
-        VehicleColourBody: [13, 14, 15, 16],
-        VehicleColourTrim: [17, 18, 19, 20],
-        VehicleColourTernary: [21, 22, 23, 23],
-      },
-    },
-    allowDuplicates: false,
-  },
-  "All Colors Baby": {
-    name: 'All Colors Baby',
-    description: `Useful for monochrome mode since it'll pull from the whole palate`,
-    colours: {
-      themeColours:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],
-    },
-    allowDuplicates: false,
-  }
+  allowDuplicates: true,
 };
 
-
-
-export const getThemeNames = ():string[] =>  Object.keys(themes);
-
-export const getThemeByName = (name: string):Theme => {
-  const themeAttempt = Object.keys(themes).filter((k) => k===name)
-  if (themeAttempt[0]) return themes[themeAttempt[0]]
-  console.log(`Setting theme to: ${themes[themeAttempt[0]]}`);
-  return themes.allBlack
+const dazzlingColors: Theme = {
+  name: 'Dazzling Colors',
+  description: 'Color scheme qualifies park for the "Most Dazzling Ride Colors" award.',
+  colours: {
+    themeColours: [5, 14, 20, 30],
+    partColours: {
+      trackColourMain: [5, 14, 20, 30],
+      trackColourAdditional: [5, 14, 20, 30],
+      trackColourSupports: [5, 14, 20, 30],
+      VehicleColourBody: [5, 14, 20, 30],
+      VehicleColourTrim: [5, 14, 20, 30],
+      VehicleColourTernary: [5, 14, 20, 30],
+    },
+    preferredRideColours: [
+      [5, 30, 5, 30, 5, 5],
+      [14, 14, 20, 20, 20, 20]
+    ],
+  },
+  allowDuplicates: true,
 };
+
+const pdogSpecial: Theme = {
+  name: 'Pdog Special',
+  description: 'One that I like',
+  colours: {
+    themeColours: [29,30,31],
+    partColours: {
+      trackColourMain: [1, 2, 3, 4],
+      trackColourAdditional: [5, 6, 7, 8],
+      trackColourSupports: [9, 10, 11, 12],
+      VehicleColourBody: [13, 14, 15, 16],
+      VehicleColourTrim: [17, 18, 19, 20],
+      VehicleColourTernary: [21, 22, 23, 23],
+    },
+  },
+  allowDuplicates: false,
+};
+
+const allColoursBaby: Theme = {
+  name: 'All Colors Baby',
+  description: `Useful for monochrome mode since it'll pull from the whole palate`,
+  colours: {
+    themeColours:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],
+  },
+  allowDuplicates: false,
+}
+
+
+export const themes: Theme[] = [
+  allBlack,
+  tenThirteen,
+  dazzlingColors,
+  pdogSpecial,
+  allColoursBaby
+]
 

@@ -2,7 +2,7 @@
 /* eslint-disable consistent-return */
 
 import { box, button, dropdown,  label, store, toggle, vertical, window } from "openrct2-flexui";
-import { themes, Mode, ModeToggle, ModeFunctions, getThemeByName} from './themes';
+import { themes,} from './themes';
 import ColourChange from './ColourChange';
 import {getConfig, setConfig} from './helperFunctions';
 import { debug } from "./helpers/logger";

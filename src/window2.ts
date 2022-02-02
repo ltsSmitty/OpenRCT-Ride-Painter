@@ -1,6 +1,6 @@
 /// <reference path="../lib/openrct2.d.ts" />
 
-import { box, button, compute, dropdownSpinner, horizontal, label, store,
+import { box, button, compute, dropdown, horizontal, label, store,
   toggle, viewport, window } from "openrct2-flexui";
 import { Mode, Modes, ModeObject, pickFrom } from "./modes";
 import { Theme, themes } from "./themes";
@@ -35,20 +35,17 @@ const subscribeToggle = (modeName: string) => compute(model.activeModes, (modes)
 
 
  // check in activeModes for the mode. if it's there, remove it. if it's not there, add it.
-const toggleModeActive = (modeName: string, isPressed: boolean) => {
+const toggleModeActive = (modeName: string) => {
   const allModes = model.allModes.get();
-  debug(`allModes: ${JSON.stringify(allModes)}`)
   const thisMode = allModes.filter(mode => mode.name === modeName)[0]
-  debug(`in toggleModeActive. looking for ${modeName}. found: ${JSON.stringify(thisMode)}`)
   // the mode exists
   if (thisMode){
     const activeModes = model.activeModes.get();
     const thisModeIndex =  activeModes.indexOf(thisMode);
-    debug(`thisModeIndex = ${thisModeIndex}`);
     // if the mode is active the indexOf will be >=0. If it's not in it it'll be -1.
     if (thisModeIndex>=0)  activeModes.splice(thisModeIndex,1)
     else activeModes.push(thisMode);
-    debug(`activeModes to be set to model: ${JSON.stringify(activeModes)}`);
+    debug(`Toggle complete. current active modes: ${JSON.stringify(activeModes)}`);
     model.activeModes.set(activeModes);
     }
   }
@@ -60,9 +57,11 @@ const modeInit = () => {
 };
 
 const themeInit = () => {
-  const startingTheme = themes["All Colors Baby"];
-  model.allThemes.set([startingTheme])
-  model.selectedTheme.set(startingTheme)
+  model.allThemes.set(themes);
+  // TODO don't reset this every time?
+  model.selectedThemeIndex.set(0);
+  model.selectedTheme.set(model.allThemes.get()[model.selectedThemeIndex.get()]);
+
 }
 
 const colourRides = () => {
@@ -94,19 +93,32 @@ export const themeWindow = window({
     themeInit();
   },
   content: [
+    box({
+      text: 'Pick a theme',
+      content: dropdown({
+        items: compute(model.allThemes, (t) => t.map(theme => theme.name)),
+        selectedIndex: model.selectedThemeIndex,
+        disabled: compute(model.allThemes, t => t.length === 0),
+        disabledMessage: 'No themes defined.',
+        onChange: (index: number) => {
+          model.selectedThemeIndex.set(index)
+          model.selectedTheme.set(model.allThemes.get()[index])
+        }
+      })
+    }),
     toggle({
       text: 'Toggle monochrome mode',
-      onChange: (isPressed: boolean) => {toggleModeActive('monochromatic', isPressed)},
+      onChange: () => {toggleModeActive('monochromatic')},
       isPressed: subscribeToggle('monochromatic')
     }),
     toggle({
       text: 'Toggle random mode',
-      onChange: (isPressed: boolean) => {toggleModeActive('random', isPressed)},
+      onChange: () => {toggleModeActive('random')},
       isPressed: subscribeToggle('random')
     }),
     button({
       text: 'Set ride colours according to mode',
-      // todo disabled: check store if a theme is set
+      disabled: compute(model.activeModes, mode => mode.length<=0),
       onClick: () => colourRides()
     })
   ]
