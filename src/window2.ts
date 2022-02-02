@@ -1,11 +1,11 @@
-import { store } from 'openrct2-flexui';
 /// <reference path="../lib/openrct2.d.ts" />
 
 import { box, button, compute, dropdownSpinner, horizontal, label, store,
   toggle, viewport, window } from "openrct2-flexui";
 import { Mode, Modes, ModeObject, pickFrom } from "./modes";
-import { Theme } from "./themes";
+import { Theme, themes } from "./themes";
 import { debug } from "./helpers/logger";
+import ColourChange from "./ColourChange";
 
 const model = {
   // Theme data
@@ -29,6 +29,7 @@ const subscribeToggle = (modeName: string) => compute(model.activeModes, (modes)
      debug(`In subscribeToggle. mode name: ${modeName}, active state: ${modeNameActive}`)
      return modeNameActive;
    }
+   debug(`In subscribeToggle. mode name: ${modeName}, active state: false`)
    return false
  })
 
@@ -37,7 +38,7 @@ const subscribeToggle = (modeName: string) => compute(model.activeModes, (modes)
 const toggleModeActive = (modeName: string, isPressed: boolean) => {
   const allModes = model.allModes.get();
   debug(`allModes: ${JSON.stringify(allModes)}`)
-  const thisMode = allModes.find(mode => mode.name === modeName)
+  const thisMode = allModes.filter(mode => mode.name === modeName)[0]
   debug(`in toggleModeActive. looking for ${modeName}. found: ${JSON.stringify(thisMode)}`)
   // the mode exists
   if (thisMode){
@@ -58,13 +59,27 @@ const modeInit = () => {
   model.allModes.set(modes);
 };
 
+const themeInit = () => {
+  const startingTheme = themes["All Colors Baby"];
+  model.allThemes.set([startingTheme])
+  model.selectedTheme.set(startingTheme)
+}
+
 const colourRides = () => {
   const currentTheme = model.selectedTheme.get();
   const activeModes = model.activeModes.get();
 
-  if (currentTheme && activeModes) {
+  if (currentTheme && activeModes.length>0) {
     // choose one mode to use, or come up with a system for blending them together
-    const mode = pickFrom(activeModes)
+    const mode = pickFrom(activeModes);
+    // get all rides
+    const ridesToTheme = map.rides.filter((ride) => ride.classification === "ride" );
+    ridesToTheme.forEach( ride => {
+      const cols = mode.applyTheme(currentTheme);
+      if (cols) {
+        ColourChange.setRideColour(ride, ...cols)
+      }
+    })
   }
 }
 
@@ -74,12 +89,25 @@ export const themeWindow = window({
 	width: 350, minWidth: 220, maxWidth: 500,
 	height: 300, minHeight: 220, maxHeight: 400,
 	padding: 8,
-  onOpen: () => modeInit(),
+  onOpen: () => {
+    modeInit();
+    themeInit();
+  },
   content: [
     toggle({
       text: 'Toggle monochrome mode',
       onChange: (isPressed: boolean) => {toggleModeActive('monochromatic', isPressed)},
       isPressed: subscribeToggle('monochromatic')
+    }),
+    toggle({
+      text: 'Toggle random mode',
+      onChange: (isPressed: boolean) => {toggleModeActive('random', isPressed)},
+      isPressed: subscribeToggle('random')
+    }),
+    button({
+      text: 'Set ride colours according to mode',
+      // todo disabled: check store if a theme is set
+      onClick: () => colourRides()
     })
   ]
 })

@@ -23,14 +23,12 @@ export type ModeObject =
 
 export interface Mode {
   readonly name: string,
-  active: boolean,
   applyTheme(theme:Theme): RideColours | null
 }
 
 const monoChromaticMode: Mode = {
   name: "monochromatic",
-  active: false,
-  applyTheme: (theme: Theme) => {
+  applyTheme(theme: Theme) {
     if (theme.colours.themeColours) {
     const c = getRandomColour(theme.colours.themeColours);
     return [c,c,c,c,c,c] as RideColours;
@@ -39,8 +37,27 @@ const monoChromaticMode: Mode = {
   }
 }
 
+const randomMode: Mode = {
+  name: "random",
+  applyTheme(theme: Theme) {
+    if (theme.colours.themeColours) {
+      const colours = [
+        getRandomColour(theme.colours.themeColours),
+        getRandomColour(theme.colours.themeColours),
+        getRandomColour(theme.colours.themeColours),
+        getRandomColour(theme.colours.themeColours),
+        getRandomColour(theme.colours.themeColours),
+        getRandomColour(theme.colours.themeColours)];
+        debug(`debug RandomMode: ${colours}`)
+        return colours as RideColours
+        }
+    return null;
+  }
+}
+
 export const Modes: Mode[] = [
   monoChromaticMode,
+  randomMode
 ]
 
 const doAllPartsHaveColours = (parts: {[keys: string]: Number[]}) => {
@@ -119,16 +136,16 @@ const makeChoosePreferredRideColoursMode = (theme: Theme) => {
   }
 }
 
-export const ModeFunctions = (mode:Mode) => {
-  switch (mode) {
-    case "ColourByPartMode": return makeColourByPartMode;
-    case "MonochromaticMode": return makeMonochromaticMode;
-    case "MakeTwoTone": return makeTwoTone;
-    case "ChoosePreferredRideColoursMode": return makeChoosePreferredRideColoursMode;
-    case "RandomMode": return makeRandomMode
-    default: return makeMonochromaticMode
-  }
-}
+// export const ModeFunctions = (mode:Mode) => {
+//   switch (mode) {
+//     case "ColourByPartMode": return makeColourByPartMode;
+//     case "MonochromaticMode": return makeMonochromaticMode;
+//     case "MakeTwoTone": return makeTwoTone;
+//     case "ChoosePreferredRideColoursMode": return makeChoosePreferredRideColoursMode;
+//     case "RandomMode": return makeRandomMode
+//     default: return makeMonochromaticMode
+//   }
+// }
 
 // TODO make this actually pick from an array of modes
-export const pickFrom =(modes: Mode[]) => modes[0]
+export const pickFrom = (modes: Mode[]) => modes[0]
