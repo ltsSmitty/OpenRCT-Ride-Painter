@@ -112,5 +112,4 @@ dist
 .editorconfig
 .eslintignore
 .nvmrc
-nodemon.json
 .DS_Store

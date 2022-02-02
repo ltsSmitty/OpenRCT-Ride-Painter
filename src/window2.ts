@@ -1,8 +1,10 @@
 /// <reference path="../lib/openrct2.d.ts" />
 
+
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { box, button, compute, dropdown, horizontal, label, store,
-  toggle, viewport, window } from "openrct2-flexui";
-import { Mode, Modes, ModeObject, pickFrom } from "./modes";
+  toggle, window } from "openrct2-flexui";
+import { Mode, Modes, pickFrom } from "./modes";
 import { Theme, themes } from "./themes";
 import { debug } from "./helpers/logger";
 import ColourChange from "./ColourChange";
