@@ -1,6 +1,5 @@
 import { themeWindow } from './window2';
 /// <reference path="../lib/openrct2.d.ts" />
-import themeChooser from './window';
 
 registerPlugin({
   name: 'Random Ride Colours',
