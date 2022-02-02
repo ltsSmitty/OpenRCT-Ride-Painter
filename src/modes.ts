@@ -51,7 +51,7 @@ const twoToneMode: Mode = {
   name: "twoTone",
   applyTheme(theme: Theme) {
     if (theme.colours.themeColours && theme.colours.themeColours.length > 1) {
-      const c1 = getRandomColour(theme.colours.themeColours);
+      const c1 = 0
       let c2;
       do {
         c2 = getRandomColour(theme.colours.themeColours);

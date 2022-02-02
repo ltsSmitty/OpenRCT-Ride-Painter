@@ -4,7 +4,7 @@ export const enum GameColour
 	Black,          // 0
 	Grey,           // 1
 	White,          // 2
-  DarkPurple,     // 3
+    DarkPurple,     // 3
 	LightPurple,    // 4
 	BrightPurple,   // 5
 	DarkBlue,       // 6
@@ -26,7 +26,7 @@ export const enum GameColour
 	LightBrown,     // 22
 	SaturatedBrown, // 23
 	DarkBrown,      // 24
-SalmonPink,       // 25
+    SalmonPink,       // 25
 	BordeauxRed,    // 26
 	SaturatedRed,   // 27
 	BrightRed,      // 28

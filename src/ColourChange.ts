@@ -76,6 +76,7 @@ export default class ColourChange {
     ColourChange.setRideColourPart(ride, 5, vehicleTernaryColour);
   };
 
+  // Examples
   public static setAllPartsBlack = (ride:Ride): void => {
     ColourChange.setRideColour(ride, 0, 0, 0, 0, 0, 0);
   };
