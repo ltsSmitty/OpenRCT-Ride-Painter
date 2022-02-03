@@ -1,5 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
+// eslint-disable-next-line import/no-unresolved
+import { Colour } from 'openrct2-flexui';
 /* eslint-disable no-console */
-
 export type RideColours = [number, number, number, number, number, number];
 
 export interface Theme {
@@ -15,7 +17,7 @@ export interface Theme {
     // If you know you want certain parts of the ride to have certain colors, you can define them here.
     // If you go this route, you need to offer at least one colour option for each track park
     partColours?: {
-      trackColourMain: number[],
+      trackColourMain: Colour[],
       trackColourAdditional: number[],
       trackColourSupports: number[],
       VehicleColourBody: number[],
@@ -27,8 +29,8 @@ export interface Theme {
 }
 
 
-const allBlack: Theme = {
-  name: 'All Black',
+const justBlack: Theme = {
+  name: 'Just Black',
   description: 'All parts of all rides are black.',
   colours: {
     themeColours: [0],
@@ -44,7 +46,7 @@ const allBlack: Theme = {
   allowDuplicates: true,
 }
 
-const tenThirteen: Theme =  {
+const forest: Theme =  {
   name: 'Forest',
   description: 'All parts between 10 and 13.',
   colours: {
@@ -74,6 +76,51 @@ const dazzlingColors: Theme = {
   allowDuplicates: true,
 };
 
+const rainbow: Theme = {
+    name: 'Rainbow',
+    description: "Marcel's favorite",
+    colours: {
+      themeColours: [
+        Colour.BrightRed, Colour.LightOrange, Colour.BrightYellow,
+        Colour.BrightGreen, Colour.LightBlue, Colour.LightPurple,
+        Colour.LightPink,
+        Colour.SaturatedRed, Colour.DarkOrange, Colour.Yellow,
+        Colour.SaturatedGreen, Colour.DarkBlue, Colour.BrightPurple,
+        Colour.BrightPink
+    ],
+      partColours: {
+        trackColourMain: [
+            Colour.BrightRed, Colour.LightOrange, Colour.BrightYellow,
+            Colour.BrightGreen, Colour.LightBlue, Colour.LightPurple,
+            Colour.LightPink],
+        trackColourAdditional: [
+            Colour.BrightRed, Colour.LightOrange, Colour.BrightYellow,
+            Colour.BrightGreen, Colour.LightBlue, Colour.LightPurple,
+            Colour.LightPink],
+        trackColourSupports: [
+            Colour.BrightRed, Colour.LightOrange, Colour.BrightYellow,
+            Colour.BrightGreen, Colour.LightBlue, Colour.LightPurple,
+            Colour.LightPink],
+        VehicleColourBody: [
+            Colour.SaturatedRed, Colour.DarkOrange, Colour.Yellow,
+            Colour.SaturatedGreen, Colour.DarkBlue, Colour.BrightPurple,
+            Colour.BrightPink
+            ],
+        VehicleColourTrim: [
+            Colour.SaturatedRed, Colour.DarkOrange, Colour.Yellow,
+            Colour.SaturatedGreen, Colour.DarkBlue, Colour.BrightPurple,
+            Colour.BrightPink
+            ],
+        VehicleColourTernary: [
+            Colour.SaturatedRed, Colour.DarkOrange, Colour.Yellow,
+            Colour.SaturatedGreen, Colour.DarkBlue, Colour.BrightPurple,
+            Colour.BrightPink
+            ],
+      },
+    },
+    allowDuplicates: false,
+  };
+
 const valentines: Theme = {
   name: 'Valentines',
   description: 'One that I like',
@@ -102,10 +149,11 @@ const allColours: Theme = {
 
 
 export const themes: Theme[] = [
-  allBlack,
-  tenThirteen,
-  dazzlingColors,
-  valentines,
-  allColours
+    justBlack,
+    forest,
+    dazzlingColors,
+    valentines,
+    allColours,
+    rainbow
 ]
 

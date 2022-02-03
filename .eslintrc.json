@@ -21,6 +21,7 @@
     "@typescript-eslint"
   ],
   "rules": {
+
     "import/extensions": [
       "error",
       "always",
