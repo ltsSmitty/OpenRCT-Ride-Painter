@@ -1,7 +1,8 @@
 /// <reference path="../lib/openrct2.d.ts" />
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { box, button, compute, dropdown, horizontal, label, store, toggle, window } from 'openrct2-flexui';
+import { box, button, compute, colourPicker ,dropdown, horizontal, label,
+    store, toggle, window, vertical, Colour } from 'openrct2-flexui';
 import { Mode, Modes, pickFrom } from './modes';
 import { Theme, themes } from './themes';
 import { debug } from './helpers/logger';
@@ -20,6 +21,18 @@ const model = {
 	allRides: store<Ride[]>([]),
 	lockedRides: store<Ride[] | null>(null),
 };
+
+const subscribeColourPicker = (colourToggleIndex: Colour) => compute(model.selectedTheme, theme => {
+        if (theme?.colours.themeColours[colourToggleIndex]) {
+            return theme.colours.themeColours[colourToggleIndex] as Colour
+        }
+        return 0 as Colour
+    })
+
+const subscribeColourPickerActive = (colourToggleIndex: Colour) => compute(model.selectedTheme, theme => {
+    if (theme?.colours.themeColours.length &&  theme.colours.themeColours.length > colourToggleIndex) return "visible"
+    return "none"
+})
 
 // Subscribe a toggle element to it's mode active state, subscribe to whether it's in activeModes
 const subscribeToggle = (modeName: string) =>
@@ -79,6 +92,10 @@ const colourRides = () => {
 	}
 };
 
+const colourPickerPadding = "0px";
+const colourPickerWidth = "6.25%";
+const colourPickerHeight = "6.25%";
+
 // eslint-disable-next-line import/prefer-default-export
 export const themeWindow = window({
 	title: 'ToggleTest',
@@ -96,16 +113,179 @@ export const themeWindow = window({
 	content: [
 		box({
 			text: 'Pick a theme',
-			content: dropdown({
-				items: compute(model.allThemes, (t) => t.map((theme) => theme.name)),
-				selectedIndex: model.selectedThemeIndex,
-				disabled: compute(model.allThemes, (t) => t.length === 0),
-				disabledMessage: 'No themes defined.',
-				onChange: (index: number) => {
-					model.selectedThemeIndex.set(index);
-					model.selectedTheme.set(model.allThemes.get()[index]);
-				},
-			}),
+			content:
+                vertical([
+                    dropdown({
+                        items: compute(model.allThemes, (t) => t.map((theme) => theme.name)),
+                        selectedIndex: model.selectedThemeIndex,
+                        disabled: compute(model.allThemes, (t) => t.length === 0),
+                        disabledMessage: 'No themes defined.',
+                        onChange: (index: number) => {
+                            model.selectedThemeIndex.set(index);
+                            model.selectedTheme.set(model.allThemes.get()[index]);
+                        }
+                    }),
+                    horizontal([
+                        // a bunch of colour pickers to show the theme colours
+                        // 0th colour picker
+                        colourPicker({
+                            width: colourPickerWidth,
+                            height: colourPickerHeight,
+                            padding: colourPickerPadding,
+                            colour: subscribeColourPicker(0),
+                            visibility: subscribeColourPickerActive(0)
+                        }),
+                        colourPicker({
+                            width: colourPickerWidth,
+                            height: colourPickerHeight,
+                            padding: colourPickerPadding,
+                            colour: subscribeColourPicker(1),
+                            visibility: subscribeColourPickerActive(1)
+                        }),
+                        colourPicker({
+                            width: colourPickerWidth,
+                            height: colourPickerHeight,
+                            padding: colourPickerPadding,
+                            colour: subscribeColourPicker(2),
+                            visibility: subscribeColourPickerActive(2)
+                        }),
+                        colourPicker({
+                            width: colourPickerWidth,
+                            height: colourPickerHeight,
+                            padding: colourPickerPadding,
+                            colour: subscribeColourPicker(3),
+                            visibility: subscribeColourPickerActive(3)
+                        }),
+                        colourPicker({
+                            width: colourPickerWidth,
+                            height: colourPickerHeight,
+                            padding: colourPickerPadding,
+                            colour: subscribeColourPicker(4),
+                            visibility: subscribeColourPickerActive(4)
+                        }),
+                        colourPicker({
+                            width: colourPickerWidth,
+                            height: colourPickerHeight,
+                            padding: colourPickerPadding,
+                            colour: subscribeColourPicker(5),
+                            visibility: subscribeColourPickerActive(5)
+                        }),
+                        colourPicker({
+                            width: colourPickerWidth,
+                            height: colourPickerHeight,
+                            padding: colourPickerPadding,
+                            colour: subscribeColourPicker(6),
+                            visibility: subscribeColourPickerActive(6)
+                        }),
+                        colourPicker({
+                            width: colourPickerWidth,
+                            height: colourPickerHeight,
+                            padding: colourPickerPadding,
+                            colour: subscribeColourPicker(7),
+                            visibility: subscribeColourPickerActive(7)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(8),
+                            visibility: subscribeColourPickerActive(8)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(9),
+                            visibility: subscribeColourPickerActive(9)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(10),
+                            visibility: subscribeColourPickerActive(10)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(11),
+                            visibility: subscribeColourPickerActive(11)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(12),
+                            visibility: subscribeColourPickerActive(12)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(13),
+                            visibility: subscribeColourPickerActive(13)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(14),
+                            visibility: subscribeColourPickerActive(14)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(15),
+                            visibility: subscribeColourPickerActive(15)
+                        }),
+                    ]),
+                    horizontal([
+                        // second row
+                        colourPicker({
+                            colour: subscribeColourPicker(16),
+                            visibility: subscribeColourPickerActive(16)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(17),
+                            visibility: subscribeColourPickerActive(17)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(18),
+                            visibility: subscribeColourPickerActive(18)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(19),
+                            visibility: subscribeColourPickerActive(19)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(20),
+                            visibility: subscribeColourPickerActive(20)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(21),
+                            visibility: subscribeColourPickerActive(21)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(22),
+                            visibility: subscribeColourPickerActive(22)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(23),
+                            visibility: subscribeColourPickerActive(23)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(24),
+                            visibility: subscribeColourPickerActive(24)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(25),
+                            visibility: subscribeColourPickerActive(25)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(26),
+                            visibility: subscribeColourPickerActive(26)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(27),
+                            visibility: subscribeColourPickerActive(27)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(28),
+                            visibility: subscribeColourPickerActive(28)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(29),
+                            visibility: subscribeColourPickerActive(29)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(30),
+                            visibility: subscribeColourPickerActive(30)
+                        }),
+                        colourPicker({
+                            colour: subscribeColourPicker(31),
+                            visibility: subscribeColourPickerActive(31)
+                        }),
+                    ]),
+                ]),
+            // show one colour widget per theme
 		}),
 		toggle({
 			text: 'Toggle monochrome mode',
