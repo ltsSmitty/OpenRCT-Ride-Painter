@@ -15,11 +15,14 @@ const doAllPartsHaveColours = (parts: {[keys: string]: Number[]}) => {
 
 export interface Mode {
   readonly name: string,
+  description: string,
   applyTheme(theme:Theme): RideColours | null
+
 }
 
 const monoChromaticMode: Mode = {
-  name: "monochromatic",
+  name: "Monochromatic ride & track",
+  description: "The ride track and cars will be one solid colour.",
   applyTheme(theme: Theme) {
     if (theme.colours.themeColours) {
     const c = getRandomColour(theme.colours.themeColours);
@@ -30,7 +33,8 @@ const monoChromaticMode: Mode = {
 }
 
 const randomMode: Mode = {
-  name: "random",
+  name: "Random colours",
+  description: "All track and car pieces will be assigned random colours from the theme palette",
   applyTheme(theme: Theme) {
     if (theme.colours.themeColours) {
       const colours = [
@@ -49,6 +53,8 @@ const randomMode: Mode = {
 
 const twoToneMode: Mode = {
   name: "twoTone",
+  description: `Track main, track support, car additional, and car tertiary set to black;
+  track additional and car main set to a colour from the theme palette.`,
   applyTheme(theme: Theme) {
     if (theme.colours.themeColours && theme.colours.themeColours.length > 1) {
       const c1 = 0
@@ -66,6 +72,7 @@ const twoToneMode: Mode = {
 
 const  colourByPartMode: Mode = {
   name: 'colourByPart',
+  description: "",
   applyTheme(theme: Theme) {
     // Get ride parts from theme
     const parts = theme.colours.partColours;
@@ -90,6 +97,7 @@ const  colourByPartMode: Mode = {
 
 const prebuiltColoursMode: Mode = {
   name: "prebuildColours",
+  description: "",
   applyTheme(theme: Theme) {
     if (theme.colours.preferredRideColours) {
       const colours = [...theme.colours.preferredRideColours
