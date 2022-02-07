@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable consistent-return */
 import { debug } from './helpers/logger';
@@ -53,8 +54,7 @@ const randomMode: Mode = {
 
 const twoToneMode: Mode = {
 	name: 'Two-tone',
-	description: `The track main & support and car additional & tertiary set by colour picker.
-  Others will be a colour from the theme palette.`,
+	description: `The track main & support and car additional & tertiary set by colour picker. Others will be a colour from the theme palette.`,
 	applyTheme(theme: Theme, { baseColour }) {
 		if (theme.colours.themeColours) {
 			const c1 = baseColour;

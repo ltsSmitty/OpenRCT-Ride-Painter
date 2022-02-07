@@ -26,21 +26,21 @@ export const model = {
     // all rides
     allRides: store<Ride[]>([]),
     allRideTypes: store<RideType[]>([]),
-    // rides that'll show in the view
-    visibleRides: store<Ride[]>([]),
     // rides that will have the theme applied onClick()
     selectedRides: store<Ride[]>([]),
     selectedRidesText: store<string>(""),
+    // rides that'll show in the view
+
+    filteredRides: store<Ride[]>([]),
+    // a subset of the visible rides that will be viewed on any given page
+    // will be between 0-10
+    // 0 if no rides exist, capping at 10 for any single p
+
     // index of dropdown to filter rides for view
-    rideTypeFilterIndexstore: store<number>(0),
+    rideTypeFilterIndex: store<number>(0),
     rideTypeFilter: store<RideType | null>(null),
     pickerPageCurrentPage: store<number>(0),
     pickerPageText: store<string>(""),
-    // a subset of the visible rides that will be viewed on any given page
-    // will be between 0-10
-    // 0 if no rides exist, capping at 10 for any single page
-    // updates onUpdate() based on current page
-    ridesOnCurrentPage: store<Ride[]>([])
 };
 
 const subscribeColourPicker = (colourToggleIndex: Colour) => compute(model.selectedTheme, theme => {
@@ -55,20 +55,93 @@ const subscribeColourPickerActive = (colourToggleIndex: Colour) => compute(model
     return "none"
 })
 
-const subscribeRideViewerActive = (rideNumber = 0) => compute(model.visibleRides, visibleRides => {
-    if (rideNumber<=visibleRides.length) return "visible"
+const subscribeRideViewerActive = (rideNumber = 0) => compute(model.filteredRides, model.pickerPageCurrentPage, (filteredRides) => {
+    if (rideNumber<=filteredRides.length) return "visible"
     return "none"
 })
 
+/**
+ *
+ * Find the right ride based on model.pickerPageCurrentPage
+ * Returns the colour of the ride in the position defined by @param rideNumberInView (1-10)
+ * @param partNumber
+ * @returns
+ */
 // eslint-disable-next-line consistent-return
-const subscribeGetRideColourPart = (rideNumber = 0, partNumber = 0) => compute(model.visibleRides, visibleRides => {
-    if (visibleRides[rideNumber]) {
-        const parts = (partNumber<=2) ? Object.keys(visibleRides[rideNumber].colourSchemes[0])[partNumber] : Object.keys(visibleRides[rideNumber].vehicleColours[0])[partNumber]
-        debug(`Parts: ${parts}`)
+const subscribeGetRideColourPart = (rideNumberInView: number, partNumber: number ) =>
+    compute(model.filteredRides, model.pickerPageCurrentPage, (filteredRides, currentPage) => {
+        // if currentPage =0, then we want filteredRides[0-9], if it's 1, then we want filteredRides[10-19]
+        const thisRideIndex = currentPage*10+(rideNumberInView-1)
+        const thisRide = filteredRides[thisRideIndex]
+        if (thisRide) {
+            switch(partNumber){
+                case 0: return thisRide.colourSchemes[0].main;
+                case 1: return thisRide.colourSchemes[0].additional;
+                case 2: return thisRide.colourSchemes[0].supports;
+                case 3: return thisRide.vehicleColours[0].body;
+                case 4: return thisRide.vehicleColours[0].trim;
+                case 5: return thisRide.vehicleColours[0].ternary;
+                default: { debug(`in default`);return 9}
+            }
+        }
+        return 31
+    })
+
+    const setRideColourPart = (rideNumberInView: number, partNumber: number, colour: Colour ) =>{
+        const filteredRides = model.filteredRides.get();
+        const currentPage = model.pickerPageCurrentPage.get();
+        // if currentPage =0, then we want filteredRides[0-9], if it's 1, then we want filteredRides[10-19]
+        const thisRideIndex = currentPage*10+(rideNumberInView-1)
+        const thisRide = filteredRides[thisRideIndex]
+        if (thisRide) {
+            switch(partNumber){
+                case 0: ColourChange.setRideColour(thisRide, colour, -1, -1, -1, -1, -1); break;
+                case 1: ColourChange.setRideColour(thisRide, -1, colour, -1, -1, -1, -1); break;
+                case 2: ColourChange.setRideColour(thisRide, -1, -1, colour, -1, -1, -1); break;
+                case 3: ColourChange.setRideColour(thisRide, -1, -1, -1, colour, -1, -1); break;
+                case 4: ColourChange.setRideColour(thisRide, -1, -1, -1, -1, colour, -1); break;
+                case 5: ColourChange.setRideColour(thisRide, -1, -1, -1, -1, -1, colour); break;
+                default: break;
+            }
+        }
 
     }
-    return 0 as Colour
-})
+
+    // const subscribeSetRideColourPart= (rideNumberInView: number, partNumber: number, colour: Colour ) =>{
+    //     compute(model.filteredRides, model.pickerPageCurrentPage, (filteredRides, currentPage) => {
+    //         // if currentPage =0, then we want filteredRides[0-9], if it's 1, then we want filteredRides[10-19]
+    //         debug(`trying to setRideColourPart`)
+    //         const thisRideIndex = currentPage*10+(rideNumberInView-1)
+    //         const thisRide = filteredRides[thisRideIndex]
+    //         debug(`ride before: ${JSON.stringify(thisRide.colourSchemes[0])}`)
+    //         if (thisRide) {
+    //             switch(partNumber){
+    //                 case 0: ColourChange.setRideColour(thisRide, colour, -1, -1, -1, -1, -1); break;
+    //                 case 1: ColourChange.setRideColour(thisRide, -1, colour, -1, -1, -1, -1); break;
+    //                 case 2: ColourChange.setRideColour(thisRide, -1, -1, colour, -1, -1, -1); break;
+    //                 case 3: ColourChange.setRideColour(thisRide, -1, -1, -1, colour, -1, -1); break;
+    //                 case 4: ColourChange.setRideColour(thisRide, -1, -1, -1, -1, colour, -1); break;
+    //                 case 5: ColourChange.setRideColour(thisRide, -1, -1, -1, -1, -1, colour); break;
+    //                 default: break;
+    //             }
+    //         debug(`ride after: ${JSON.stringify(thisRide.colourSchemes[0])}`)
+    //         }
+    //     }
+    // )}
+
+    // // its a colourScheme
+    // if (partNumber<=2 && thisRide.colourSchemes) {
+    //     const keys = Object.keys(thisRide.colourSchemes[0])
+    //     const colourofPartNumber = thisRide.colourSchemes[0][keys[partNumber]]
+    //     debug(`colourofPartNumber: ${colourofPartNumber}`)
+    //     return colourofPartNumber as Colour
+    // }
+    // // its a vehicleColour
+    // else {
+    //     const keys = Object.keys(model.filteredRides.get()[rideNumber].colourSchemes[0])
+    //     debug(`keys[partNumber]: ${keys[partNumber]}`)
+    //     return 0
+    // }    }
 
 
 const modeInit = () => {
@@ -86,19 +159,17 @@ const themeInit = () => {
 };
 
 const rideTypeInit = () => {
-    model.allRides.set(map.rides.filter(ride=> ride.classification === 'ride'));
-    debug(model.allRides.get().length.toString())
-    const allRideTypes = model.allRides.get().map(ride => ride.type);
+    // get rides from map and set to model.allRides
+    const allRides=map.rides.filter(ride => ride.classification === 'ride')
+    model.allRides.set(allRides)
+
+    const allRideTypes = allRides.map(ride => ride.type);
     const uniqueRideTypes = allRideTypes
         // get the unique ride types
         .filter(onlyUnique)
         // get only non-zero/truthy values
         .filter( n => n);
-    debug(
-        `All ride types: ${allRideTypes}
-    Unique Ride Types: ${uniqueRideTypes}`);
     model.allRideTypes.set(uniqueRideTypes);
-    model.visibleRides.set(model.allRides.get())
 }
 
 const colourRides = () => {
@@ -107,7 +178,7 @@ const colourRides = () => {
 
 	if (currentTheme && currentMode) {
 		// get all rides
-		const ridesToTheme = map.rides.filter((ride) => ride.classification === 'ride');
+		const ridesToTheme = model.selectedRides.get();
 		ridesToTheme.forEach((ride, i) => {
 			const cols = currentMode.applyTheme(currentTheme,
                 {baseColour:model.selectedTwoToneBase.get(),
@@ -138,20 +209,19 @@ export const themeWindow = window({
 
         // Page picker text output
         const selectedRides = model.selectedRides.get();
-        const totalSelectedRides = selectedRides.length;
-        const totalPages = Math.floor(totalSelectedRides/10)+1;
+        const filteredRides = model.filteredRides.get();
+        const totalPages = Math.floor(filteredRides.length/10)+1;
         const currentPage = model.pickerPageCurrentPage.get() + 1
-        const rideRemainder = totalSelectedRides % 10;
+        const rideRemainder = filteredRides.length % 10;
 
         // set the text for number of rides selected
-        model.selectedRidesText.set(`${totalSelectedRides}/${model.allRides.get().length} rides selected`)
+        model.selectedRidesText.set(`${selectedRides.length}/${model.allRides.get().length} rides selected`)
 
         // If the user deselects rides, reset the page back to the 0
         if (currentPage>totalPages) model.pickerPageCurrentPage.set(0);
 
         // show either the selected number remainder of rides or the remainder
-
-        const ridesOnThisPageText = (currentPage !== totalPages) ? `${Math.min(totalSelectedRides,10)}` : `${Math.min(rideRemainder,10)}`
+        const ridesOnThisPageText = (currentPage !== totalPages) ? `${Math.min(filteredRides.length,10)}` : `${Math.min(rideRemainder,10)}`
         model.pickerPageText.set(`Showing ${ridesOnThisPageText}/10 rides on page ${currentPage}/${totalPages}`)
 
         // actually selected rides for onClick
@@ -160,9 +230,8 @@ export const themeWindow = window({
 
         // set the visible rides in the view
         // paginate through the selected
-        debug(`Visible rides: ${model.visibleRides.get().forEach(r=>r.name)}`)
-        // model.ridesOnCurrentPage.set()
-        // model.visibleRides.set()
+        // model.ridesInView.set()
+        // model.filteredRides.set()
     },
 	content: [
         horizontal({
@@ -365,7 +434,7 @@ export const themeWindow = window({
                                             }),
                                             horizontal([
                                                 label({
-                                                    height: 20,
+                                                    height: 25,
                                                     width: 155,
                                                     alignment: 'left',
                                                     text: 'Choose two-tone base colour:',
@@ -399,15 +468,6 @@ export const themeWindow = window({
                                         ]
                                     })
                             }),
-                            toggle({
-                                text: ' Select rides to apply theme ==>',
-                                onChange: () => {
-                                    const rides = map.rides.filter(ride => ride.classification === "ride");
-                                    rides.forEach(ride => {
-                                        debug(`ride name: ${ride.name}, ride type: ${ride.type}`)
-                                    })
-                                }
-                            }),
                             button({
                                 text: 'Set ride colours according to mode',
                                 disabled: compute(model.selectedMode , (mode) => !mode),
@@ -430,6 +490,7 @@ export const themeWindow = window({
                                             padding: 10,
                                             spacing: 5,
                                             content: [
+                                                // toggle to Select all rides
                                                 toggle({
                                                     width:25,
                                                     onChange: (isPressed) => {
@@ -446,8 +507,8 @@ export const themeWindow = window({
                                                     text: compute(model.selectedRides, rides => {
                                                         // TODO make the starting value show as `select all rides`
                                                         // debug(`selected rides: ${rides.length} all rides: ${model.allRides.get().length}`)
-                                                        if (rides.length===model.allRides.get().length) return "Deselect all rides"
-                                                        return "Select all rides"
+                                                        if (rides.length!==model.allRides.get().length) return "Select all rides"
+                                                        return "Deselect all rides"
                                                     })
                                                 }),
                                                 label({
@@ -455,8 +516,14 @@ export const themeWindow = window({
                                                     text: "filter by ride type:"
                                                 }),
                                                 dropdown({
+                                                    width: 180,
                                                     padding: {top: 5},
-                                                    items: compute(model.allRideTypes, rideType => rideType.map(type => type.toString()))
+                                                    items: compute(model.allRideTypes, rideType => rideType.map(type => RideType[type])),
+                                                    onChange: (typeIndex) => {
+                                                        const ridesOfThisType = model.allRides.get().filter(ride=>ride.type===model.allRideTypes.get()[typeIndex])
+                                                        debug(`ride of types ${typeIndex}: ${ridesOfThisType.map(ride=>ride.name)}`)
+                                                        model.filteredRides.set(ridesOfThisType)
+                                                    }
                                                 })
                                             ]
 
@@ -468,7 +535,10 @@ export const themeWindow = window({
                                             spacing: 5,
                                             content: [
                                                 button({
-                                                    text: 'Show selected rides'
+                                                    text: 'Show selected rides',
+                                                    onClick: () => {
+                                                        model.filteredRides.set(model.selectedRides.get())
+                                                    }
                                                 }),
                                                 label({
                                                     text: model.selectedRidesText
@@ -525,10 +595,14 @@ export const themeWindow = window({
                                                                 horizontal({
                                                                     content: [
                                                                         toggle({
+                                                                            height: 17,
+                                                                            width: 17,
+                                                                            padding: 5,
                                                                             visibility: subscribeRideViewerActive(1)
                                                                         }),
                                                                         label({
-                                                                            text: compute(model.visibleRides, rides => {
+                                                                            padding: 4,
+                                                                            text: compute(model.filteredRides, rides => {
                                                                                 if (rides[0]) return rides[0].name
                                                                                 return ""
                                                                             }),
@@ -538,27 +612,37 @@ export const themeWindow = window({
                                                                         colourPicker({
                                                                             visibility: subscribeRideViewerActive(1),
                                                                             colour: subscribeGetRideColourPart(1,0),
-                                                                            onChange: () => {subscribeGetRideColourPart(1,0)}
+                                                                            onChange: (colour:Colour) => {setRideColourPart(1,0, colour)}
                                                                         }),
                                                                         // track additional colour
                                                                         colourPicker({
-                                                                            visibility: subscribeRideViewerActive(1)
+                                                                            visibility: subscribeRideViewerActive(1),
+                                                                            colour: subscribeGetRideColourPart(1,1),
+                                                                            onChange: (colour:Colour) => {setRideColourPart(1,1, colour)}
                                                                         }),
                                                                         // track support colour
                                                                         colourPicker({
-                                                                            visibility: subscribeRideViewerActive(1)
+                                                                            visibility: subscribeRideViewerActive(1),
+                                                                            colour: subscribeGetRideColourPart(1,2),
+                                                                            onChange: (colour:Colour) => {setRideColourPart(1,2, colour)}
                                                                         }),
                                                                         // car main colour
                                                                         colourPicker({
-                                                                            visibility: subscribeRideViewerActive(1)
+                                                                            visibility: subscribeRideViewerActive(1),
+                                                                            colour: subscribeGetRideColourPart(1,3),
+                                                                            onChange: (colour:Colour) => {setRideColourPart(1,3, colour)}
                                                                         }),
                                                                         // car additional colour
                                                                         colourPicker({
-                                                                            visibility: subscribeRideViewerActive(1)
+                                                                            visibility: subscribeRideViewerActive(1),
+                                                                            colour: subscribeGetRideColourPart(1,4),
+                                                                            onChange: (colour:Colour) => {setRideColourPart(1,4, colour)}
                                                                         }),
                                                                         // car tertiary colour
                                                                         colourPicker({
-                                                                            visibility: subscribeRideViewerActive(1)
+                                                                            visibility: subscribeRideViewerActive(1),
+                                                                            colour: subscribeGetRideColourPart(1,5),
+                                                                            onChange: (colour:Colour) => {setRideColourPart(1,5, colour)}
                                                                         }),
                                                                     ]
                                                                 }),
