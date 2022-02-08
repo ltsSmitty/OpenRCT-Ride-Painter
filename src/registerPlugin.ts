@@ -2,12 +2,12 @@ import { themeWindow } from './window2';
 /// <reference path="../lib/openrct2.d.ts" />
 
 registerPlugin({
-  name: 'Random Ride Colours',
-  version: '1.0',
+  name: 'drawing test',
+  version: '0.1',
   authors: ['ltsSmitty'],
   type: 'remote',
   licence: 'GPL-3.0',
   main: () => {
-    ui.registerMenuItem("Theme Manager", () => themeWindow.open())
+    ui.registerMenuItem("Drawing test", () => themeWindow.open())
   }
 });
