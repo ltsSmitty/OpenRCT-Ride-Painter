@@ -38,6 +38,5 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "object.values": "^1.1.5"
   }
 }

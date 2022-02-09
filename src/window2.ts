@@ -43,6 +43,7 @@ export const model = {
     pickerPageText: store<string>(""),
 };
 
+
 const subscribeColourPicker = (colourToggleIndex: Colour) => compute(model.selectedTheme, theme => {
         if (theme?.colours.themeColours[colourToggleIndex]) {
             return theme.colours.themeColours[colourToggleIndex] as Colour
@@ -55,25 +56,20 @@ const subscribeColourPickerActive = (colourToggleIndex: Colour) => compute(model
     return "none"
 })
 
-const subscribeRideViewerActive = (rideNumber = 0) => compute(model.filteredRides, model.pickerPageCurrentPage, (filteredRides) => {
-    if (rideNumber<=filteredRides.length) return "visible"
+const subscribeRideViewerActive = (rideNumber:number ) => compute(model.filteredRides, model.pickerPageCurrentPage, (filteredRides, currentPage) => {
+    // Ride number starts between 1-10, actualRideNumber computes what the total number is.
+    const actualRideNumber = rideNumber+currentPage*10
+    if (actualRideNumber<=filteredRides.length) return "visible"
     return "none"
 })
 
-/**
- *
- * Find the right ride based on model.pickerPageCurrentPage
- * Returns the colour of the ride in the position defined by @param rideNumberInView (1-10)
- * @param partNumber
- * @returns
- */
-// eslint-disable-next-line consistent-return
 const subscribeGetRideColourPart = (rideNumberInView: number, partNumber: number ) =>
     compute(model.filteredRides, model.pickerPageCurrentPage, (filteredRides, currentPage) => {
         // if currentPage =0, then we want filteredRides[0-9], if it's 1, then we want filteredRides[10-19]
         const thisRideIndex = currentPage*10+(rideNumberInView-1)
         const thisRide = filteredRides[thisRideIndex]
         if (thisRide) {
+            debug(`ride ${rideNumberInView} colours: ${thisRide.colourSchemes[0].main}, ${thisRide.colourSchemes[0].additional}, ${thisRide.colourSchemes[0].supports}, ${thisRide.vehicleColours[0].body}, ${thisRide.vehicleColours[0].trim}, ${thisRide.vehicleColours[0].ternary}`)
             switch(partNumber){
                 case 0: return thisRide.colourSchemes[0].main;
                 case 1: return thisRide.colourSchemes[0].additional;
@@ -87,62 +83,61 @@ const subscribeGetRideColourPart = (rideNumberInView: number, partNumber: number
         return 31
     })
 
-    const setRideColourPart = (rideNumberInView: number, partNumber: number, colour: Colour ) =>{
-        const filteredRides = model.filteredRides.get();
-        const currentPage = model.pickerPageCurrentPage.get();
-        // if currentPage =0, then we want filteredRides[0-9], if it's 1, then we want filteredRides[10-19]
-        const thisRideIndex = currentPage*10+(rideNumberInView-1)
-        const thisRide = filteredRides[thisRideIndex]
-        if (thisRide) {
-            switch(partNumber){
-                case 0: ColourChange.setRideColour(thisRide, colour, -1, -1, -1, -1, -1); break;
-                case 1: ColourChange.setRideColour(thisRide, -1, colour, -1, -1, -1, -1); break;
-                case 2: ColourChange.setRideColour(thisRide, -1, -1, colour, -1, -1, -1); break;
-                case 3: ColourChange.setRideColour(thisRide, -1, -1, -1, colour, -1, -1); break;
-                case 4: ColourChange.setRideColour(thisRide, -1, -1, -1, -1, colour, -1); break;
-                case 5: ColourChange.setRideColour(thisRide, -1, -1, -1, -1, -1, colour); break;
-                default: break;
-            }
+const setRideColourPart = (rideNumberInView: number, partNumber: number, colour: Colour ) =>{
+    const filteredRides = model.filteredRides.get();
+    const currentPage = model.pickerPageCurrentPage.get();
+    // if currentPage =0, then we want filteredRides[0-9], if it's 1, then we want filteredRides[10-19]
+    const thisRideIndex = currentPage*10+(rideNumberInView-1)
+    const thisRide = filteredRides[thisRideIndex]
+    if (thisRide) {
+        switch(partNumber){
+            case 0: ColourChange.setRideColour(thisRide, colour, -1, -1, -1, -1, -1); break;
+            case 1: ColourChange.setRideColour(thisRide, -1, colour, -1, -1, -1, -1); break;
+            case 2: ColourChange.setRideColour(thisRide, -1, -1, colour, -1, -1, -1); break;
+            case 3: ColourChange.setRideColour(thisRide, -1, -1, -1, colour, -1, -1); break;
+            case 4: ColourChange.setRideColour(thisRide, -1, -1, -1, -1, colour, -1); break;
+            case 5: ColourChange.setRideColour(thisRide, -1, -1, -1, -1, -1, colour); break;
+            default: break;
         }
-
     }
 
-    // const subscribeSetRideColourPart= (rideNumberInView: number, partNumber: number, colour: Colour ) =>{
-    //     compute(model.filteredRides, model.pickerPageCurrentPage, (filteredRides, currentPage) => {
-    //         // if currentPage =0, then we want filteredRides[0-9], if it's 1, then we want filteredRides[10-19]
-    //         debug(`trying to setRideColourPart`)
-    //         const thisRideIndex = currentPage*10+(rideNumberInView-1)
-    //         const thisRide = filteredRides[thisRideIndex]
-    //         debug(`ride before: ${JSON.stringify(thisRide.colourSchemes[0])}`)
-    //         if (thisRide) {
-    //             switch(partNumber){
-    //                 case 0: ColourChange.setRideColour(thisRide, colour, -1, -1, -1, -1, -1); break;
-    //                 case 1: ColourChange.setRideColour(thisRide, -1, colour, -1, -1, -1, -1); break;
-    //                 case 2: ColourChange.setRideColour(thisRide, -1, -1, colour, -1, -1, -1); break;
-    //                 case 3: ColourChange.setRideColour(thisRide, -1, -1, -1, colour, -1, -1); break;
-    //                 case 4: ColourChange.setRideColour(thisRide, -1, -1, -1, -1, colour, -1); break;
-    //                 case 5: ColourChange.setRideColour(thisRide, -1, -1, -1, -1, -1, colour); break;
-    //                 default: break;
-    //             }
-    //         debug(`ride after: ${JSON.stringify(thisRide.colourSchemes[0])}`)
-    //         }
-    //     }
-    // )}
+}
 
-    // // its a colourScheme
-    // if (partNumber<=2 && thisRide.colourSchemes) {
-    //     const keys = Object.keys(thisRide.colourSchemes[0])
-    //     const colourofPartNumber = thisRide.colourSchemes[0][keys[partNumber]]
-    //     debug(`colourofPartNumber: ${colourofPartNumber}`)
-    //     return colourofPartNumber as Colour
-    // }
-    // // its a vehicleColour
-    // else {
-    //     const keys = Object.keys(model.filteredRides.get()[rideNumber].colourSchemes[0])
-    //     debug(`keys[partNumber]: ${keys[partNumber]}`)
-    //     return 0
-    // }    }
+const getRideInView = (rideNumberInView: number):Ride => {
+    const filteredRides = model.filteredRides.get();
+    const currentPage = model.pickerPageCurrentPage.get();
+    // currentPage is zero-indexed, rideNumberInView is 1-index
+    const thisRideIndex = currentPage*10+(rideNumberInView-1)
+    const thisRide = filteredRides[thisRideIndex]
+    return thisRide
+}
 
+const setRideSelected = (rideNumberInView: number, isPressed: boolean) => {
+    // Get the Ride corresponding to the number in the view
+    const thisRide = getRideInView(rideNumberInView)
+    const selectedRides = model.selectedRides.get();
+
+    // If the ride is in the array, remove it; otherwise add it.
+    const thisRideSelectedRidesIndex = selectedRides.indexOf(thisRide)
+    debug(`selectedRides before: ${selectedRides.map(ride=> ride.name)}`)
+
+    if (thisRideSelectedRidesIndex === -1) selectedRides.push(thisRide)
+    else selectedRides.slice(thisRideSelectedRidesIndex, 1)
+    model.selectedRides.set(selectedRides)
+
+    debug(`selectedRides after: ${selectedRides.map(ride=> ride.name)}`)
+}
+
+const subscribeRideSelected = (rideNumberInView: number) =>
+    compute(model.selectedRides, model.filteredRides, (selectedRides) => {
+        const thisRide = getRideInView(rideNumberInView);
+
+        const thisRideSelectedRidesIndex = selectedRides.indexOf(thisRide)
+        debug(`thisRideSelectedRidesIndex: ${thisRideSelectedRidesIndex}`)
+        if (thisRideSelectedRidesIndex === -1) {return false}
+        return true
+        // need to set model.selectedRides to add or remove it
+    })
 
 const modeInit = () => {
 	const modes: Mode[] = Modes;
@@ -195,10 +190,10 @@ export const themeWindow = window({
 	title: 'ToggleTest',
 	width: 700,
     minWidth: 280,
-    maxWidth: 700,
+    maxWidth: 900,
 	height: 300,
-	minHeight: 220,
-	maxHeight: 400,
+	minHeight: 400,
+	maxHeight: 500,
 	padding: 8,
 	onOpen: () => {
 		modeInit();
@@ -222,16 +217,8 @@ export const themeWindow = window({
 
         // show either the selected number remainder of rides or the remainder
         const ridesOnThisPageText = (currentPage !== totalPages) ? `${Math.min(filteredRides.length,10)}` : `${Math.min(rideRemainder,10)}`
-        model.pickerPageText.set(`Showing ${ridesOnThisPageText}/10 rides on page ${currentPage}/${totalPages}`)
-
-        // actually selected rides for onClick
-        // all the rides that'll show up as i page through the view
-        // the currently shown rides
-
-        // set the visible rides in the view
-        // paginate through the selected
-        // model.ridesInView.set()
-        // model.filteredRides.set()
+        // todo make it show a different number
+        model.pickerPageText.set(`Showing ${ridesOnThisPageText} of ${filteredRides.length} rides. Page ${currentPage}/${totalPages}`)
     },
 	content: [
         horizontal({
@@ -459,6 +446,7 @@ export const themeWindow = window({
                                             ]),
                                             label({
                                                 height: 25,
+                                                padding: {top: 5},
                                                 alignment: 'centred',
                                                 text: compute(model.selectedMode, mode => {
                                                     if (mode) return `${mode.description}`;
@@ -471,6 +459,7 @@ export const themeWindow = window({
                             button({
                                 text: 'Set ride colours according to mode',
                                 disabled: compute(model.selectedMode , (mode) => !mode),
+                                // todo make view update colours onClick
                                 onClick: () => colourRides(),
                             }),
                     ]}),
@@ -521,7 +510,6 @@ export const themeWindow = window({
                                                     items: compute(model.allRideTypes, rideType => rideType.map(type => RideType[type])),
                                                     onChange: (typeIndex) => {
                                                         const ridesOfThisType = model.allRides.get().filter(ride=>ride.type===model.allRideTypes.get()[typeIndex])
-                                                        debug(`ride of types ${typeIndex}: ${ridesOfThisType.map(ride=>ride.name)}`)
                                                         model.filteredRides.set(ridesOfThisType)
                                                     }
                                                 })
@@ -569,7 +557,7 @@ export const themeWindow = window({
                                                 button({
                                                     width: 25,
                                                     text: "-->",
-                                                    disabled: compute(model.selectedRides, model.pickerPageCurrentPage, (rides,currentPage) => {
+                                                    disabled: compute(model.filteredRides, model.pickerPageCurrentPage, (rides,currentPage) => {
                                                         // returns true if there are more pages left
                                                         const totalPages = Math.floor(rides.length/10)+1;
                                                         const onLastPage = (currentPage + 1 === totalPages)
@@ -595,13 +583,14 @@ export const themeWindow = window({
                                                                 horizontal({
                                                                     content: [
                                                                         toggle({
-                                                                            height: 17,
-                                                                            width: 17,
+                                                                            height: 12,
+                                                                            width: 12,
                                                                             padding: 5,
-                                                                            visibility: subscribeRideViewerActive(1)
+                                                                            visibility: subscribeRideViewerActive(1),
+
                                                                         }),
                                                                         label({
-                                                                            padding: 4,
+                                                                            padding: {top:5, left: 2},
                                                                             text: compute(model.filteredRides, rides => {
                                                                                 if (rides[0]) return rides[0].name
                                                                                 return ""
@@ -610,91 +599,629 @@ export const themeWindow = window({
                                                                         }),
                                                                         // track main colour
                                                                         colourPicker({
+                                                                            padding: {top:4},
                                                                             visibility: subscribeRideViewerActive(1),
                                                                             colour: subscribeGetRideColourPart(1,0),
-                                                                            onChange: (colour:Colour) => {setRideColourPart(1,0, colour)}
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(1,0, colour)}
                                                                         }),
                                                                         // track additional colour
                                                                         colourPicker({
+                                                                            padding: {top:4},
                                                                             visibility: subscribeRideViewerActive(1),
                                                                             colour: subscribeGetRideColourPart(1,1),
-                                                                            onChange: (colour:Colour) => {setRideColourPart(1,1, colour)}
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(1,1, colour)}
                                                                         }),
                                                                         // track support colour
                                                                         colourPicker({
+                                                                            padding: {top:4},
                                                                             visibility: subscribeRideViewerActive(1),
                                                                             colour: subscribeGetRideColourPart(1,2),
-                                                                            onChange: (colour:Colour) => {setRideColourPart(1,2, colour)}
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(1,2, colour)}
                                                                         }),
                                                                         // car main colour
                                                                         colourPicker({
+                                                                            padding: {top:4},
                                                                             visibility: subscribeRideViewerActive(1),
                                                                             colour: subscribeGetRideColourPart(1,3),
-                                                                            onChange: (colour:Colour) => {setRideColourPart(1,3, colour)}
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(1,3, colour)}
                                                                         }),
                                                                         // car additional colour
                                                                         colourPicker({
+                                                                            padding: {top:4},
                                                                             visibility: subscribeRideViewerActive(1),
                                                                             colour: subscribeGetRideColourPart(1,4),
-                                                                            onChange: (colour:Colour) => {setRideColourPart(1,4, colour)}
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(1,4, colour)}
                                                                         }),
                                                                         // car tertiary colour
                                                                         colourPicker({
+                                                                            padding: {top:4},
                                                                             visibility: subscribeRideViewerActive(1),
                                                                             colour: subscribeGetRideColourPart(1,5),
-                                                                            onChange: (colour:Colour) => {setRideColourPart(1,5, colour)}
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(1,5, colour)}
                                                                         }),
                                                                     ]
                                                                 }),
-                                                                label({
-                                                                    text: "ride 2"
-                                                                })
+                                                                // ride 2
+                                                                horizontal({
+                                                                    content: [
+                                                                        toggle({
+                                                                            height: 12,
+                                                                            width: 12,
+                                                                            padding: 5,
+                                                                            visibility: subscribeRideViewerActive(2),
+                                                                        }),
+                                                                        label({
+                                                                            padding: {top:5, left: 2},
+                                                                            text: compute(model.filteredRides, rides => {
+                                                                                if (rides[1]) return rides[1].name
+                                                                                return ""
+                                                                            }),
+                                                                            visibility: subscribeRideViewerActive(1)
+                                                                        }),
+                                                                        // track main colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(2),
+                                                                            colour: subscribeGetRideColourPart(2,0),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(2,0, colour)}
+                                                                        }),
+                                                                        // track additional colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(2),
+                                                                            colour: subscribeGetRideColourPart(2,1),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(2,1, colour)}
+                                                                        }),
+                                                                        // track support colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(2),
+                                                                            colour: subscribeGetRideColourPart(2,2),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(2,2, colour)}
+                                                                        }),
+                                                                        // car main colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(2),
+                                                                            colour: subscribeGetRideColourPart(2,3),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(2,3, colour)}
+                                                                        }),
+                                                                        // car additional colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(2),
+                                                                            colour: subscribeGetRideColourPart(2,4),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(2,4, colour)}
+                                                                        }),
+                                                                        // car tertiary colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(2),
+                                                                            colour: subscribeGetRideColourPart(2,5),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(2,5, colour)}
+                                                                        }),
+                                                                    ]
+                                                                }),
                                                             ]
                                                         }),
                                                         // rides 3 & 4
                                                         horizontal({
                                                             // padding: 5,
                                                             content: [
-                                                                label({
-                                                                    text: "ride 3"
+                                                                // ride 3
+                                                                horizontal({
+                                                                    content: [
+                                                                        toggle({
+                                                                            height: 12,
+                                                                            width: 12,
+                                                                            padding: 5,
+                                                                            visibility: subscribeRideViewerActive(3)
+                                                                        }),
+                                                                        label({
+                                                                            padding: {top:5, left: 2},
+                                                                            text: compute(model.filteredRides, rides => {
+                                                                                if (rides[2]) return rides[2].name
+                                                                                return ""
+                                                                            }),
+                                                                            visibility: subscribeRideViewerActive(3)
+                                                                        }),
+                                                                        // track main colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(3),
+                                                                            colour: subscribeGetRideColourPart(3,0),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(3,0, colour)}
+                                                                        }),
+                                                                        // track additional colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(3),
+                                                                            colour: subscribeGetRideColourPart(3,1),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(3,1, colour)}
+                                                                        }),
+                                                                        // track support colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(3),
+                                                                            colour: subscribeGetRideColourPart(3,2),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(3,2, colour)}
+                                                                        }),
+                                                                        // car main colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(3),
+                                                                            colour: subscribeGetRideColourPart(3,3),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(3,3, colour)}
+                                                                        }),
+                                                                        // car additional colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(3),
+                                                                            colour: subscribeGetRideColourPart(3,4),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(3,4, colour)}
+                                                                        }),
+                                                                        // car tertiary colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(3),
+                                                                            colour: subscribeGetRideColourPart(3,5),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(3,5, colour)}
+                                                                        }),
+                                                                    ]
                                                                 }),
-                                                                label({
-                                                                    text: "ride 4"
-                                                                })
+                                                                 // ride 4
+                                                                 horizontal({
+                                                                    content: [
+                                                                        toggle({
+                                                                            height: 12,
+                                                                            width: 12,
+                                                                            padding: 5,
+                                                                            visibility: subscribeRideViewerActive(4)
+                                                                        }),
+                                                                        label({
+                                                                            padding: {top:5, left: 2},
+                                                                            text: compute(model.filteredRides, rides => {
+                                                                                if (rides[3]) return rides[3].name
+                                                                                return ""
+                                                                            }),
+                                                                            visibility: subscribeRideViewerActive(4)
+                                                                        }),
+                                                                        // track main colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(4),
+                                                                            colour: subscribeGetRideColourPart(4,0),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(4,0, colour)}
+                                                                        }),
+                                                                        // track additional colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(4),
+                                                                            colour: subscribeGetRideColourPart(4,1),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(4,1, colour)}
+                                                                        }),
+                                                                        // track support colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(4),
+                                                                            colour: subscribeGetRideColourPart(4,2),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(4,2, colour)}
+                                                                        }),
+                                                                        // car main colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(4),
+                                                                            colour: subscribeGetRideColourPart(4,3),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(4,3, colour)}
+                                                                        }),
+                                                                        // car additional colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(4),
+                                                                            colour: subscribeGetRideColourPart(4,4),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(4,4, colour)}
+                                                                        }),
+                                                                        // car tertiary colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(4),
+                                                                            colour: subscribeGetRideColourPart(4,5),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(4,5, colour)}
+                                                                        }),
+                                                                    ]
+                                                                }),
                                                             ]}),
                                                         // rides 5 & 6
                                                         horizontal({
                                                             // padding: 5,
                                                             content: [
-                                                                label({
-                                                                    text: "ride 5"
+                                                                // ride 5
+                                                                horizontal({
+                                                                    content: [
+                                                                        toggle({
+                                                                            height: 12,
+                                                                            width: 12,
+                                                                            padding: 5,
+                                                                            visibility: subscribeRideViewerActive(5)
+                                                                        }),
+                                                                        label({
+                                                                            padding: {top:5, left: 2},
+                                                                            text: compute(model.filteredRides, rides => {
+                                                                                if (rides[4]) return rides[4].name
+                                                                                return ""
+                                                                            }),
+                                                                            visibility: subscribeRideViewerActive(5)
+                                                                        }),
+                                                                        // track main colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(5),
+                                                                            colour: subscribeGetRideColourPart(5,0),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(5,0, colour)}
+                                                                        }),
+                                                                        // track additional colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(5),
+                                                                            colour: subscribeGetRideColourPart(5,1),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(5,1, colour)}
+                                                                        }),
+                                                                        // track support colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(5),
+                                                                            colour: subscribeGetRideColourPart(5,2),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(5,2, colour)}
+                                                                        }),
+                                                                        // car main colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(5),
+                                                                            colour: subscribeGetRideColourPart(5,3),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(5,3, colour)}
+                                                                        }),
+                                                                        // car additional colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(5),
+                                                                            colour: subscribeGetRideColourPart(5,4),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(5,4, colour)}
+                                                                        }),
+                                                                        // car tertiary colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(5),
+                                                                            colour: subscribeGetRideColourPart(5,5),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(5,5, colour)}
+                                                                        }),
+                                                                    ]
                                                                 }),
-                                                                label({
-                                                                    text: "ride 6"
-                                                                })
-                                                            ]}),
-                                                        // rides 7 & 8
-                                                        horizontal({
-                                                            // padding: 5,
-                                                            content: [
-                                                                label({
-                                                                    text: "ride 7"
+                                                                // ride 6
+                                                                horizontal({
+                                                                    content: [
+                                                                        toggle({
+                                                                            height: 12,
+                                                                            width: 12,
+                                                                            padding: 5,
+                                                                            visibility: subscribeRideViewerActive(6)
+                                                                        }),
+                                                                        label({
+                                                                            padding: {top:5, left: 2},
+                                                                            text: compute(model.filteredRides, rides => {
+                                                                                if (rides[5]) return rides[5].name
+                                                                                return ""
+                                                                            }),
+                                                                            visibility: subscribeRideViewerActive(6)
+                                                                        }),
+                                                                        // track main colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(6),
+                                                                            colour: subscribeGetRideColourPart(6,0),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(6,0, colour)}
+                                                                        }),
+                                                                        // track additional colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(6),
+                                                                            colour: subscribeGetRideColourPart(6,1),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(6,1, colour)}
+                                                                        }),
+                                                                        // track support colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(6),
+                                                                            colour: subscribeGetRideColourPart(6,2),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(6,2, colour)}
+                                                                        }),
+                                                                        // car main colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(6),
+                                                                            colour: subscribeGetRideColourPart(6,3),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(6,3, colour)}
+                                                                        }),
+                                                                        // car additional colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(6),
+                                                                            colour: subscribeGetRideColourPart(6,4),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(6,4, colour)}
+                                                                        }),
+                                                                        // car tertiary colour
+                                                                        colourPicker({
+                                                                            padding: {top:4},
+                                                                            visibility: subscribeRideViewerActive(6),
+                                                                            colour: subscribeGetRideColourPart(6,5),
+                                                                            // onChange: (colour:Colour) => {setRideColourPart(6,5, colour)}
+                                                                        }),
+                                                                    ]
                                                                 }),
-                                                                label({
-                                                                    text: "ride 8"
-                                                                })
                                                             ]}),
-                                                        // rides 9 & 10
-                                                        horizontal({
-                                                            // padding: 5,
-                                                            content: [
-                                                                label({
-                                                                    text: "ride 9"
-                                                                }),
-                                                                label({
-                                                                    text: "ride 10"
-                                                                })
-                                                            ]}),
+
+                                                            // ! disabling rides 7-10 to see if it stops the weird stuff
+
+                                                        // // rides 7 & 8
+                                                        // horizontal({
+                                                        //     // padding: 5,
+                                                        //     content: [
+                                                        //         // ride 7
+                                                        //         horizontal({
+                                                        //             content: [
+                                                        //                 toggle({
+                                                        //                     height: 12,
+                                                        //                     width: 12,
+                                                        //                     padding: 5,
+                                                        //                     visibility: subscribeRideViewerActive(7)
+                                                        //                 }),
+                                                        //                 label({
+                                                        //                     padding: {top:5, left: 2},
+                                                        //                     text: compute(model.filteredRides, rides => {
+                                                        //                         if (rides[6]) return rides[6].name
+                                                        //                         return ""
+                                                        //                     }),
+                                                        //                     visibility: subscribeRideViewerActive(7)
+                                                        //                 }),
+                                                        //                 // track main colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(7),
+                                                        //                     colour: subscribeGetRideColourPart(7,0),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(7,0, colour)}
+                                                        //                 }),
+                                                        //                 // track additional colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(7),
+                                                        //                     colour: subscribeGetRideColourPart(7,1),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(7,1, colour)}
+                                                        //                 }),
+                                                        //                 // track support colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(7),
+                                                        //                     colour: subscribeGetRideColourPart(7,2),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(7,2, colour)}
+                                                        //                 }),
+                                                        //                 // car main colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(7),
+                                                        //                     colour: subscribeGetRideColourPart(7,3),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(7,3, colour)}
+                                                        //                 }),
+                                                        //                 // car additional colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(7),
+                                                        //                     colour: subscribeGetRideColourPart(7,4),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(7,4, colour)}
+                                                        //                 }),
+                                                        //                 // car tertiary colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(7),
+                                                        //                     colour: subscribeGetRideColourPart(7,5),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(7,5, colour)}
+                                                        //                 }),
+                                                        //             ]
+                                                        //         }),
+                                                        //         // ride 8
+                                                        //         horizontal({
+                                                        //             content: [
+                                                        //                 toggle({
+                                                        //                     height: 12,
+                                                        //                     width: 12,
+                                                        //                     padding: 5,
+                                                        //                     visibility: subscribeRideViewerActive(8)
+                                                        //                 }),
+                                                        //                 label({
+                                                        //                     padding: {top:5, left: 2},
+                                                        //                     text: compute(model.filteredRides, rides => {
+                                                        //                         if (rides[7]) return rides[7].name
+                                                        //                         return ""
+                                                        //                     }),
+                                                        //                     visibility: subscribeRideViewerActive(8)
+                                                        //                 }),
+                                                        //                 // track main colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(8),
+                                                        //                     colour: subscribeGetRideColourPart(8,0),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(8,0, colour)}
+                                                        //                 }),
+                                                        //                 // track additional colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(8),
+                                                        //                     colour: subscribeGetRideColourPart(8,1),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(8,1, colour)}
+                                                        //                 }),
+                                                        //                 // track support colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(8),
+                                                        //                     colour: subscribeGetRideColourPart(8,2),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(8,2, colour)}
+                                                        //                 }),
+                                                        //                 // car main colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(8),
+                                                        //                     colour: subscribeGetRideColourPart(8,3),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(8,3, colour)}
+                                                        //                 }),
+                                                        //                 // car additional colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(8),
+                                                        //                     colour: subscribeGetRideColourPart(8,4),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(8,4, colour)}
+                                                        //                 }),
+                                                        //                 // car tertiary colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(8),
+                                                        //                     colour: subscribeGetRideColourPart(8,5),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(8,5, colour)}
+                                                        //                 }),
+                                                        //             ]
+                                                        //         }),
+                                                        //     ]}),
+                                                        // // rides 9 & 10
+                                                        // horizontal({
+                                                        //     // padding: 5,
+                                                        //     content: [
+                                                        //         // ride 9
+                                                        //         horizontal({
+                                                        //             content: [
+                                                        //                 toggle({
+                                                        //                     height: 12,
+                                                        //                     width: 12,
+                                                        //                     padding: 5,
+                                                        //                     visibility: subscribeRideViewerActive(9),
+                                                        //                     // add/move it from model.selectedRides
+                                                        //                     onChange: (isPressed: boolean) => subscribeRideSelected(9),
+
+                                                        //                     // subscribe to model.selectedRides
+                                                        //                     // ,
+                                                        //                 }),
+                                                        //                 label({
+                                                        //                     padding: {top:5, left: 2},
+                                                        //                     text: compute(model.filteredRides, rides => {
+                                                        //                         if (rides[8]) return rides[8].name
+                                                        //                         return ""
+                                                        //                     }),
+                                                        //                     visibility: subscribeRideViewerActive(9)
+                                                        //                 }),
+                                                        //                 // track main colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(9),
+                                                        //                     colour: subscribeGetRideColourPart(9,0),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(9,0, colour)}
+                                                        //                 }),
+                                                        //                 // track additional colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(9),
+                                                        //                     colour: subscribeGetRideColourPart(9,1),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(9,1, colour)}
+                                                        //                 }),
+                                                        //                 // track support colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(9),
+                                                        //                     colour: subscribeGetRideColourPart(9,2),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(9,2, colour)}
+                                                        //                 }),
+                                                        //                 // car main colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(9),
+                                                        //                     colour: subscribeGetRideColourPart(9,3),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(9,3, colour)}
+                                                        //                 }),
+                                                        //                 // car additional colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(9),
+                                                        //                     colour: subscribeGetRideColourPart(9,4),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(9,4, colour)}
+                                                        //                 }),
+                                                        //                 // car tertiary colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(9),
+                                                        //                     colour: subscribeGetRideColourPart(9,5),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(9,5, colour)}
+                                                        //                 }),
+                                                        //             ]
+                                                        //         }),
+                                                        //         // ride 10
+                                                        //         horizontal({
+                                                        //             content: [
+                                                        //                 toggle({
+                                                        //                     height: 12,
+                                                        //                     width: 12,
+                                                        //                     padding: 5,
+                                                        //                     visibility: subscribeRideViewerActive(10),
+                                                        //                     onChange: (isPressed: boolean) => setRideSelected(10, isPressed),
+                                                        //                     isPressed: subscribeRideSelected(10)
+                                                        //                 }),
+                                                        //                 label({
+                                                        //                     padding: {top:5, left: 2},
+                                                        //                     text: compute(model.filteredRides, rides => {
+                                                        //                         if (rides[9]) return rides[9].name
+                                                        //                         return ""
+                                                        //                     }),
+                                                        //                     visibility: subscribeRideViewerActive(10)
+                                                        //                 }),
+                                                        //                 // track main colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(10),
+                                                        //                     colour: subscribeGetRideColourPart(10,0),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(10,0, colour)}
+                                                        //                 }),
+                                                        //                 // track additional colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(10),
+                                                        //                     colour: subscribeGetRideColourPart(10,1),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(10,1, colour)}
+                                                        //                 }),
+                                                        //                 // track support colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(10),
+                                                        //                     colour: subscribeGetRideColourPart(10,2),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(10,2, colour)}
+                                                        //                 }),
+                                                        //                 // car main colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(10),
+                                                        //                     colour: subscribeGetRideColourPart(10,3),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(10,3, colour)}
+                                                        //                 }),
+                                                        //                 // car additional colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(10),
+                                                        //                     colour: subscribeGetRideColourPart(10,4),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(10,4, colour)}
+                                                        //                 }),
+                                                        //                 // car tertiary colour
+                                                        //                 colourPicker({
+                                                        //                     padding: {top:4},
+                                                        //                     visibility: subscribeRideViewerActive(10),
+                                                        //                     colour: subscribeGetRideColourPart(10,5),
+                                                        //                     // onChange: (colour:Colour) => {setRideColourPart(10,5, colour)}
+                                                        //                 }),
+                                                        //             ]
+                                                        //         }),
+                                                        //     ]}),
                                                     ]
                                                 })
 
