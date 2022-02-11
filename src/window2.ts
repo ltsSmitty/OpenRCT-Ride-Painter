@@ -90,11 +90,6 @@ const groupingInit = () => {
     model.allGroupings.set(groupings);
     model.selectedGroupingIndex.set(0);
     model.selectedGrouping.set(model.allGroupings.get()[model.selectedGroupingIndex.get()])
-
-    // need to establish the keys for all groups
-    model.allGroupings.get().map(grouping => {
-
-    })
 }
 
 const colourRides = () => {
@@ -381,6 +376,7 @@ export const themeWindow = window({
                                         ]
                                     })
                             }),
+                            // group selection
                             box({
                                 text: 'Group by',
                                 content:
@@ -400,6 +396,7 @@ export const themeWindow = window({
                                                 }
                                             }),
                                             label({
+                                                height: 75,
                                                 padding: {top: 10},
                                                 alignment: 'centred',
                                                 text: compute(model.selectedGrouping, grouping => {
@@ -420,29 +417,6 @@ export const themeWindow = window({
 
                     // Ride Selection Section
                     vertical([
-                        // TODO implement a grouping selection system
-                    //     box({
-                    //         text: "Select Rides by",
-                    //         content:
-                    //             dropdown({
-                    //                 items: compute(model.allGroupings, groupings => groupings.map(group => group.name)),
-                    //                 onChange:(index) => {
-                    //                     model.selectedSelectionsIndex.set(index);
-                    //                     model.selectedSelections.set(model.allGroupings.get()[index])
-                    //                     debug(`model.selectedSelections.get(): ${JSON.stringify(model.selectedSelections.get())}`)
-                    //                 }
-                    //             })
-                    //     }),
-                    //     dropdown({
-                    //         // eslint-disable-next-line arrow-body-style
-                    //         items: compute(model.selectedSelections, grouping => {
-                    //             if (!grouping?.cohorts) {debug(`no grouping.cohorts`); return ["1"]}
-                    //             const k = Object.keys(grouping.cohorts);
-                    //             debug (`k: ${k}`)
-                    //             debug(`for numerical types: ${grouping.cohorts[0]}`)
-                    //             return ["1","2","3"]
-                    //         })
-                    // }),
                         box({
                             text: 'Select Rides',
                             content:
