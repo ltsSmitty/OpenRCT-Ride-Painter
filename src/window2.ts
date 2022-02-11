@@ -1,4 +1,3 @@
-/* eslint-disable arrow-body-style */
 /* eslint-disable max-len */
 /// <reference path="../lib/openrct2.d.ts" />
 
@@ -17,37 +16,32 @@ export const model = {
 	allThemes: store<Theme[]>([]),
 	selectedThemeIndex: store<number>(0),
 	selectedTheme: store<Theme | null>(null),
+
 	// Mode data
 	allModes: store<Mode[]>([]),
 	selectedModeIndex: store<number>(0),
 	selectedMode: store<Mode | null>(null),
         // twoTone mode data
         selectedTwoToneBase: store<Colour | null>(0),
-    // Grouping Data
+
+    // Grouping data
     allGroupings: store<Grouping<number | string>[]>([]),
     selectedGroupingIndex: store<number>(0),
     selectedGrouping: store<Grouping<number | string> | null> (null),
     selectedGroupedRides: store<Ride[][]>([[]]),
 
-    // Ride theme application selection
-    // all rides
+    // Ride Selection data
     allRides: store<Ride[]>([]),
     allRideTypes: store<RideType[]>([]),
     // rides that will have the theme applied onClick()
     selectedRides: store<Ride[]>([]),
     selectedRidesText: store<string>(""),
-    // rides that'll show in the view
 
-    filteredRides: store<Ride[]>([]),
-    // a subset of the visible rides that will be viewed on any given page
-    // will be between 0-10
-    // 0 if no rides exist, capping at 10 for any single p
+    // Selections
+    allSelections: store<Grouping<number | string>[]>([]),
+    selectedSelections: store<Grouping<number | string> | null> (null),
+    selectedSelectionsIndex: store<number>(0)
 
-    // index of dropdown to filter rides for view
-    rideTypeFilterIndex: store<number>(0),
-    rideTypeFilter: store<RideType | null>(null),
-    pickerPageCurrentPage: store<number>(0),
-    pickerPageText: store<string>(""),
 };
 
 
@@ -96,6 +90,11 @@ const groupingInit = () => {
     model.allGroupings.set(groupings);
     model.selectedGroupingIndex.set(0);
     model.selectedGrouping.set(model.allGroupings.get()[model.selectedGroupingIndex.get()])
+
+    // need to establish the keys for all groups
+    model.allGroupings.get().map(grouping => {
+
+    })
 }
 
 const colourRides = () => {
@@ -141,21 +140,9 @@ export const themeWindow = window({
 
         // Page picker text output
         const selectedRides = model.selectedRides.get();
-        const filteredRides = model.filteredRides.get();
-        const totalPages = Math.floor(filteredRides.length/10)+1;
-        const currentPage = model.pickerPageCurrentPage.get() + 1
-        const rideRemainder = filteredRides.length % 10;
 
         // set the text for number of rides selected
         model.selectedRidesText.set(`${selectedRides.length}/${model.allRides.get().length} rides selected`)
-
-        // If the user deselects rides, reset the page back to the 0
-        if (currentPage>totalPages) model.pickerPageCurrentPage.set(0);
-
-        // show either the selected number remainder of rides or the remainder
-        const ridesOnThisPageText = (currentPage !== totalPages) ? `${Math.min(filteredRides.length,10)}` : `${Math.min(rideRemainder,10)}`
-        // todo make it show a different number
-        model.pickerPageText.set(`Showing ${ridesOnThisPageText} of ${filteredRides.length} rides. Page ${currentPage}/${totalPages}`)
     },
 	content: [
         horizontal({
@@ -433,6 +420,29 @@ export const themeWindow = window({
 
                     // Ride Selection Section
                     vertical([
+                        // TODO implement a grouping selection system
+                    //     box({
+                    //         text: "Select Rides by",
+                    //         content:
+                    //             dropdown({
+                    //                 items: compute(model.allGroupings, groupings => groupings.map(group => group.name)),
+                    //                 onChange:(index) => {
+                    //                     model.selectedSelectionsIndex.set(index);
+                    //                     model.selectedSelections.set(model.allGroupings.get()[index])
+                    //                     debug(`model.selectedSelections.get(): ${JSON.stringify(model.selectedSelections.get())}`)
+                    //                 }
+                    //             })
+                    //     }),
+                    //     dropdown({
+                    //         // eslint-disable-next-line arrow-body-style
+                    //         items: compute(model.selectedSelections, grouping => {
+                    //             if (!grouping?.cohorts) {debug(`no grouping.cohorts`); return ["1"]}
+                    //             const k = Object.keys(grouping.cohorts);
+                    //             debug (`k: ${k}`)
+                    //             debug(`for numerical types: ${grouping.cohorts[0]}`)
+                    //             return ["1","2","3"]
+                    //         })
+                    // }),
                         box({
                             text: 'Select Rides',
                             content:
@@ -473,12 +483,10 @@ export const themeWindow = window({
                                         dropdown({
                                             width: 200,
                                             padding: {top: 5},
-                                            items: compute(model.allRideTypes, rideType => {
-                                                return rideType.map(type => {
-                                                // Display the ride type and the number of those rides
-                                                    return `${RideType[type]} - ${model.allRides.get().filter(ride=>ride.type===type).length}`
-                                                })
-                                            }),
+                                            items: compute(model.allRideTypes, rideType => rideType.map(type =>
+                                                    // Display the ride type and the number of those rides
+                                                     `${RideType[type]} - ${model.allRides.get().filter(ride=>ride.type===type).length}`
+                                                )),
                                             onChange: (typeIndex) => {
                                                 const ridesOfThisType = model.allRides.get().filter(ride=>ride.type===model.allRideTypes.get()[typeIndex])
                                                 model.selectedRides.set(ridesOfThisType)
