@@ -72,6 +72,7 @@ const subscribeColourPickerActive = (colourToggleIndex: Colour) => compute(model
 const modeInit = () => {
 	const modes: Mode[] = Modes;
 	model.modes.all.set(modes);
+    // todo change to reference a more global key
     model.modes.selectedIndex.set(0);
     model.modes.selected.set(model.modes.all.get()[model.modes.selectedIndex.get()]);
 };
@@ -159,7 +160,7 @@ export const themeWindow = window({
     maxWidth: 900,
 	height: 300,
 	minHeight: 400,
-	maxHeight: 500,
+	maxHeight: 800,
 	padding: 8,
 	onOpen: () => {
 		modeInit();
@@ -179,10 +180,9 @@ export const themeWindow = window({
 	content: [
         vertical({
             content: [
-                // TOP ROW: THEME AND MODE PICKERS
+                // TOP ROW: THEME PICKER
                 horizontal({
                     content:[
-                        // THEME PICKER
                         vertical({
                             width: '200px',
                             content: [
@@ -362,66 +362,65 @@ export const themeWindow = window({
                                 ]
 
                             }),
-                        // MODE PICKER
-                        box({
-                            text: 'Pick a mode',
-                            content:
-                                vertical({
-                                    padding: 5,
-                                    spacing: 10,
-                                    content: [
-                                        dropdown({
-                                            padding: {top:5},
-                                            items: compute(model.modes.all, (modes) => modes.map((mode)=>mode.name)),
-                                            selectedIndex: model.modes.selectedIndex,
-                                            disabled: compute(model.modes.all, m => m.length === 0),
-                                            disabledMessage: 'No modes defined',
-                                            onChange: (index:number) => {
-                                                model.modes.selectedIndex.set(index);
-                                                model.modes.selected.set(model.modes.all.get()[index]);
-                                            }
-                                        }),
-                                        horizontal([
-                                            label({
-                                                height: 25,
-                                                width: 155,
-                                                alignment: 'left',
-                                                text: 'Choose two-tone base colour:',
-                                                visibility: compute(model.modes.selected, mode => {
-                                                    debug(`mode: ${JSON.stringify(mode?.name)}`)
-                                                    if (mode?.name==='Two-tone') return "visible";
-                                                    return "none"
-                                                    }
-                                                ),
-                                            }),
-                                            colourPicker({
-                                                colour: 0,
-                                                visibility: compute(model.modes.selected, mode => {
-                                                    debug(`mode: ${JSON.stringify(mode?.name)}`)
-                                                    if (mode?.name==='Two-tone') return "visible";
-                                                    return "none"
-                                                    }
-                                                ),
-                                                onChange: (colourChosen:Colour) =>
-                                                    model.modes. selectedTwoToneBase.set(colourChosen)
-                                            })
-                                        ]),
-                                        label({
-                                            height: 25,
-                                            padding: {top: 5},
-                                            alignment: 'centred',
-                                            text: compute(model.modes.selected, mode => {
-                                                if (mode) return `${mode.description}`;
-                                                return 'No mode selected';
-                                            })
-                                        })
-                                    ]
-                                })
-                        })
                     ]
-                })
-                ,
-                // SECOND ROW: GROUP BY AND SELECT RIDES
+                }),
+                // SECOND ROW: MODE PICKER
+                box({
+                    text: 'Pick a mode',
+                    content:
+                        vertical({
+                            padding: 5,
+                            spacing: 10,
+                            content: [
+                                dropdown({
+                                    padding: {top:5},
+                                    items: compute(model.modes.all, (modes) => modes.map((mode)=>mode.name)),
+                                    selectedIndex: model.modes.selectedIndex,
+                                    disabled: compute(model.modes.all, m => m.length === 0),
+                                    disabledMessage: 'No modes defined',
+                                    onChange: (index:number) => {
+                                        model.modes.selectedIndex.set(index);
+                                        model.modes.selected.set(model.modes.all.get()[index]);
+                                    }
+                                }),
+                                horizontal([
+                                    label({
+                                        height: 25,
+                                        width: 155,
+                                        alignment: 'left',
+                                        text: 'Choose two-tone base colour:',
+                                        visibility: compute(model.modes.selected, mode => {
+                                            debug(`mode: ${JSON.stringify(mode?.name)}`)
+                                            if (mode?.name==='Two-tone') return "visible";
+                                            return "none"
+                                            }
+                                        ),
+                                    }),
+                                    colourPicker({
+                                        colour: 0,
+                                        visibility: compute(model.modes.selected, mode => {
+                                            debug(`mode: ${JSON.stringify(mode?.name)}`)
+                                            if (mode?.name==='Two-tone') return "visible";
+                                            return "none"
+                                            }
+                                        ),
+                                        onChange: (colourChosen:Colour) =>
+                                            model.modes. selectedTwoToneBase.set(colourChosen)
+                                    })
+                                ]),
+                                label({
+                                    height: 25,
+                                    padding: {top: 5},
+                                    alignment: 'centred',
+                                    text: compute(model.modes.selected, mode => {
+                                        if (mode) return `${mode.description}`;
+                                        return 'No mode selected';
+                                    })
+                                })
+                            ]
+                        })
+                }),
+                // THIRD ROW: GROUP BY AND SELECT RIDES
                 horizontal({
                     content:[
                         // GROUP PICKER
@@ -455,65 +454,64 @@ export const themeWindow = window({
                                     ]
                                 })
                         }),
-                        // OTHER WIDGET
-                        vertical([
-                            box({
-                                text: 'Select Rides',
-                                content:
-                                    vertical({
-                                        spacing: 10,
-                                        // padding: 5
-                                        content: [
-                                            // Top row of view
-                                            horizontal({
-                                                height: 25,
-                                                padding: 10,
-                                                spacing: 5,
-                                                content: [
-                                                    // toggle to Select all rides
-                                                    button({
-                                                        onClick: () => {
-                                                            if (model.rides.selected.get().length === model.rides.all.get().length) {
-                                                                model.rides.selected.set([]);
-                                                            }
-                                                            else {
-                                                                model.rides.selected.set(model.rides.all.get());
-                                                            }
-                                                        },
-                                                        text: 'Select/Deselect all rides'
-                                                    }),
-                                                    label({
-                                                        padding: {top: 5},
-                                                        text: model.rides.selectedText,
-                                                    }),
-                                                ]
-
-                                            }),
-                                            // Select a type
-                                            label({
-                                                padding: {top: 5},
-                                                text: "Select a type:",
-                                            }),
-                                            dropdown({
-                                                width: 200,
-                                                padding: {top: 5},
-                                                items: compute(model.rides.allRideTypes, rideType => rideType.map(type =>
-                                                        // Display the ride type and the number of those rides
-                                                            `${RideType[type]} - ${model.rides.all.get().filter(ride=>ride.type===type).length}`
-                                                    )),
-                                                onChange: (typeIndex) => {
-                                                    const ridesOfThisType = model.rides.all.get().filter(ride=>ride.type===model.rides.allRideTypes.get()[typeIndex])
-                                                    model.rides.selected.set(ridesOfThisType)
-                                                }
-                                            }),
-                                        ]
-                                    })
-                            })
-                        ])
-
                     ]
                 }),
-                // THIRD ROW: SETTINGS AND CTA
+                // RIDE TYPE SELECTION
+                vertical([
+                    box({
+                        text: 'Select Rides',
+                        content:
+                            vertical({
+                                spacing: 10,
+                                // padding: 5
+                                content: [
+                                    // Top row of view
+                                    horizontal({
+                                        height: 25,
+                                        padding: 10,
+                                        spacing: 5,
+                                        content: [
+                                            // toggle to Select all rides
+                                            button({
+                                                onClick: () => {
+                                                    if (model.rides.selected.get().length === model.rides.all.get().length) {
+                                                        model.rides.selected.set([]);
+                                                    }
+                                                    else {
+                                                        model.rides.selected.set(model.rides.all.get());
+                                                    }
+                                                },
+                                                text: 'Select/Deselect all rides'
+                                            }),
+                                            label({
+                                                padding: {top: 5},
+                                                text: model.rides.selectedText,
+                                            }),
+                                        ]
+
+                                    }),
+                                    // Select a type
+                                    label({
+                                        padding: {top: 5},
+                                        text: "Select a type:",
+                                    }),
+                                    dropdown({
+                                        width: 200,
+                                        padding: {top: 5},
+                                        items: compute(model.rides.allRideTypes, rideType => rideType.map(type =>
+                                                // Display the ride type and the number of those rides
+                                                    `${RideType[type]} - ${model.rides.all.get().filter(ride=>ride.type===type).length}`
+                                            )),
+                                        onChange: (typeIndex) => {
+                                            const ridesOfThisType = model.rides.all.get().filter(ride=>ride.type===model.rides.allRideTypes.get()[typeIndex])
+                                            model.rides.selected.set(ridesOfThisType)
+                                        }
+                                    }),
+                                ]
+                            })
+                    })
+                ]),
+                // SETTINGS
                 horizontal({
                     content:[
                         box({
@@ -548,14 +546,13 @@ export const themeWindow = window({
                                     ]
                             }),
                         }),
-
-                        button({
-                                text: 'Paint rides',
-                                disabled: compute(model.rides.selected , (rides) => rides.length<=0),
-                                onClick: () => colourRides(),
-                            }),
                     ]
-                })
+                }),
+                button({
+                    text: 'Paint rides',
+                    disabled: compute(model.rides.selected , (rides) => rides.length<=0),
+                    onClick: () => colourRides(),
+                }),
             ]
         })]
     })
