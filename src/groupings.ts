@@ -11,7 +11,6 @@ import { debug } from "./helpers/logger"
     // ride age => ride.age, [<5, <13, <40, <88,<104, <120, <128, <200, >200 months]
     // ride excitement, intensity, nausea, [0-2, 2-4, 4-6, 6-8, 8-10, 10-12, 12-14, 14+]
 
-// each grouping function will take in a Ride property
 
 export interface Grouping<T extends string | number > {
 	readonly name: string
