@@ -15,7 +15,7 @@ export interface Mode {
 
 const monoChromaticMode: Mode = {
 	name: 'Monochromatic ride & track',
-	description: 'The ride track and cars will be one solid colour.',
+	description: 'Paint the ride & cars in one solid colour.',
 	applyTheme(theme: Theme) {
 		if (theme.colours.themeColours) {
 			const c = getRandomColour(theme.colours.themeColours);
@@ -27,7 +27,7 @@ const monoChromaticMode: Mode = {
 
 const randomMode: Mode = {
 	name: 'Random colours',
-	description: 'All track and car pieces will be assigned random colours from the theme palette',
+	description: 'Paint each track and car piece in random colours from the theme palette.',
 	applyTheme(theme: Theme) {
 		if (theme.colours.themeColours) {
 			const colours = [
@@ -47,7 +47,7 @@ const randomMode: Mode = {
 
 const customPatternMode: Mode = {
 	name: 'Custom pattern',
-	description: `Paint the ride parts which are enabled.`,
+	description: `Paint the enabled ride parts with your chosen colour; otherwise fill from palette.`,
 	applyTheme(theme: Theme, options:{customColours:Colour[]} ) {
 		if (theme.colours.themeColours) {
             // choose a random base colour from the theme

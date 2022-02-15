@@ -23,7 +23,7 @@ export interface Grouping<T extends string | number > {
 
 const GroupIndividually: Grouping<number> ={
     name: "None (default)",
-    description: "Paint each ride individually",
+    description: "Paint each ride individually.",
     cohorts: [],
     applyGrouping(selectedRides) {
         this.cohorts = []
@@ -38,7 +38,7 @@ type GroupByCostCohort =  "Free" | "0-2" | "2-4"| "4-6"| "6-8"| "8-10"| "10-12"|
 
 const GroupByCost: Grouping<GroupByCostCohort> = {
     name: "Ride cost",
-    description: "Group rides by $2 cost intervals",
+    description: "Group rides by $2 cost intervals.",
     cohorts: {
         "Free": [],
         "0-2": [],
@@ -112,7 +112,7 @@ const GroupByAge: Grouping<GroupByAgeCohort> = {
 
 const GroupByRideType: Grouping<number> = {
     name: "Ride type",
-    description: "Paint all rides of a type together; e.g. all selected Looping Coasters will match",
+    description: "Paint all rides of a type together; e.g. all Looping Coasters will have identical colours for all parts.",
     cohorts: {
     },
     applyGrouping(selectedRides) {

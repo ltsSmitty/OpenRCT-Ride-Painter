@@ -1,7 +1,7 @@
-import { themeWindow, dailyUpdate } from "./window2";
+import { themeWindow, dailyUpdate } from "./window";
 
 const main = () => {
-    ui.registerMenuItem("Ride Paint Manager", () => themeWindow.open())
+    ui.registerMenuItem("Ride Painter", () => themeWindow.open())
     context.subscribe('interval.day', () => {
         dailyUpdate();
     });
