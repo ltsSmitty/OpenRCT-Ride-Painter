@@ -11,6 +11,7 @@ import ColourChange from './ColourChange';
 import { RideType } from './RideType';
 import { Grouping, Groupings } from './groupings';
 
+
 /**
  * Record the model information inside of stores so the values can be read/updated by the UI
  */
@@ -47,6 +48,7 @@ export const model = {
         allRideTypes: store<RideType[]>([]),
         // rides that will have the theme applied when colourRides() is called
         selected: store<Ride[]>([]),
+        selectedIndex: store<number>(0),
         // displays number of rides selected e.g. "4/30 rides selected"
         selectedText: store<string>(""),
         // rides that have already been painted using the plugin
@@ -95,61 +97,72 @@ const subscribeColourPickerActive = (colourToggleIndex: Colour) => compute(model
 })
 
 /**
- * Initializes mode data into the store. Checks the game's config to persist from one load to another
+ * Run on game load to set up initial plugin settings
  */
-const modeInit = () => {
+export const initPluginSettings = () => {
+    /**
+     * Initializes mode data into the store. Checks the game's config to persist from one load to another
+     */
+    const modeInit = () => {
+        const modes: Mode[] = Modes;
+        model.modes.all.set(modes);
+        model.modes.selectedIndex.set(0);
+        model.modes.selected.set(model.modes.all.get()[model.modes.selectedIndex.get()]);
+        model.modes.selectedCustomColours.set([0, 0, 0, 0, 0, 0]);
+        model.modes.selectedColoursEnabled.set([true, false, true, true, false, true,]);
+    };
 
-	const modes: Mode[] = Modes;
-	model.modes.all.set(modes);
-    model.modes.selectedIndex.set(0);
-    model.modes.selected.set(model.modes.all.get()[model.modes.selectedIndex.get()]);
-    model.modes.selectedCustomColours.set([0, 0, 0, 0, 0, 0]);
-    model.modes.selectedColoursEnabled.set([true, false, true, true, false, true,]);
-};
+    /**
+     * Initializes theme data into the store. Checks the game's config to persist from one load to another
+     */
+    const themeInit = () => {
+        // only needed once per game load
+        model.themes.all.set(themes);
+        // only needed once per game load
+        model.themes.selectedIndex.set(0);
+        // only needed once per game load
+        model.themes.selected.set(model.themes.all.get()[model.themes.selectedIndex.get()]);
+    };
 
-/**
- * Initializes theme data into the store. Checks the game's config to persist from one load to another
- */
-const themeInit = () => {
-	model.themes.all.set(themes);
-	// TODO don't reset this every time?
-	model.themes.selectedIndex.set(4);
-	model.themes.selected.set(model.themes.all.get()[model.themes.selectedIndex.get()]);
-};
+    /**
+     * Initializes ride data into the store. Checks the game's config to persist from one load to another
+     */
+    const rideTypeInit = () => {
+        // get rides from map and set to model.rides.all
+        const allRides=map.rides.filter(ride => ride.classification === 'ride')
+        model.rides.all.set(allRides)
 
-/**
- * Initializes ride data into the store. Checks the game's config to persist from one load to another
- */
-const rideTypeInit = () => {
-    // get rides from map and set to model.rides.all
-    const allRides=map.rides.filter(ride => ride.classification === 'ride')
-    model.rides.all.set(allRides)
+        const allRideTypes = allRides.map(ride => ride.type);
+        const uniqueRideTypes = allRideTypes
+            // get the unique ride types
+            .filter(onlyUnique)
+            // get only non-zero/truthy values
+            .filter( n => n);
+        model.rides.allRideTypes.set(uniqueRideTypes);
 
-    const allRideTypes = allRides.map(ride => ride.type);
-    const uniqueRideTypes = allRideTypes
-        // get the unique ride types
-        .filter(onlyUnique)
-        // get only non-zero/truthy values
-        .filter( n => n);
-    model.rides.allRideTypes.set(uniqueRideTypes);
+    }
 
-}
+    /**
+     * Initializes grouping data into the store. Checks the game's config to persist from one load to another
+     */
+    const groupingInit = () => {
+        const groupings: Grouping<number|string>[] = Groupings;
+        model.groupings.all.set(groupings);
+        model.groupings.selectedIndex.set(0);
+        model.groupings.selected.set(model.groupings.all.get()[model.groupings.selectedIndex.get()])
+    }
 
-/**
- * Initializes grouping data into the store. Checks the game's config to persist from one load to another
- */
-const groupingInit = () => {
-    const groupings: Grouping<number|string>[] = Groupings;
-    model.groupings.all.set(groupings);
-    model.groupings.selectedIndex.set(0);
-    model.groupings.selected.set(model.groupings.all.get()[model.groupings.selectedIndex.get()])
-}
-
-/**
- * Initializes settings data into the store. Checks the game's config to persist from one load to another
- */
-const settingInit = () => {
-    model.settings.repaintExistingRides.set(true);
+    /**
+     * Initializes settings data into the store. Checks the game's config to persist from one load to another
+     */
+    const settingInit = () => {
+        model.settings.repaintExistingRides.set(true);
+    }
+    modeInit();
+    themeInit();
+    rideTypeInit();
+    groupingInit();
+    settingInit();
 }
 
 /**
@@ -233,13 +246,7 @@ export const themeWindow = window({
     spacing: 10,
 	padding: 8,
     colours: [1,24],
-	onOpen: () => {
-		modeInit();
-		themeInit();
-        rideTypeInit();
-        groupingInit();
-        settingInit();
-	},
+	onOpen: () => {},
     onUpdate: () => {
 
         // Page picker text output
@@ -685,6 +692,7 @@ export const themeWindow = window({
                                 // Select a type
                                 dropdown({
                                     padding: {top:5},
+                                    selectedIndex: compute(model.rides.selectedIndex, index=> index),
                                     items: compute(model.rides.allRideTypes, rideType => rideType.map(type =>
                                             // Display the ride type and the number of those rides
                                                 `${RideType[type]} - ${model.rides.all.get().filter(ride=>ride.type===type).length}`
@@ -692,6 +700,7 @@ export const themeWindow = window({
                                     onChange: (typeIndex) => {
                                         const ridesOfThisType = model.rides.all.get().filter(ride=>ride.type===model.rides.allRideTypes.get()[typeIndex])
                                         model.rides.selected.set(ridesOfThisType)
+                                        model.rides.selectedIndex.set(typeIndex)
                                     }
                                 }),
                                 label({
@@ -786,7 +795,6 @@ function onlyUnique(value: any, index: any, self: any) {
   /**
    * Runs daily.
    * 1. Repaint daily/weekly/monthly/annually based on store setting.
-   * todo 2. Set system config for menu persistence
    */
 export const dailyUpdate = () => {
 
@@ -826,6 +834,5 @@ export const dailyUpdate = () => {
         if (paintFrequency === 1) colourRides()
 }
 
-// todo make window settings persist; don't reset every time if settings are non-default using get/setConfig()
 // todo make some fonts be black/other colours
 // todo update readme
