@@ -15,7 +15,7 @@ export interface Mode {
 
 const monoChromaticMode: Mode = {
 	name: 'Monochromatic ride & track',
-	description: 'Paint the ride & cars in one solid colour.',
+	description: '{BLACK}Paint the ride & cars in one solid colour.',
 	applyTheme(theme: Theme) {
 		if (theme.colours.themeColours) {
 			const c = getRandomColour(theme.colours.themeColours);
@@ -27,7 +27,7 @@ const monoChromaticMode: Mode = {
 
 const randomMode: Mode = {
 	name: 'Random colours',
-	description: 'Paint each track and car piece in random colours from the theme palette.',
+	description: '{BLACK}Paint each track and car piece in random colours from the theme palette.',
 	applyTheme(theme: Theme) {
 		if (theme.colours.themeColours) {
 			const colours = [
@@ -47,7 +47,7 @@ const randomMode: Mode = {
 
 const customPatternMode: Mode = {
 	name: 'Custom pattern',
-	description: `Paint the enabled ride parts with your chosen colour; otherwise fill from palette.`,
+	description: `{BLACK}Paint the enabled ride parts with your chosen colour; otherwise fill from palette.`,
 	applyTheme(theme: Theme, options:{customColours:Colour[]} ) {
 		if (theme.colours.themeColours) {
             // choose a random base colour from the theme
@@ -68,7 +68,7 @@ const customPatternMode: Mode = {
 
 const buildOrderMode: Mode = {
 	name: 'Build order',
-	description: `Paint rides in the order they were built. Goes especially well with the 'Rainbow' theme and selecting a ride type you have multiple of.`,
+	description: `{BLACK}Paint rides in the order they were built. Goes especially well with the 'Rainbow' theme and selecting a ride type you have multiple of.`,
 	applyTheme(theme: Theme, { index }) {
 		if (theme.colours.partColours) {
 			const ret = [

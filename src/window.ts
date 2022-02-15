@@ -248,12 +248,10 @@ export const themeWindow = window({
     colours: [1,24],
 	onOpen: () => {},
     onUpdate: () => {
-
         // Page picker text output
         const selectedRides = model.rides.selected.get();
-
         // set the text for number of rides selected
-        model.rides.selectedText.set(`${selectedRides.length}/${model.rides.all.get().length} rides selected`)
+        model.rides.selectedText.set(`{BLACK}${selectedRides.length}/${model.rides.all.get().length} rides selected`)
     },
 	content: [
             // TOP ROW: THEME PICKER
@@ -264,14 +262,12 @@ export const themeWindow = window({
                         width: '200px',
                         content: [
                             box({
-                                padding: 0,
                                 text: '1. Pick a theme',
                                 content:
                                     vertical({
                                         spacing: 0,
                                         content: [
                                             dropdown({
-                                                padding: {bottom:5},
                                                 items: compute(model.themes.all, (t) => t.map((theme) => theme.name)),
                                                 selectedIndex: model.themes.selectedIndex,
                                                 disabled: compute(model.themes.all, (t) => t.length === 0),
@@ -581,7 +577,7 @@ export const themeWindow = window({
                                 height: 20,
                                 content: [
                                     toggle({
-                                        text: "Track main",
+                                        text: "{BLACK}Track main",
                                         isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[0]),
                                         onChange: () => enableRideColourPicker(0),
                                         visibility: compute(model.modes.selected, mode => {
@@ -591,7 +587,7 @@ export const themeWindow = window({
                                         ),
                                     }),
                                     toggle({
-                                        text: "Track add'l",
+                                        text: "{BLACK}Track add'l",
                                         isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[1]),
                                         onChange: () => enableRideColourPicker(1),
                                         visibility: compute(model.modes.selected, mode => {
@@ -601,7 +597,7 @@ export const themeWindow = window({
                                         ),
                                     }),
                                     toggle({
-                                        text: "Track sups",
+                                        text: "{BLACK}Track sups",
                                         isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[2]),
                                         onChange: () => enableRideColourPicker(2),
                                         visibility: compute(model.modes.selected, mode => {
@@ -611,7 +607,7 @@ export const themeWindow = window({
                                         ),
                                     }),
                                     toggle({
-                                        text: "Car main",
+                                        text: "{BLACK}Car main",
                                         isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[3]),
                                         onChange: () => enableRideColourPicker(3),
                                         visibility: compute(model.modes.selected, mode => {
@@ -621,7 +617,7 @@ export const themeWindow = window({
                                         ),
                                     }),
                                     toggle({
-                                        text: "Car trim",
+                                        text: "{BLACK}Car trim",
                                         isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[4]),
                                         onChange: () => enableRideColourPicker(4),
                                         visibility: compute(model.modes.selected, mode => {
@@ -631,7 +627,7 @@ export const themeWindow = window({
                                         ),
                                     }),
                                     toggle({
-                                        text: "Car add'l",
+                                        text: "{BLACK}Car add'l",
                                         isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[5]),
                                         onChange: () => enableRideColourPicker(5),
                                         visibility: compute(model.modes.selected, mode => {
@@ -647,6 +643,7 @@ export const themeWindow = window({
             }),
             // THIRD ROW: GROUP BY
             horizontal({
+                height: 80,
                 content:[
                     // GROUP PICKER
                     box({
@@ -705,7 +702,7 @@ export const themeWindow = window({
                                 }),
                                 label({
                                     padding: {top:5},
-                                    text: "Or select all rides:",
+                                    text: "{BLACK}Or select all rides:",
                                 }),
                                 horizontal({
                                     height: 20,
@@ -721,7 +718,7 @@ export const themeWindow = window({
                                                     model.rides.selected.set(model.rides.all.get());
                                                 }
                                             },
-                                            text: 'Select/Deselect all rides'
+                                            text: '{BLACK}Select/Deselect all rides'
                                         }),
                                         label({
                                             padding: {top: 5},
@@ -748,7 +745,7 @@ export const themeWindow = window({
                                             label({
 
                                                 padding: {top: 2},
-                                                text: "Auto-paint selected rides:",
+                                                text: "{BLACK}Auto-paint selected rides:",
                                                 alignment: "left"
                                             }),
                                             dropdownSpinner({
@@ -760,13 +757,13 @@ export const themeWindow = window({
                                     toggle({
                                         height: 20,
                                         isPressed: true,
-                                        text: "Allow repainting of already painted rides",
+                                        text: "{BLACK}Allow repainting of already painted rides",
                                         onChange: (isPressed:boolean) => model.settings.repaintExistingRides.set(isPressed),
 
                                     }),
                                     toggle({
                                         height: 20,
-                                        text: "Paint newly built rides automatically",
+                                        text: "{BLACK}Paint newly built rides automatically",
                                         onChange: (isPressed:boolean) => model.settings.paintBrantNewRides.set(isPressed),
                                     })
                                 ]
@@ -834,5 +831,4 @@ export const dailyUpdate = () => {
         if (paintFrequency === 1) colourRides()
 }
 
-// todo make some fonts be black/other colours
 // todo update readme

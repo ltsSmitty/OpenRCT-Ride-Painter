@@ -26,7 +26,7 @@ export interface Grouping<T extends string | number > {
 
 const GroupIndividually: Grouping<number> ={
     name: "None (default)",
-    description: "Paint each ride individually.",
+    description: "{BLACK}Paint each ride individually.",
     cohorts: [],
     applyGrouping(selectedRides) {
         this.cohorts = []
@@ -41,7 +41,7 @@ type GroupByCostCohort =  "Free" | "0-2" | "2-4"| "4-6"| "6-8"| "8-10"| "10-12"|
 
 const GroupByCost: Grouping<GroupByCostCohort> = {
     name: "Ride cost",
-    description: "Group rides by $2 cost intervals.",
+    description: "{BLACK}Group rides by $2 cost intervals.",
     cohorts: {
         "Free": [],
         "0-2": [],
@@ -86,7 +86,7 @@ type GroupByAgeCohort =
 
 const GroupByAge: Grouping<GroupByAgeCohort> = {
     name: "Ride age",
-    description: "Group rides by age intervals matching how much guests are willing to pay; e.g. 0-4 mo, 5-12 mo, 13-39 mo, etc.",
+    description: "{BLACK}Group rides by age intervals matching how much guests are willing to pay; e.g. 0-4 mo, 5-12 mo, 13-39 mo, etc.",
     cohorts: {
         "0-4 months old": [],
         "5-12 months old": [],
@@ -115,7 +115,7 @@ const GroupByAge: Grouping<GroupByAgeCohort> = {
 
 const GroupByRideType: Grouping<number> = {
     name: "Ride type",
-    description: "Paint all rides of a type together; e.g. all Looping Coasters will have identical colours for all parts.",
+    description: "{BLACK}Paint all rides of a type together; e.g. all Looping Coasters will have identical colours for all parts.",
     cohorts: {
     },
     applyGrouping(selectedRides) {
