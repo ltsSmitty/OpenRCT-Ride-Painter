@@ -1,6 +1,9 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable max-len */
+import { Colour } from 'openrct2-flexui';
 import { debug } from './helpers/logger';
 import { Theme, RideColours } from './themes';
+
 
 const getRandomColour = (colours: number[]) => colours[Math.floor(Math.random() * colours.length)];
 
@@ -42,17 +45,22 @@ const randomMode: Mode = {
 	},
 };
 
-const twoToneMode: Mode = {
-	name: 'Two-tone',
-	description: `The track main & support and car additional & tertiary set by colour picker. Others will be a colour from the theme palette.`,
-	applyTheme(theme: Theme, { baseColour }) {
+const customPatternMode: Mode = {
+	name: 'Custom pattern',
+	description: `Paint the ride parts which are enabled.`,
+	applyTheme(theme: Theme, options:{customColours:Colour[]} ) {
 		if (theme.colours.themeColours) {
-			const c1 = baseColour;
-			let c2;
-			do {
-				c2 = getRandomColour(theme.colours.themeColours);
-			} while (c1 === c2);
-			return [c1, c2, c1, c2, c1, c1] as RideColours;
+            // choose a random base colour from the theme
+			const col = getRandomColour(theme.colours.themeColours);
+            // loop through the given customColours
+            // any that were active will paint that piece
+            // otherwise it'll paint the base colour
+            const ret = [-1,-1,-1,-1,-1,-1];
+            for (let i = 0; i<6;i+=1){
+                ret[i]=(options.customColours[i]>=0 ? options.customColours[i] : col)
+            }
+            debug(`custom colour to paint: ${ret}`)
+			return ret as RideColours;
 		}
 		return null;
 	},
@@ -60,7 +68,7 @@ const twoToneMode: Mode = {
 
 const buildOrderMode: Mode = {
 	name: 'Build order',
-	description: 'Paint rides in the order they were built.',
+	description: `Paint rides in the order they were built. Goes especially well with the 'Rainbow' theme and selecting a ride type you have multiple of.`,
 	applyTheme(theme: Theme, { index }) {
 		if (theme.colours.partColours) {
 			const ret = [
@@ -131,11 +139,6 @@ const buildOrderMode: Mode = {
 export const Modes: Mode[] = [
 	monoChromaticMode,
 	randomMode,
-	twoToneMode,
-	// colourByPartMode,
-	// prebuiltColoursMode,
 	buildOrderMode,
+	customPatternMode,
 ];
-
-// TODO make this actually pick from an array of modes
-export const pickFrom = (modes: Mode[]) => modes[0];
