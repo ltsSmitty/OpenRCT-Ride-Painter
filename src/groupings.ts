@@ -15,6 +15,9 @@ import { debug } from "./helpers/logger"
 export interface Grouping<T extends string | number > {
 	readonly name: string
 	description: string
+    /**
+     * Group @param selectedRides into cohorts based on the grouping's rules
+     */
     applyGrouping(selectedRides: Ride[],options?: { [key: string]: any }): {[k in T]: Ride[]}
     cohorts: {
         [k in T]: Ride[]

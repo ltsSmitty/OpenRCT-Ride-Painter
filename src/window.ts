@@ -11,52 +11,62 @@ import ColourChange from './ColourChange';
 import { RideType } from './RideType';
 import { Grouping, Groupings } from './groupings';
 
+/**
+ * Record the model information inside of stores so the values can be read/updated by the UI
+ */
 export const model = {
 	// Theme data
     themes: {
         all: store<Theme[]>([]),
-        selectedIndex: store<number>(0),
+        // the currently selected theme and dropdown index
         selected: store<Theme | null>(null),
+        selectedIndex: store<number>(0),
     },
     // Mode data
 	modes: {
         all: store<Mode[]>([]),
-        selectedIndex: store<number>(0),
+        // the currently active mode and dropdown index
         selected: store<Mode | null>(null),
+        selectedIndex: store<number>(0),
+        // used for the 'Custom Pattern' mode
+        // stores the colourPicker colours and their active state
         selectedCustomColours: store<Colour[]>([0,0,0,0,0,0]),
         selectedColoursEnabled: store<boolean[]>([true,true,true,true,true,true])
     },
     // Grouping data
     groupings: {
         all: store<Grouping<number | string>[]>([]),
-        selectedIndex: store<number>(0),
+        // the currently active grouping and index
         selected: store<Grouping<number | string> | null> (null),
-        selectedRides: store<Ride[][]>([[]]),
+        selectedIndex: store<number>(0),
     },
     // Ride Selection data
     rides: {
         all: store<Ride[]>([]),
-        // stores all ride types built in park
+        // stores all ride types built in park as numerical values
         allRideTypes: store<RideType[]>([]),
-        // rides that will have the theme applied onClick()
+        // rides that will have the theme applied when colourRides() is called
         selected: store<Ride[]>([]),
         // displays number of rides selected e.g. "4/30 rides selected"
         selectedText: store<string>(""),
-        // rides that have been painted using the plugin
+        // rides that have already been painted using the plugin
         painted: store<Ride[]>([])
     },
     // Settings data
     settings: {
         // repaint all rides at the park
         automaticPaintFrequency: store<number>(0),
-        // allow RPM to repaint already themed rides
+        // allow plugin to repaint already themed rides
         repaintExistingRides: store<boolean>(false),
+        // paint any newly built rides the day they're built
         paintBrantNewRides: store<boolean>(false)
     }
 
 };
-
-const combineCustomColourArrays = () => {
+/**
+ * Helper for 'Custom Pattern' mode. Combine the selected colours & widget active state to know what to paint and return a Colour[]
+ */
+const combineCustomColourArrays = (): Colour[] => {
     const colours = model.modes.selectedCustomColours.get();
     const enabledArr = model.modes.selectedColoursEnabled.get();
     const ret = [];
@@ -66,7 +76,9 @@ const combineCustomColourArrays = () => {
     return ret;
 
 }
-
+/**
+ * Helper for the theme section colourPickers to compute what colour to display
+ */
 const subscribeColourPicker = (colourToggleIndex: Colour) => compute(model.themes.selected, theme => {
         if (theme?.colours.themeColours[colourToggleIndex]) {
             return theme.colours.themeColours[colourToggleIndex] as Colour
@@ -74,21 +86,30 @@ const subscribeColourPicker = (colourToggleIndex: Colour) => compute(model.theme
         return 0 as Colour
     })
 
+/**
+ * Helper for theme section colourPickers to compute whether to display or be invisible
+ */
 const subscribeColourPickerActive = (colourToggleIndex: Colour) => compute(model.themes.selected, theme => {
     if (theme?.colours.themeColours.length &&  theme.colours.themeColours.length > colourToggleIndex) return "visible"
     return "none"
 })
 
+/**
+ * Initializes mode data into the store. Checks the game's config to persist from one load to another
+ */
 const modeInit = () => {
+
 	const modes: Mode[] = Modes;
 	model.modes.all.set(modes);
-    // todo change to reference a more global key
     model.modes.selectedIndex.set(0);
     model.modes.selected.set(model.modes.all.get()[model.modes.selectedIndex.get()]);
     model.modes.selectedCustomColours.set([0, 0, 0, 0, 0, 0]);
     model.modes.selectedColoursEnabled.set([true, false, true, true, false, true,]);
 };
 
+/**
+ * Initializes theme data into the store. Checks the game's config to persist from one load to another
+ */
 const themeInit = () => {
 	model.themes.all.set(themes);
 	// TODO don't reset this every time?
@@ -96,6 +117,9 @@ const themeInit = () => {
 	model.themes.selected.set(model.themes.all.get()[model.themes.selectedIndex.get()]);
 };
 
+/**
+ * Initializes ride data into the store. Checks the game's config to persist from one load to another
+ */
 const rideTypeInit = () => {
     // get rides from map and set to model.rides.all
     const allRides=map.rides.filter(ride => ride.classification === 'ride')
@@ -111,6 +135,9 @@ const rideTypeInit = () => {
 
 }
 
+/**
+ * Initializes grouping data into the store. Checks the game's config to persist from one load to another
+ */
 const groupingInit = () => {
     const groupings: Grouping<number|string>[] = Groupings;
     model.groupings.all.set(groupings);
@@ -118,10 +145,17 @@ const groupingInit = () => {
     model.groupings.selected.set(model.groupings.all.get()[model.groupings.selectedIndex.get()])
 }
 
+/**
+ * Initializes settings data into the store. Checks the game's config to persist from one load to another
+ */
 const settingInit = () => {
     model.settings.repaintExistingRides.set(true);
 }
 
+/**
+ * Apply the selected theme, mode and grouping to rides in park.
+ * Applies to @param ridesToPaint if given; otherwise applies to model.rides.selected
+ */
 const colourRides = (ridesToPaint?:Ride[]) => {
 	const currentTheme = model.themes.selected.get();
 	const currentMode = model.modes.selected.get();
@@ -146,19 +180,21 @@ const colourRides = (ridesToPaint?:Ride[]) => {
     // for each group of rides
     Object.keys(groupedRides).forEach((group, i) => {
         // get the 6 ride colours based on the theme and mode
-        const cols = currentMode.applyTheme(currentTheme,
-            {   customColours: combineCustomColourArrays() as Colour[],
-                index: i});
+        const colours = currentMode.applyTheme(currentTheme,{
+            customColours: combineCustomColourArrays() as Colour[],
+            index: i
+        });
         // guard to make sure there are some colours
-        if (!cols) return;
+        if (!colours) return;
 
+        // apply the colour to each ride
         groupedRides[group].forEach(ride => {
-            // If it's a maze, the maze theme type only looks at cols[2]. And if that is >3, the maze bugs out
-            // So need to make sure it's not that before moving on
-            if (ride.type === 20 && cols[2]>3) return
+            // If it's a maze, the maze theme type only looks at cols[2]. If that is >3, the maze bugs out
+            // Need to make sure it's not that before moving on
+            if (ride.type === 20 && colours[2]>3) return
 
             // Actually do the painting!
-            ColourChange.setRideColour(ride, ...cols);
+            ColourChange.setRideColour(ride, ...colours);
             markRideAsHavingBeenPainted(ride)
         })
 
@@ -167,7 +203,10 @@ const colourRides = (ridesToPaint?:Ride[]) => {
 
 };
 
-// mark a ride as having been painted
+/**
+ * Mark a ride as having been painted.
+ * Prevents the ride from being repainted if 'Allow repainting of already painted rides' is disabled.
+ */
 const markRideAsHavingBeenPainted = (ride: Ride) => {
     const previouslyPaintedRides = model.rides.painted.get()
     // if the ride isn't already on the list
@@ -178,15 +217,17 @@ const markRideAsHavingBeenPainted = (ride: Ride) => {
     }
 }
 
+/**
+ * Helper for 'Custom Pattern' mode. Flip the active state of the colourPicker widgets onClick/onChange
+ */
 const enableRideColourPicker = (index:number) => {
     const enabledColours = model.modes.selectedColoursEnabled.get()
     enabledColours[index] = !enabledColours[index]
     model.modes.selectedColoursEnabled.set(enabledColours);
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export const themeWindow = window({
-	title: 'Ride Paint Manager',
+	title: 'Ride Painter',
     width: 400,
 	height: 600,
     spacing: 10,
@@ -735,11 +776,18 @@ export const themeWindow = window({
         ]
     })
 
-
+/**
+ * Helper to get unique ride types
+ */
 function onlyUnique(value: any, index: any, self: any) {
     return self.indexOf(value) === index;
   }
 
+  /**
+   * Runs daily.
+   * 1. Repaint daily/weekly/monthly/annually based on store setting.
+   * todo 2. Set system config for menu persistence
+   */
 export const dailyUpdate = () => {
 
     // PAINT NEW RIDES BASED ON paintBrantNewRides === true
@@ -778,7 +826,6 @@ export const dailyUpdate = () => {
         if (paintFrequency === 1) colourRides()
 }
 
-// todo add more themes
 // todo make window settings persist; don't reset every time if settings are non-default using get/setConfig()
 // todo make some fonts be black/other colours
 // todo update readme
