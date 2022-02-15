@@ -146,6 +146,11 @@ const colourRides = (ridesToPaint?:Ride[]) => {
                     index: i});
 			if (cols) {
                 groupedRides[group].forEach(ride => {
+                    // If it's a maze, the maze theme type only looks at cols[2]. And if that is >3, the maze bugs out
+                    // So need to make sure it's not that before moving on
+                    if (ride.type === 20 && cols[2]>3) return
+
+                    // Actually do the painting!
                     ColourChange.setRideColour(ride, ...cols);
                     markRideAsHavingBeenPainted(ride)
                 })

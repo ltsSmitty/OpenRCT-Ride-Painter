@@ -24,7 +24,6 @@ export default class ColourChange {
         flags: 0,
       },
       // Awkward callback but necessary
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       () => { });
     } else {
       /* eslint-disable no-console */
@@ -54,48 +53,27 @@ export default class ColourChange {
     ColourChange.setRideColourPart(ride, 5, vehicleTernaryColour);
   };
 
-  public static setRideColourTracks = (
-    ride:Ride,
-    mainColour:number,
-    additionalColour: number,
-    supportsColour: number,
-  ) => {
-    ColourChange.setRideColourPart(ride, 0, mainColour);
-    ColourChange.setRideColourPart(ride, 1, additionalColour);
-    ColourChange.setRideColourPart(ride, 2, supportsColour);
+
+   public static setRideStationStyle = (ride:Ride, stationStyle: number) => {
+    ColourChange.setRideColourPart(ride, 7, stationStyle);
   };
 
-  public static setRideColourVehicle = (
-    ride:Ride,
-    vehicleBodyColour: number,
-    vehicleTrimColour: number,
-    vehicleTernaryColour: number,
-  ) => {
-    ColourChange.setRideColourPart(ride, 3, vehicleBodyColour);
-    ColourChange.setRideColourPart(ride, 4, vehicleTrimColour);
-    ColourChange.setRideColourPart(ride, 5, vehicleTernaryColour);
-  };
-
-  // Examples
+  // EXAMPLES
   public static setAllPartsBlack = (ride:Ride): void => {
     ColourChange.setRideColour(ride, 0, 0, 0, 0, 0, 0);
   };
 
   public static setRandomTrackColour = (ride:Ride): void => {
-    ColourChange.setRideColourTracks(ride,
-      context.getRandom(0, 31), context.getRandom(0, 31),
-      context.getRandom(0, 31));
-  };
+    ColourChange.setRideColour(
+        ride,
+        context.getRandom(0, 31),
+        context.getRandom(0, 31),
+        context.getRandom(0, 31),
+        -1,
+        -1,
+        -1
+        )
+    }
 
-  public static setRandomVehicleColour = (ride:Ride): void => {
-    ColourChange.setRideColourVehicle(ride,
-      context.getRandom(0, 31),
-      context.getRandom(0, 31),
-      context.getRandom(0, 31));
-  };
-
-  public static setRideStationStyle = (ride:Ride, stationStyle: number) => {
-    ColourChange.setRideColourPart(ride, 7, stationStyle);
-  };
   // end of class
 }
