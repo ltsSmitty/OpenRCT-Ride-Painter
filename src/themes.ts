@@ -11,6 +11,8 @@ export interface Theme {
     // The palette of colours you'd like available.
     // e.g. [2, 5, 9, 12, 13, 14, 30]
     themeColours: number[],
+
+    // !curently unused
     // Preselected RideColour combinations that you know look good. Can include colors different from themeColours above
     // e.g. [[1, 2, 3, 4, 5, 6], [5, 20, 5, 20, 4, 1]]
     preferredRideColours?: RideColours[],
@@ -25,7 +27,8 @@ export interface Theme {
       VehicleColourTernary: number[],
     },
   };
-  allowDuplicates: boolean,
+  // todo add functionality to ensure no duplicates
+  allowDuplicates?: boolean,
 }
 
 
@@ -81,12 +84,13 @@ const rainbow: Theme = {
     description: "Marcel's favorite",
     colours: {
       themeColours: [
+        //
         Colour.BrightRed, Colour.LightOrange, Colour.BrightYellow,
         Colour.BrightGreen, Colour.LightBlue, Colour.LightPurple,
         Colour.LightPink,
         Colour.SaturatedRed, Colour.DarkOrange, Colour.Yellow,
         Colour.SaturatedGreen, Colour.DarkBlue, Colour.BrightPurple,
-        Colour.BrightPink
+        Colour.BrightPink,
     ],
       partColours: {
         trackColourMain: [
@@ -125,15 +129,7 @@ const valentines: Theme = {
   name: 'Valentines',
   description: 'One that I like',
   colours: {
-    themeColours: [29,30,31],
-    partColours: {
-      trackColourMain: [1, 2, 3, 4],
-      trackColourAdditional: [5, 6, 7, 8],
-      trackColourSupports: [9, 10, 11, 12],
-      VehicleColourBody: [13, 14, 15, 16],
-      VehicleColourTrim: [17, 18, 19, 20],
-      VehicleColourTernary: [21, 22, 23, 23],
-    },
+    themeColours: [25,26,27,28,29,30,31],
   },
   allowDuplicates: false,
 };
@@ -147,13 +143,30 @@ const allColours: Theme = {
   allowDuplicates: false,
 }
 
+const desert: Theme = {
+    name: "Desert",
+    description: "Browns and tans",
+    colours: {
+        themeColours: [1, 16, 18, 19, 21, 22, 23, 24, 25]
+    }
+}
+
+const aqua: Theme = {
+    name: "Aqua",
+    description: "Blues and Greens",
+    colours: {
+        themeColours: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16]
+    }
+}
 
 export const themes: Theme[] = [
-    justBlack,
-    forest,
-    dazzlingColors,
-    valentines,
     allColours,
-    rainbow
+    dazzlingColors,
+    rainbow,
+    forest,
+    valentines,
+    desert,
+    aqua,
+    justBlack,
 ]
 
