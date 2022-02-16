@@ -8,7 +8,9 @@
 - Ensure that newly built rides match your park's theme?
 
 The Ride Painter plugin makes recolouring your park a breeze!
-![example of 4 different colour modes](https://github.com/thesm17/OpenRCT-Ride-Painter/blob/main/screenshots/4%20type%20examples.jpeg?raw=true "example of 4 different colour modes")
+
+<img src="https://github.com/thesm17/OpenRCT-Ride-Painter/blob/main/screenshots/4%20type%20examples.jpeg?raw=true" alt="drawing" width="400"/>
+
 ## Features
 - Choose a theme colour palette for all your rides to follow.
 - Apply the colour scheme to some or all of your rides, with multiple colouring modes such as Monochromatic mode or Random part colour mode.
