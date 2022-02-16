@@ -5,43 +5,41 @@
 - Recolour your rides every now-and-then to keep things fresh?
 - Win the "Most Dazzling Colour Scheme" award?
 - Make your 8 Ferris Wheels or 20 Corkscrew Coasters into a rainbow with one click?
-- Ensure that newly built rides match your park's theme?
 
-The Ride Painter plugin makes recolouring your park a breeze!
+#### The Ride Painter plugin makes recolouring your park a breeze!
 
-<img src="https://github.com/thesm17/OpenRCT-Ride-Painter/blob/main/screenshots/4%20type%20examples.jpeg?raw=true" alt="drawing" width="400"/>
+|<img src="https://p-rdFQqyg.t1.n0.cdn.getcloudapp.com/items/8LupKzJ8/fe8ff80a-4567-405f-9fae-b9da54306dde.jpg" alt="drawing" width="400"/> | <img src="https://github.com/thesm17/OpenRCT-Ride-Painter/blob/main/screenshots/4%20type%20examples.jpeg?raw=true" alt="drawing" width="400"/>|
 
 ## Features
-- Choose a theme colour palette for all your rides to follow.
-- Apply the colour scheme to some or all of your rides, with multiple colouring modes such as Monochromatic mode or Random part colour mode.
+- Choose a theme colour palette & apply the colour scheme to your rides with multiple colouring modes.
 - Automatically recolour your rides daily, weekly, monthly or annually.
-- Colour your brand new rides as they're built.
+- Colour your new rides as they're being built.
 - Built with Basssiiie’s new [Flex-UI framework](https://github.com/Basssiiie/OpenRCT2-FlexUI "Flex-UI framework").
 
 ## Using the plugin
-###### 0. Open the Ride Painter plugin
-###### 1. Choose a colour theme.
-######  2. Choose a painting mode:
-- Monochromatic – paint rides so that all the track and car pieces match, for an all-orange or all-pink ride.
-- Random colours – paint every piece randomly from the theme colour palette.
-- Build order – paint rides in the order they were built. If you combine this mode with the `Rainbow` theme, and then select a ride type you have 5+ rides of, youll paint [Marcel's](https://www.youtube.com/c/MarcelVos "Marcel's") favourite scheme.
-- Custom pattern – Lock in a colour for any/all of the 6 ride parts (track main, track additional, track supports, car main, car additional, car tertiary). Any toggle that is not activated will colour rides from the theme palette.
+#### 0. Open the Ride Painter plugin
+#### 1. Choose a colour theme.
+####  2. Choose a painting mode:
+- **Monochromatic**: paint rides so that all the track and car pieces match, for an all-orange or all-pink ride.
+- **Random colours**: paint every piece randomly from the theme colour palette.
+- **Build order**: paint rides in the order they were built. If you combine this mode with the `Rainbow` theme, and then select a ride type you have 5+ rides of, you'll paint [Marcel's](https://www.youtube.com/c/MarcelVos "Marcel's") favourite scheme.
+- **Custom pattern**: Lock in a colour for any/all of the 6 ride parts (track main, track additional, track supports, car main, car additional, car tertiary). Any toggle that is not activated will colour rides from the theme palette.
 
-###### 3. Choose a grouping (optional):
-- None (default): every ride will go through the painting process separately. Some rides may end up with the same randomly selected colours, but most will be unique
-- Ride type: all rides of the same type will get the exact same paint job. This is useful if you want every ride of a type to be the exact same colour; you'll end up with 10 red Looping Coasters, 8 Orange Ferris wheels, etc.
-- Ride cost: rides within the same price bracket of $2 will get painted the same way. So all rides between $2-$4, $4-$6, $6-$8, $8-$10, $10-$12, etc. and free rides will get the same paint job.
-- Ride age: paint rides based on their age bracket for what guests are willing to pay. Useful if you want to maximize your ticket prices but find the Ride Price Manager too overpowered.
+#### 3. Choose a grouping (optional):
+- **None (default)**: every ride will go through the painting process separately. Some rides may end up with the same randomly selected colours, but most will be unique.
+- **Ride type**: all rides of the same type will get the exact same paint job. This is useful if you want every ride of a type to be the exact same colour; you'll end up with 10 red Looping Coasters, 8 Orange Ferris wheels, etc.
+- **Ride cost**: rides within the same price bracket of $2 will get painted the same way. So all rides between $2-$4, $4-$6, $6-$8, $8-$10, $10-$12, etc. and free rides will get the same paint job.
+- **Ride age**: paint rides based on their age bracket for what guests are willing to pay. Useful if you want to maximize your ticket prices but find the Ride Price Manager too overpowered.
 
-###### 4. Select rides to paint:
+#### 4. Select rides to paint:
 Choose a ride type from the dropdown, or select all rides.
 
-###### 5. Adjust other settings (optional):
+#### 5. Adjust other settings (optional):
 - If you want your rides to recolour automatically, choose a time interval from the dropdown (daily, weekly, monthly, annually).
 - If you love your colour scheme and don't want to repaint your already-painted rides, disable the 'Allow repainting of already painted rides'.
 - If you want your newly built rides to match the theme, enable the last toggle. It'll paint all new rides each day
 
-###### 6. Paint your rides!
+#### 6. Paint your rides!
 ## Installation
 1. Install a compatible version of OpenRCT2 (I wrote it on 3.5.1, so that will certainly work)
 	- Downloads are here: https://openrct2.org/downloads
