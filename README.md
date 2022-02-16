@@ -1,65 +1,77 @@
-# 🎢 Theme Editor
+# Ride Painter - a plugin for OpenRCT2
+## Overview
+#### Ever wanted to:
+- Paint every ride in your park at once?
+- Recolour your rides every now-and-then to keep things fresh?
+- Win the "Most Dazzling Colour Scheme" award?
+- Make your 8 Ferris Wheels or 20 Corkscrew Coasters into a rainbow with one click?
+- Ensure that newly built rides match your park's theme?
 
-## Table of contents
-  * [About](#about)
-  * [Installation](#installation)
-  * [Usage](#usage)
-     * [How it works](#how-it-works)
-     * [npm scripts](#npm-scripts)
-  * [Releasing your mod](#releasing-your-mod)
-  * [Notes](#notes)
-  * [Useful links](#useful-links)
+The Ride Painter plugin makes recolouring your park a breeze!
+![example of 4 different colour modes](https://github.com/thesm17/OpenRCT-Ride-Painter/blob/main/screenshots/4%20type%20examples.jpeg?raw=true "example of 4 different colour modes")
+## Features
+- Choose a theme colour palette for all your rides to follow.
+- Apply the colour scheme to some or all of your rides, with multiple colouring modes such as Monochromatic mode or Random part colour mode.
+- Automatically recolour your rides daily, weekly, monthly or annually.
+- Colour your brand new rides as they're built.
+- Built with Basssiiie’s new [Flex-UI framework](https://github.com/Basssiiie/OpenRCT2-FlexUI "Flex-UI framework").
 
-## About
+## Using the plugin
+###### 0. Open the Ride Painter plugin
+###### 1. Choose a colour theme.
+######  2. Choose a painting mode:
+- Monochromatic – paint rides so that all the track and car pieces match, for an all-orange or all-pink ride.
+- Random colours – paint every piece randomly from the theme colour palette.
+- Build order – paint rides in the order they were built. If you combine this mode with the `Rainbow` theme, and then select a ride type you have 5+ rides of, youll paint [Marcel's](https://www.youtube.com/c/MarcelVos "Marcel's") favourite scheme.
+- Custom pattern – Lock in a colour for any/all of the 6 ride parts (track main, track additional, track supports, car main, car additional, car tertiary). Any toggle that is not activated will colour rides from the theme palette.
 
-This repository was created to serve as a template TypeScript mod repository for OpenRCT2.
+###### 3. Choose a grouping (optional):
+- None (default): every ride will go through the painting process separately. Some rides may end up with the same randomly selected colours, but most will be unique
+- Ride type: all rides of the same type will get the exact same paint job. This is useful if you want every ride of a type to be the exact same colour; you'll end up with 10 red Looping Coasters, 8 Orange Ferris wheels, etc.
+- Ride cost: rides within the same price bracket of $2 will get painted the same way. So all rides between $2-$4, $4-$6, $6-$8, $8-$10, $10-$12, etc. and free rides will get the same paint job.
+- Ride age: paint rides based on their age bracket for what guests are willing to pay. Useful if you want to maximize your ticket prices but find the Ride Price Manager too overpowered.
 
+###### 4. Select rides to paint:
+Choose a ride type from the dropdown, or select all rides.
+
+###### 5. Adjust other settings (optional):
+- If you want your rides to recolour automatically, choose a time interval from the dropdown (daily, weekly, monthly, annually).
+- If you love your colour scheme and don't want to repaint your already-painted rides, disable the 'Allow repainting of already painted rides'.
+- If you want your newly built rides to match the theme, enable the last toggle. It'll paint all new rides each day
+
+###### 6. Paint your rides!
 ## Installation
+1. Install a compatible version of OpenRCT2 (I wrote it on 3.5.1, so that will certainly work)
+	- Downloads are here: https://openrct2.org/downloads
+2. Download the plugin file here: https://github.com/thesm17/OpenRCT-Ride-Painter
+    - Put that file in your OpenRCT2 plugin folder.
+    - It's typically in `C:\Users\{User}\Documents\OpenRCT2` on Windows.
+    - For more info, see OpenRCT2's info on Plugins.
+3. Run OpenRCT2!
+4. Once in a scenario, open the options window via the Map dropdown to configure the plugin.
 
-## Usage
+## Multiplayer
+The plugin should work in multiplayer, though I have yet to test it. I'd love feedback :)
+## Possible Future Plans
+Extension of the plugin is somewhat limited due to current plugin widget constraints with OpenRCT 3.5.1. Once there are over 64 widgets, they start to overwrite each other, leading to toggles/buttons that are mis-pressed. (For instance, you'll notice the 4th colourPicker in the theme section gets disabled whenever the ride painting button is disabled.) The development team is aware of this shortcoming and is working to extend the number of widgets available before this behaviour appears.
 
-### How it works
+There are still numerous other features I'd like to add once the widget capacity is raised:
+- Ability for a user to create their own themes without rebuilding from source code
+- Option to lock specific rides so they stay their colour regardless
+- Improved plugin text readability
+- An undo button in case you paint the rides wrong
+- A pop-out panel to paint individual rides/parts without having to open them up separately
+- Better persistence load-to-load
+- Group flat rides vs coasters
+- Incorporate balloon/umbrella colouration
 
-Your mod files live in `./src/` directory. That's the ones you will be writing code in.
-Upon starting Nodemon server, it will start watching changes you make to files in `./src/`, and it will build them accordingly.
+## Feature Requests
+If you want to request a feature or find a bug, open an issue on GitHub (as long as one doesn't exist already for the same thing). And if you like the sound of one of the Possible Future Plans and want it to happen, it's cool if you open an issue for it.
 
-The entry point is `./src/registerPlugin.ts`. Any file, class, module you create in `./src/` needs to be imported to `registerPlugin.ts` one way or another.
-
-Template uses [Terser](https://github.com/terser/terser) to minify your output mod bundle file and to resolve any dependencies.
-
-### npm scripts
-
-|script|function|
-|--|--|
-|`npm start`|starts Nodemon server that will be watching `./src/` directory for any changes you make to any files inside it|
-|`npm run lint`|lints your `.ts` and `.js` files from `./src/` directory|
-|`npm run build:dev`|compiles `registerPlugin.ts` and minifies it, then places it inside `PATH_TO_OPENRCT2/plugin/` as `MOD_NAME.js`|
-|`npm run build`|runs `npm run lint` and if no linting errors are found, compiles `registerPlugin.ts` and minifies it, then places it inside `./dist/` folder as `MOD_NAME.js` - this is your final mod file|
-
-## Releasing your mod
-
-After running `npm run build` locally, `./dist/` directory will be created that will contain `MOD_NAME.js`.
-It's up to you, if you want to edit `.gitignore` to actually include `./dist/` contents and push them to your remote or if you want to manually copy the contents of `./dist/` and publish them somewhere. However creating a GitHub release using contents of `./dist/` directory sounds like a cool idea. You would have your mod file available for download straight from the repo.
-Don't forget to update `README.md` to reflect your mod and update version numbers for future releases.
-
-## Notes
-
-If you've added a new mod folder to `plugin`, and the OpenRCT2 didn't seem like it registered it (and you had a running park), just load the save/start a new park, so OpenRCT2 loads the mods again. Now when you overwrite them during development, there shouldn't be any problems with hot reload noticing file changes.
-
-Don't touch `app.js`. Its existence makes Nodemon happy.
-
-Nodemon is what watches your files for changes & fires off new dev builds for hot reloading.
-Furthermore, it's used for resolving root directory of the project - that's used, for example, in init script.
-
-Nodemon will watch all the files in `./src/` directory. You can also freely create classes, modules, import them in your mod files.
-Sky's the limit :)
-
-## Useful links
-
-- [OpenRCT2 website](https://openrct2.io/)
-- [OpenRCT2 on GitHub](https://github.com/OpenRCT2)
-- [OpenRCT2 on Reddit](https://www.reddit.com/r/openrct2)
-- [OpenRCT2 plugins website](https://openrct2plugins.org/)
-- [OpenRCT2 example plugins repository](https://github.com/OpenRCT2/plugin-samples)
-- [OpenRCT2 scripting guide](https://github.com/OpenRCT2/OpenRCT2/blob/develop/distribution/scripting.md)
-- [OpenRCT2 hot reload feature presentation](https://www.youtube.com/watch?v=jmjWzEhmDjk)
+## Contributing
+I'm happy for others to contribute, but my Github skills are a bit shoddy. You should be able to build the plugin from source and make a Pull Request to contribute, but I'm not 100% certain how to make that happen :D
+## Thanks
+- Huge thanks to Basssiiie for the [Flex-UI](https://github.com/Basssiiie/OpenRCT2-FlexUI "Flex-UI") framework to build this from and guidance mid-build. I can't wait to see where it goes and hopefully contribute to it!
+- This plugin is powered by wisnia74's excellent TypeScript plugin template. If you want to get started building your own OpenRCT plugins, it's an excellent place to start.
+- Marcel Vos for showing me the need to paint lots of rides at once
+- IntelOrca & the OpenRCT devs for their hard work on the PluginAPI. You've made an excellent game even better by putting these plugin options into our hands.
