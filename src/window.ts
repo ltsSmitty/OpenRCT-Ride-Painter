@@ -242,7 +242,7 @@ const enableRideColourPicker = (index:number) => {
 export const themeWindow = window({
 	title: 'Ride Painter',
     width: 400,
-	height: 600,
+	height: 540,
     spacing: 10,
 	padding: 8,
     colours: [1,24],
@@ -772,7 +772,7 @@ export const themeWindow = window({
                 ]
             }),
             button({
-                height: 40,
+                height: 30,
                 padding: [5,"10%"],
                 text: '6. Paint selected rides',
                 disabled: compute(model.rides.selected , (rides) => rides.length<=0),
@@ -791,7 +791,8 @@ function onlyUnique(value: any, index: any, self: any) {
 
   /**
    * Runs daily.
-   * 1. Repaint daily/weekly/monthly/annually based on store setting.
+   * 1. Paint brand new rides if that option is seleced
+   * 2. Repaint daily/weekly/monthly/annually based on store setting.
    */
 export const dailyUpdate = () => {
 
@@ -831,4 +832,3 @@ export const dailyUpdate = () => {
         if (paintFrequency === 1) colourRides()
 }
 
-// todo update readme
