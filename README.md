@@ -8,7 +8,7 @@
 
 #### The Ride Painter plugin makes recolouring your park a breeze!
 
-|<img src="https://p-rdFQqyg.t1.n0.cdn.getcloudapp.com/items/8LupKzJ8/fe8ff80a-4567-405f-9fae-b9da54306dde.jpg" alt="drawing" width="400"/> | <img src="https://github.com/thesm17/OpenRCT-Ride-Painter/blob/main/screenshots/4%20type%20examples.jpeg?raw=true" alt="drawing" width="400"/>|
+|<img src="https://p-rdFQqyg.t1.n0.cdn.getcloudapp.com/items/8LupKzJ8/fe8ff80a-4567-405f-9fae-b9da54306dde.jpg" alt="drawing" width="400"/> <img src="https://github.com/thesm17/OpenRCT-Ride-Painter/blob/main/screenshots/4%20type%20examples.jpeg?raw=true" alt="drawing" width="400"/>|
 
 ## Features
 - Choose a theme colour palette & apply the colour scheme to your rides with multiple colouring modes.
@@ -48,28 +48,30 @@ Choose a ride type from the dropdown, or select all rides.
     - It's typically in `C:\Users\{User}\Documents\OpenRCT2` on Windows.
     - For more info, see OpenRCT2's info on Plugins.
 3. Run OpenRCT2!
-4. Once in a scenario, open the options window via the Map dropdown to configure the plugin.
+4. Once in a scenario, open the Ride Painter window via the Map dropdown to configure the plugin.
 
 ## Multiplayer
 The plugin should work in multiplayer, though I have yet to test it. I'd love feedback :)
 ## Possible Future Plans
 Extension of the plugin is somewhat limited due to current plugin widget constraints with OpenRCT 3.5.1. Once there are over 64 widgets, they start to overwrite each other, leading to toggles/buttons that are mis-pressed. (For instance, you'll notice the 4th colourPicker in the theme section gets disabled whenever the ride painting button is disabled.) The development team is aware of this shortcoming and is working to extend the number of widgets available before this behaviour appears.
 
-There are still numerous other features I'd like to add once the widget capacity is raised:
+There are numerous other features I'd like to add. Some can be added now, others once the widget capacity is raised:
 - Ability for a user to create their own themes without rebuilding from source code
-- Option to lock specific rides so they stay their colour regardless
+- Option to edit and lock specific ride paint so it keeps its colour regardless
 - Improved plugin text readability
 - An undo button in case you paint the rides wrong
 - A pop-out panel to paint individual rides/parts without having to open them up separately
 - Better persistence load-to-load
 - Group flat rides vs coasters
-- Incorporate balloon/umbrella colouration
 
 ## Feature Requests
 If you want to request a feature or find a bug, open an issue on GitHub (as long as one doesn't exist already for the same thing). And if you like the sound of one of the Possible Future Plans and want it to happen, it's cool if you open an issue for it.
 
 ## Contributing
-I'm happy for others to contribute, but my Github skills are a bit shoddy. You should be able to build the plugin from source and make a Pull Request to contribute, but I'm not 100% certain how to make that happen :D
+Since I built this plugin with Basssiiie's Flex-UI framework, this is an adequate example for how it functions, especially the MVVM store system. 
+
+At the moment, the only way to add new themes is by building from source, so this will be your only option if you want to add your own custom colour themes. You should be able to build the plugin from source and make a Pull Request to contribute, but I'm not 100% certain how to make that happen because my Github skills are shoddy :D
+
 ## Thanks
 - Huge thanks to Basssiiie for the [Flex-UI](https://github.com/Basssiiie/OpenRCT2-FlexUI "Flex-UI") framework to build this from and guidance mid-build. I can't wait to see where it goes and hopefully contribute to it!
 - This plugin is powered by wisnia74's excellent TypeScript plugin template. If you want to get started building your own OpenRCT plugins, it's an excellent place to start.
