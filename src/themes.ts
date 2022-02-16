@@ -11,7 +11,6 @@ export interface Theme {
     // The palette of colours you'd like available.
     // e.g. [2, 5, 9, 12, 13, 14, 30]
     themeColours: number[],
-
     // !curently unused
     // Preselected RideColour combinations that you know look good. Can include colors different from themeColours above
     // e.g. [[1, 2, 3, 4, 5, 6], [5, 20, 5, 20, 4, 1]]
@@ -51,7 +50,7 @@ const justBlack: Theme = {
 
 const forest: Theme =  {
   name: 'Forest',
-  description: 'All parts between 10 and 13.',
+  description: 'Woodsy colours.',
   colours: {
     themeColours: [ 11, 12, 13, 14, 15, 16, 19, 22, 23]
   },

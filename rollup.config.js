@@ -10,8 +10,8 @@ const build = process.env.BUILD || "development";
 const isDev = (build === "development");
 
 const output = (isDev)
-	? `/Users/andrewpenman/Library/Application Support/OpenRCT2/plugin/ThemeManager.js`
-	: "./dist/PeepEditor.js";
+	? `/Users/andrewpenman/Library/Application Support/OpenRCT2/plugin/RidePainter.js`
+	: "./dist/RidePainter.js";
 
 
 /**
@@ -42,8 +42,7 @@ const config = {
 				quote_style: 1,
 				wrap_iife: true,
         // TODO change url to final.
-				preamble: "// Get the latest version: https://github.com/Manticore-007/OpenRCT2-PeepEditor",
-
+				preamble: "// Get the latest version: https://github.com/thesm17/OpenRCT-Ride-Painter",
 				beautify: isDev,
 			},
 			mangle: {

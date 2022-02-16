@@ -33,8 +33,8 @@ export default class ColourChange {
     }
   };
 
-  /**
- * To not change a colour for a param, input -1 for the param.
+/**
+ * Set a ride's colour. To not change a colour for a param, input -1 for the param.
  */
   public static setRideColour = (
     ride: Ride,
