@@ -43,7 +43,7 @@ Choose a ride type from the dropdown, or select all rides.
 ## Installation
 1. Install a compatible version of OpenRCT2 (I wrote it on 3.5.1, so that will certainly work)
 	- Downloads are here: https://openrct2.org/downloads
-2. Download the plugin file here: https://github.com/thesm17/OpenRCT-Ride-Painter
+2. Download the plugin file here: https://github.com/thesm17/OpenRCT-Ride-Painter/releases/latest
     - Put that file in your OpenRCT2 plugin folder.
     - It's typically in `C:\Users\{User}\Documents\OpenRCT2` on Windows.
     - For more info, see OpenRCT2's info on Plugins.
