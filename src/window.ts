@@ -795,40 +795,53 @@ function onlyUnique(value: any, index: any, self: any) {
    * 2. Repaint daily/weekly/monthly/annually based on store setting.
    */
 export const dailyUpdate = () => {
-
     // PAINT NEW RIDES BASED ON paintBrantNewRides === true
-        const allRides = map.rides.filter(ride=>ride.classification==="ride")
-        model.rides.all.set(allRides);
-        const paintedRides = model.rides.painted.get()
-        // should new rides be painted automatically?
-        if (model.settings.paintBrantNewRides.get()) {
-            const ridesToPaint = allRides.filter(ride => (paintedRides.indexOf(ride)===-1))
-            if (ridesToPaint.length>0) colourRides(ridesToPaint);
+
+    // reset model.rides.all
+    const allRides = map.rides.filter(ride=>ride.classification==="ride")
+    model.rides.all.set(allRides);
+
+    const paintedRides = model.rides.painted.get()
+    debug(`painted rides id: ${paintedRides.map(ride=>JSON.stringify(ride.id))}`)
+
+    // Check if new rides be painted automatically
+    if (model.settings.paintBrantNewRides.get()) {
+        // get all the rides that haven't yet been painted
+        // ! this will repaint all rides in the park upon park load
+        // todo store paintedRides in config to reference upon park load
+        const ridesToPaint = allRides.filter(ride => {
+            const thisRideHasBeenPainted = paintedRides.filter(r=> r.id===ride.id)
+            // return if it doesn't find a match in painted
+            return (thisRideHasBeenPainted.length === 0)
+        })
+        if (ridesToPaint.length>0) {
+            colourRides(ridesToPaint);
         }
+    }
 
 
     // PAINT RIDES BASED ON AUTOMATIC PAINT FREQUENCY
-        //  values: ["never", "daily", "weekly", "monthly", "yearly"],
-        const paintFrequency = model.settings.automaticPaintFrequency.get();
-        // if set to never, return
-        if (paintFrequency===0) return;
+    //  values: ["never", "daily", "weekly", "monthly", "yearly"],
+    const paintFrequency = model.settings.automaticPaintFrequency.get();
+    // if set to never, return
+    if (paintFrequency===0) return;
 
-        // if set to annual, check that month = 0 and day = 1 before painting
-        if (paintFrequency === 4 && date.month === 0 && date.day === 1) {
-            colourRides();
-            return;
-        }
-        // if set to monthly, check that day = 1 before painting
-        if (paintFrequency === 3 && date.day === 1) {
-            colourRides();
-            return;
-        }
-        // if set to weekly, check if the day remainder is 1 (will change on the 1, 8, 15, 22, 29 of the month)
-        if (paintFrequency === 2 && date.day%7===1) {
-            colourRides();
-            return;
-        }
-        // if set to daily
-        if (paintFrequency === 1) colourRides()
+    // if set to annual, check that month = 0 and day = 1 before painting
+    if (paintFrequency === 4 && date.month === 0 && date.day === 1) {
+        colourRides();
+        return;
+    }
+    // if set to monthly, check that day = 1 before painting
+    if (paintFrequency === 3 && date.day === 1) {
+        colourRides();
+        return;
+    }
+    // if set to weekly, check if the day remainder is 1 (will change on the 1, 8, 15, 22, 29 of the month)
+    if (paintFrequency === 2 && date.day%7===1) {
+        colourRides();
+        return;
+    }
+    // if set to daily
+    if (paintFrequency === 1) colourRides()
 }
 
