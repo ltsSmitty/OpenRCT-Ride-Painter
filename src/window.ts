@@ -474,7 +474,7 @@ export const themeWindow = window({
                                 colourPicker({
                                     padding: {left: "40%"},
                                     width: "1w",
-                                    colour: 0,
+                                    colour: compute(model.modes.selectedCustomColours, colours => colours[0]),
                                     disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[0]),
                                     visibility: compute(model.modes.selected, mode => {
                                         if (mode?.name==='Custom pattern') return "visible";
@@ -491,7 +491,7 @@ export const themeWindow = window({
                                 colourPicker({
                                     padding: {left: "40%"},
                                     width: "1w",
-                                    colour: 0,
+                                    colour: compute(model.modes.selectedCustomColours, colours => colours[1]),
                                     disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[1]),
                                     visibility: compute(model.modes.selected, mode => {
                                         if (mode?.name==='Custom pattern') return "visible";
@@ -508,7 +508,7 @@ export const themeWindow = window({
                                 colourPicker({
                                     padding: {left: "40%"},
                                     width: "1w",
-                                    colour: 0,
+                                    colour: compute(model.modes.selectedCustomColours, colours => colours[2]),
                                     disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[2]),
                                     visibility: compute(model.modes.selected, mode => {
                                         if (mode?.name==='Custom pattern') return "visible";
@@ -525,7 +525,7 @@ export const themeWindow = window({
                                 colourPicker({
                                     padding: {left: "40%"},
                                     width: "1w",
-                                    colour: 0,
+                                    colour: compute(model.modes.selectedCustomColours, colours => colours[3]),
                                     disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[3]),
                                     visibility: compute(model.modes.selected, mode => {
                                         if (mode?.name==='Custom pattern') return "visible";
@@ -542,7 +542,7 @@ export const themeWindow = window({
                                 colourPicker({
                                     padding: {left: "40%"},
                                     width: "1w",
-                                    colour: 0,
+                                    colour: compute(model.modes.selectedCustomColours, colours => colours[4]),
                                     disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[4]),
                                     visibility: compute(model.modes.selected, mode => {
                                         if (mode?.name==='Custom pattern') return "visible";
@@ -559,7 +559,7 @@ export const themeWindow = window({
                                 colourPicker({
                                     padding: {left: "40%"},
                                     width: "1w",
-                                    colour: 0,
+                                    colour: compute(model.modes.selectedCustomColours, colours => colours[5]),
                                     disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[5]),
                                     visibility: compute(model.modes.selected, mode => {
                                         if (mode?.name==='Custom pattern') return "visible";
