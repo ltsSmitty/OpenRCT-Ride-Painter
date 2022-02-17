@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 /* eslint-disable max-len */
 /// <reference path="../lib/openrct2.d.ts" />
 
@@ -157,12 +156,27 @@ export const initPluginSettings = () => {
      */
     const settingInit = () => {
         model.settings.repaintExistingRides.set(true);
+        model.settings.paintBrantNewRides.set(true);
     }
     modeInit();
     themeInit();
     rideTypeInit();
     groupingInit();
     settingInit();
+}
+
+/**
+ * Mark a ride as having been painted.
+ * Prevents the ride from being repainted if 'Allow repainting of already painted rides' is disabled.
+ */
+ const markRideAsHavingBeenPainted = (ride: Ride) => {
+    const previouslyPaintedRides = model.rides.painted.get()
+    // if the ride isn't already on the list
+    if (previouslyPaintedRides.indexOf(ride)===-1)
+    {
+        previouslyPaintedRides.push(ride)
+        model.rides.painted.set(previouslyPaintedRides);
+    }
 }
 
 /**
@@ -216,19 +230,6 @@ const colourRides = (ridesToPaint?:Ride[]) => {
 
 };
 
-/**
- * Mark a ride as having been painted.
- * Prevents the ride from being repainted if 'Allow repainting of already painted rides' is disabled.
- */
-const markRideAsHavingBeenPainted = (ride: Ride) => {
-    const previouslyPaintedRides = model.rides.painted.get()
-    // if the ride isn't already on the list
-    if (previouslyPaintedRides.indexOf(ride)===-1)
-    {
-        previouslyPaintedRides.push(ride)
-        model.rides.painted.set(previouslyPaintedRides);
-    }
-}
 
 /**
  * Helper for 'Custom Pattern' mode. Flip the active state of the colourPicker widgets onClick/onChange
@@ -798,16 +799,14 @@ export const dailyUpdate = () => {
     // PAINT NEW RIDES BASED ON paintBrantNewRides === true
 
     // reset model.rides.all
-    const allRides = map.rides.filter(ride=>ride.classification==="ride")
+    const allRides = map.rides.filter(ride=>ride.classification === "ride")
     model.rides.all.set(allRides);
 
     const paintedRides = model.rides.painted.get()
-    debug(`painted rides id: ${paintedRides.map(ride=>JSON.stringify(ride.id))}`)
-
     // Check if new rides be painted automatically
     if (model.settings.paintBrantNewRides.get()) {
         // get all the rides that haven't yet been painted
-        // ! this will repaint all rides in the park upon park load
+        // this will repaint all rides in the park upon park load
         // todo store paintedRides in config to reference upon park load
         const ridesToPaint = allRides.filter(ride => {
             const thisRideHasBeenPainted = paintedRides.filter(r=> r.id===ride.id)
