@@ -60,7 +60,9 @@ export const model = {
         // allow plugin to repaint already themed rides
         repaintExistingRides: store<boolean>(false),
         // paint any newly built rides the day they're built
-        paintBrantNewRides: store<boolean>(false)
+        paintBrantNewRides: store<boolean>(false),
+        // paint rides that start the scenario
+        paintScenarioStartingRides: store<boolean>(false)
     }
 
 };
@@ -79,6 +81,7 @@ const combineCustomColourArrays = (): Colour[] => {
 }
 /**
  * Helper for the theme section colourPickers to compute what colour to display
+ * todo try using subscribe instead of compute to simplify
  */
 const subscribeColourPicker = (colourToggleIndex: Colour) => compute(model.themes.selected, theme => {
         if (theme?.colours.themeColours[colourToggleIndex]) {
@@ -96,6 +99,24 @@ const subscribeColourPickerActive = (colourToggleIndex: Colour) => compute(model
 })
 
 /**
+ * Initializes ride data into the store. Checks the game's config to persist from one load to another
+ */
+const rideTypeInit = () => {
+    // get rides from map and set to model.rides.all
+    const allRides=map.rides.filter(ride => ride.classification === 'ride')
+    model.rides.all.set(allRides)
+
+    const allRideTypes = allRides.map(ride => ride.type);
+    const uniqueRideTypes = allRideTypes
+        // get the unique ride types
+        .filter(onlyUnique)
+        // get only non-zero/truthy values
+        .filter( n => n);
+    model.rides.allRideTypes.set(uniqueRideTypes);
+
+}
+
+/**
  * Run on game load to set up initial plugin settings
  */
 export const initPluginSettings = () => {
@@ -105,8 +126,11 @@ export const initPluginSettings = () => {
     const modeInit = () => {
         const modes: Mode[] = Modes;
         model.modes.all.set(modes);
-        model.modes.selectedIndex.set(0);
+        // for spiciness, randomly choose a theme to set
+        const startingMode = context.getRandom(0,modes.length-1)
+        model.modes.selectedIndex.set(startingMode);
         model.modes.selected.set(model.modes.all.get()[model.modes.selectedIndex.get()]);
+        // for 'Custom Pattern' mode
         model.modes.selectedCustomColours.set([0, 0, 0, 0, 0, 0]);
         model.modes.selectedColoursEnabled.set([true, false, true, true, false, true,]);
     };
@@ -117,29 +141,12 @@ export const initPluginSettings = () => {
     const themeInit = () => {
         // only needed once per game load
         model.themes.all.set(themes);
-        // only needed once per game load
-        model.themes.selectedIndex.set(0);
+        // for spiciness, randomly choose a theme to set
+        const startingTheme = context.getRandom(0,themes.length-1)
+        model.themes.selectedIndex.set(startingTheme);
         // only needed once per game load
         model.themes.selected.set(model.themes.all.get()[model.themes.selectedIndex.get()]);
     };
-
-    /**
-     * Initializes ride data into the store. Checks the game's config to persist from one load to another
-     */
-    const rideTypeInit = () => {
-        // get rides from map and set to model.rides.all
-        const allRides=map.rides.filter(ride => ride.classification === 'ride')
-        model.rides.all.set(allRides)
-
-        const allRideTypes = allRides.map(ride => ride.type);
-        const uniqueRideTypes = allRideTypes
-            // get the unique ride types
-            .filter(onlyUnique)
-            // get only non-zero/truthy values
-            .filter( n => n);
-        model.rides.allRideTypes.set(uniqueRideTypes);
-
-    }
 
     /**
      * Initializes grouping data into the store. Checks the game's config to persist from one load to another
@@ -157,12 +164,31 @@ export const initPluginSettings = () => {
     const settingInit = () => {
         model.settings.repaintExistingRides.set(true);
         model.settings.paintBrantNewRides.set(true);
+        model.settings.paintScenarioStartingRides.set(true);
     }
+    /**
+     * if it's not day 1 or the box isn't checked, don't paint the rides
+     * by adding all the existing rides to model.rides.paintedRides
+     */
+    const paintPrebuiltScenarioRides = () => {
+        // if it's day 1,
+        if (date.day === 0 && date.month === 1 && date.year === 1) {
+            // if the box is checked, do nothing
+            // if the box isn't checked, treat all rides like they've been painted
+            if (!model.settings.paintScenarioStartingRides.get()) {
+                const startingRides = map.rides.filter(ride=> ride.classification === "ride");
+                model.rides.painted.set(startingRides);
+            }
+        }
+    }
+
     modeInit();
     themeInit();
     rideTypeInit();
     groupingInit();
     settingInit();
+
+    paintPrebuiltScenarioRides();
 }
 
 /**
@@ -253,6 +279,8 @@ export const themeWindow = window({
         const selectedRides = model.rides.selected.get();
         // set the text for number of rides selected
         model.rides.selectedText.set(`{BLACK}${selectedRides.length}/${model.rides.all.get().length} rides selected`)
+        // update model.rides.all and model.rides.allRideTypes
+        rideTypeInit();
     },
 	content: [
             // TOP ROW: THEME PICKER
@@ -766,7 +794,14 @@ export const themeWindow = window({
                                         height: 20,
                                         text: "{BLACK}Paint newly built rides automatically",
                                         onChange: (isPressed:boolean) => model.settings.paintBrantNewRides.set(isPressed),
-                                    })
+                                    }),
+                                    toggle({
+                                        height: 20,
+                                        text: "{BLACK}Paint rides that start in the scenario",
+                                        tooltip: "In secnario play, select this to paint rides that already exist on the first day of gameplay.",
+                                        isPressed: compute(model.settings.paintScenarioStartingRides, btn => btn),
+                                        onChange: (isPressed:boolean) => model.settings.paintScenarioStartingRides.set(isPressed),
+                                    }),
                                 ]
                         }),
                     }),
@@ -797,11 +832,9 @@ function onlyUnique(value: any, index: any, self: any) {
    */
 export const dailyUpdate = () => {
     // PAINT NEW RIDES BASED ON paintBrantNewRides === true
-
     // reset model.rides.all
     const allRides = map.rides.filter(ride=>ride.classification === "ride")
     model.rides.all.set(allRides);
-
     const paintedRides = model.rides.painted.get()
     // Check if new rides be painted automatically
     if (model.settings.paintBrantNewRides.get()) {
