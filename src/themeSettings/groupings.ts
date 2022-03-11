@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 // groupings which will make rides get themed together
 
-import { debug } from "./helpers/logger"
+import { debug } from "../helpers/logger"
 
 // individual (all rides will be themed individually)
 // by:
@@ -11,14 +11,13 @@ import { debug } from "./helpers/logger"
     // ride age => ride.age, [<5, <13, <40, <88,<104, <120, <128, <200, >200 months]
     // ride excitement, intensity, nausea, [0-2, 2-4, 4-6, 6-8, 8-10, 10-12, 12-14, 14+]
 
-
 export interface Grouping<T extends string | number > {
 	readonly name: string
 	description: string
     /**
      * Group @param selectedRides into cohorts based on the grouping's rules
      */
-    applyGrouping(selectedRides: Ride[],options?: { [key: string]: any }): {[k in T]: Ride[]}
+    applyGrouping(selectedRides: Ride[], options?: { [key: string | number]: any }): {[k in T]: Ride[]}
     cohorts: {
         [k in T]: Ride[]
     }
@@ -28,9 +27,11 @@ const GroupIndividually: Grouping<number> ={
     name: "None (default)",
     description: "{BLACK}Paint each ride individually.",
     cohorts: [],
-    applyGrouping(selectedRides) {
+    applyGrouping(selectedRides)
+{
         this.cohorts = []
-        selectedRides.forEach(ride => {
+        selectedRides.forEach(ride =>
+{
             this.cohorts[ride.id] = [ride]
         })
         return this.cohorts
@@ -41,7 +42,7 @@ type GroupByCostCohort =  "Free" | "0-2" | "2-4"| "4-6"| "6-8"| "8-10"| "10-12"|
 
 const GroupByCost: Grouping<GroupByCostCohort> = {
     name: "Ride cost",
-    description: "{BLACK}Group rides by $2 cost intervals.",
+    description: "Group rides by $2 cost intervals.",
     cohorts: {
         "Free": [],
         "0-2": [],
@@ -56,7 +57,8 @@ const GroupByCost: Grouping<GroupByCostCohort> = {
         "18-20": [],
         "20+": [],
     },
-    applyGrouping(selectedRides) {
+    applyGrouping(selectedRides)
+{
         this.cohorts.Free = selectedRides.filter(ride => ride.price[0] === 0)
         this.cohorts["0-2"] = selectedRides.filter(ride => (ride.price[0] >= 0 && ride.price[0] < 20))
         this.cohorts["2-4"] = selectedRides.filter(ride => (ride.price[0] >= 20 && ride.price[0] < 40))
@@ -98,7 +100,8 @@ const GroupByAge: Grouping<GroupByAgeCohort> = {
         "128-199 months old": [],
         "200+ months old": [],
     },
-    applyGrouping(selectedRides) {
+    applyGrouping(selectedRides)
+{
         selectedRides.forEach(ride=>debug(`ride ${ride.name} is ${ride.age}`))
         this.cohorts["0-4 months old"] = selectedRides.filter(ride => (ride.age < 5))
         this.cohorts["5-12 months old"] = selectedRides.filter(ride => (ride.age >= 5 && ride.age < 13))
@@ -118,9 +121,11 @@ const GroupByRideType: Grouping<number> = {
     description: "{BLACK}Paint all rides of a type together; e.g. all Looping Coasters will have identical colours for all parts.",
     cohorts: {
     },
-    applyGrouping(selectedRides) {
+    applyGrouping(selectedRides)
+{
         this.cohorts={};
-        selectedRides.forEach(ride => {
+        selectedRides.forEach(ride =>
+{
             if (!this.cohorts[ride.type]) {this.cohorts[ride.type] = [ride]}
             else this.cohorts[ride.type].push(ride)
         })
@@ -129,7 +134,7 @@ const GroupByRideType: Grouping<number> = {
 }
 
 
-export const Groupings = [
+export const groupings = [
     GroupIndividually,
     GroupByRideType,
     GroupByCost,

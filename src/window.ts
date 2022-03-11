@@ -1,14 +1,18 @@
-/* eslint-disable max-len */
 /// <reference path="../lib/openrct2.d.ts" />
 
 import { box, button, compute, colourPicker ,dropdown, horizontal, label, dropdownSpinner,
     store, window, vertical, toggle, Colour } from 'openrct2-flexui';
-import { Mode, Modes } from './modes';
-import { Theme, themes } from './themes';
+import { Mode, modes } from './themeSettings/modes';
+import { Theme, themes } from './themeSettings/themes';
 import { debug } from './helpers/logger';
-import ColourChange from './ColourChange';
+import ColourChange from './themeSettings/ColourChange';
 import { RideType } from './RideType';
-import { Grouping, Groupings } from './groupings';
+import { Grouping, groupings } from './themeSettings/groupings';
+import themeSectionElements from './windowSections/themeSection';
+import { modeSectionElements } from './windowSections/modeSection';
+import groupingSectionElements from './windowSections/groupingSection';
+import rideSelectionElements from './windowSections/rideSelectionSection';
+import settingsSectionElements from './windowSections/settingsSection';
 
 
 /**
@@ -53,6 +57,13 @@ export const model = {
         // rides that have already been painted using the plugin
         painted: store<Ride[]>([])
     },
+    // station settings
+    stations: {
+        all: store<LoadedObject[]>([]),
+        selected: store<LoadedObject|null>(null),
+        selectedIndex: store<number>(0),
+        automaticallyApply: store<boolean>(true)
+    },
     // Settings data
     settings: {
         // repaint all rides at the park
@@ -66,42 +77,12 @@ export const model = {
     }
 
 };
-/**
- * Helper for 'Custom Pattern' mode. Combine the selected colours & widget active state to know what to paint and return a Colour[]
- */
-const combineCustomColourArrays = (): Colour[] => {
-    const colours = model.modes.selectedCustomColours.get();
-    const enabledArr = model.modes.selectedColoursEnabled.get();
-    const ret = [];
-    for (let i=0; i<colours.length;i+=1) {
-        ret[i] = (enabledArr[i] ? colours[i] : -1)
-    }
-    return ret;
-
-}
-/**
- * Helper for the theme section colourPickers to compute what colour to display
- * todo try using subscribe instead of compute to simplify
- */
-const subscribeColourPicker = (colourToggleIndex: Colour) => compute(model.themes.selected, theme => {
-        if (theme?.colours.themeColours[colourToggleIndex]) {
-            return theme.colours.themeColours[colourToggleIndex] as Colour
-        }
-        return 0 as Colour
-    })
-
-/**
- * Helper for theme section colourPickers to compute whether to display or be invisible
- */
-const subscribeColourPickerActive = (colourToggleIndex: Colour) => compute(model.themes.selected, theme => {
-    if (theme?.colours.themeColours.length &&  theme.colours.themeColours.length > colourToggleIndex) return "visible"
-    return "none"
-})
 
 /**
  * Initializes ride data into the store. Checks the game's config to persist from one load to another
  */
-const rideTypeInit = () => {
+const rideTypeInit = () =>
+{
     // get rides from map and set to model.rides.all
     const allRides=map.rides.filter(ride => ride.classification === 'ride')
     model.rides.all.set(allRides)
@@ -116,15 +97,23 @@ const rideTypeInit = () => {
 
 }
 
+export const initStationSettings = () =>
+{
+    const allStationStyles = context.getAllObjects("station")
+    model.stations.all.set(allStationStyles);
+    model.stations.automaticallyApply.set(false);
+}
+
 /**
  * Run on game load to set up initial plugin settings
  */
-export const initPluginSettings = () => {
+export const initPluginSettings = () =>
+{
     /**
      * Initializes mode data into the store. Checks the game's config to persist from one load to another
      */
-    const modeInit = () => {
-        const modes: Mode[] = Modes;
+    const modeInit = () =>
+{
         model.modes.all.set(modes);
         // for spiciness, randomly choose a theme to set
         const startingMode = context.getRandom(0,modes.length-1)
@@ -138,7 +127,8 @@ export const initPluginSettings = () => {
     /**
      * Initializes theme data into the store. Checks the game's config to persist from one load to another
      */
-    const themeInit = () => {
+    const themeInit = () =>
+{
         // only needed once per game load
         model.themes.all.set(themes);
         // for spiciness, randomly choose a theme to set
@@ -151,8 +141,8 @@ export const initPluginSettings = () => {
     /**
      * Initializes grouping data into the store. Checks the game's config to persist from one load to another
      */
-    const groupingInit = () => {
-        const groupings: Grouping<number|string>[] = Groupings;
+    const groupingInit = () =>
+{
         model.groupings.all.set(groupings);
         model.groupings.selectedIndex.set(0);
         model.groupings.selected.set(model.groupings.all.get()[model.groupings.selectedIndex.get()])
@@ -161,7 +151,8 @@ export const initPluginSettings = () => {
     /**
      * Initializes settings data into the store. Checks the game's config to persist from one load to another
      */
-    const settingInit = () => {
+    const settingInit = () =>
+{
         model.settings.repaintExistingRides.set(true);
         model.settings.paintBrantNewRides.set(true);
         model.settings.paintScenarioStartingRides.set(true);
@@ -170,12 +161,18 @@ export const initPluginSettings = () => {
      * if it's not day 1 or the box isn't checked, don't paint the rides
      * by adding all the existing rides to model.rides.paintedRides
      */
-    const paintPrebuiltScenarioRides = () => {
+    const paintPrebuiltScenarioRides = () =>
+{
         // if it's day 1,
-        if (date.day === 0 && date.month === 1 && date.year === 1) {
+        debug(`day: ${date.day}, month: ${date.month}, year: ${date.year}, months elapsed: ${date.monthsElapsed}`)
+        if (date.day === 0 && date.month === 1 && date.year === 1)
+{
+            debug(`it's day one`);
             // if the box is checked, do nothing
             // if the box isn't checked, treat all rides like they've been painted
-            if (!model.settings.paintScenarioStartingRides.get()) {
+            if (!model.settings.paintScenarioStartingRides.get())
+{
+                debug(`adding starting scenario rides to rides.painted`)
                 const startingRides = map.rides.filter(ride=> ride.classification === "ride");
                 model.rides.painted.set(startingRides);
             }
@@ -187,641 +184,88 @@ export const initPluginSettings = () => {
     rideTypeInit();
     groupingInit();
     settingInit();
+    initStationSettings();
 
     paintPrebuiltScenarioRides();
 }
+// Set up empty methods that will be filled inside StateWatcher
+export class WindowWatcher
+{
+    // Event that triggers on window open
+    static onWindowOpen?: () => void
 
-/**
- * Mark a ride as having been painted.
- * Prevents the ride from being repainted if 'Allow repainting of already painted rides' is disabled.
- */
- const markRideAsHavingBeenPainted = (ride: Ride) => {
-    const previouslyPaintedRides = model.rides.painted.get()
-    // if the ride isn't already on the list
-    if (previouslyPaintedRides.indexOf(ride)===-1)
-    {
-        previouslyPaintedRides.push(ride)
-        model.rides.painted.set(previouslyPaintedRides);
-    }
-}
+    // Event that triggers every frame update of the window
+    static onWindowUpdate?: () => void
+        // // Page picker text output
+        // const selectedRides = model.rides.selected.get();
+        // // set the text for number of rides selected
+        // model.rides.selectedText.set(`{BLACK}${selectedRides.length}/${model.rides.all.get().length} rides selected`)
+        // // update model.rides.all and model.rides.allRideTypes
+        // rideTypeInit();
 
-/**
- * Apply the selected theme, mode and grouping to rides in park.
- * Applies to @param ridesToPaint if given; otherwise applies to model.rides.selected
- */
-const colourRides = (ridesToPaint?:Ride[]) => {
-	const currentTheme = model.themes.selected.get();
-	const currentMode = model.modes.selected.get();
-    const currentGrouping = model.groupings.selected.get();
-
-	// guard to make sure there's a theme, mode and grouping.
-    if (!(currentTheme && currentMode && currentGrouping)) return;
-
-    // get rides to theme
-    const initialRidesToTheme = (ridesToPaint) || model.rides.selected.get();
-
-    // check if all rides should be painted, or only unpainted rides
-    let finalRidesToTheme;
-    if (model.settings.repaintExistingRides.get()===false) {
-        finalRidesToTheme = initialRidesToTheme.filter(ride => (model.rides.painted.get().indexOf(ride)===-1))
-    }
-    else finalRidesToTheme = initialRidesToTheme
-
-    // group rides together so they're painted identically
-    const groupedRides = currentGrouping.applyGrouping(finalRidesToTheme);
-
-    // for each group of rides
-    Object.keys(groupedRides).forEach((group, i) => {
-        // get the 6 ride colours based on the theme and mode
-        const colours = currentMode.applyTheme(currentTheme,{
-            customColours: combineCustomColourArrays() as Colour[],
-            index: i
-        });
-        // guard to make sure there are some colours
-        if (!colours) return;
-
-        // apply the colour to each ride
-        groupedRides[group].forEach(ride => {
-            // If it's a maze, the maze theme type only looks at cols[2]. If that is >3, the maze bugs out
-            // Need to make sure it's not that before moving on
-            if (ride.type === 20 && colours[2]>3) return
-
-            // Actually do the painting!
-            ColourChange.setRideColour(ride, ...colours);
-            markRideAsHavingBeenPainted(ride)
-        })
-
-    });
-    // todo disable button if rides can't be repainted
-
-};
-
-
-/**
- * Helper for 'Custom Pattern' mode. Flip the active state of the colourPicker widgets onClick/onChange
- */
-const enableRideColourPicker = (index:number) => {
-    const enabledColours = model.modes.selectedColoursEnabled.get()
-    enabledColours[index] = !enabledColours[index]
-    model.modes.selectedColoursEnabled.set(enabledColours);
+    // Event that triggers on window close
+    static onWindowClose?: () => void
 }
 
 export const themeWindow = window({
 	title: 'Ride Painter',
     width: 400,
-	height: 540,
+	height: 600, maxHeight: 800,
     spacing: 10,
 	padding: 8,
     colours: [1,24],
-	onOpen: () => {},
-    onUpdate: () => {
-        // Page picker text output
-        const selectedRides = model.rides.selected.get();
-        // set the text for number of rides selected
-        model.rides.selectedText.set(`{BLACK}${selectedRides.length}/${model.rides.all.get().length} rides selected`)
-        // update model.rides.all and model.rides.allRideTypes
-        rideTypeInit();
+	onOpen: () =>
+    {
+        debug(`(window) window opened`);
+        if (WindowWatcher.onWindowOpen)
+        {
+            WindowWatcher.onWindowOpen()
+        }
+    },
+    onUpdate: () =>
+    {
+        debug(`debug: on window update`)
+        if (WindowWatcher.onWindowUpdate)
+        {
+            WindowWatcher.onWindowUpdate()
+        }
+    },
+    onClose: () =>
+    {
+        if (WindowWatcher.onWindowClose)
+        {
+            WindowWatcher.onWindowClose()
+        }
     },
 	content: [
             // TOP ROW: THEME PICKER
-            horizontal({
-                height: 85,
-                content:[
-                    vertical({
-                        width: '200px',
-                        content: [
-                            box({
-                                text: '1. Pick a theme',
-                                content:
-                                    vertical({
-                                        spacing: 0,
-                                        content: [
-                                            dropdown({
-                                                items: compute(model.themes.all, (t) => t.map((theme) => theme.name)),
-                                                selectedIndex: model.themes.selectedIndex,
-                                                disabled: compute(model.themes.all, (t) => t.length === 0),
-                                                disabledMessage: 'No themes defined.',
-                                                onChange: (index: number) => {
-                                                    model.themes.selectedIndex.set(index);
-                                                    model.themes.selected.set(model.themes.all.get()[index]);
-                                                }
-                                            }),
-                                            // first row of theme colours
-                                            horizontal({
-                                                spacing: 0,
-                                                content:[
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(0),
-                                                    visibility: subscribeColourPickerActive(0),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(1),
-                                                    visibility: subscribeColourPickerActive(1),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(2),
-                                                    visibility: subscribeColourPickerActive(2),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(3),
-                                                    visibility: subscribeColourPickerActive(3),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(4),
-                                                    visibility: subscribeColourPickerActive(4),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(5),
-                                                    visibility: subscribeColourPickerActive(5),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(6),
-                                                    visibility: subscribeColourPickerActive(6),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(7),
-                                                    visibility: subscribeColourPickerActive(7),
-                                                }),
-                                            ]}),
-                                            // second row of theme colours
-                                            horizontal({
-                                                spacing: 0,
-                                                content:[
-                                                // a bunch of colour pickers to show the theme colours
-                                                // 0th colour picker
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(8),
-                                                    visibility: subscribeColourPickerActive(8),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(9),
-                                                    visibility: subscribeColourPickerActive(9),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(10),
-                                                    visibility: subscribeColourPickerActive(10),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(11),
-                                                    visibility: subscribeColourPickerActive(11),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(12),
-                                                    visibility: subscribeColourPickerActive(12),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(13),
-                                                    visibility: subscribeColourPickerActive(13),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(14),
-                                                    visibility: subscribeColourPickerActive(14),
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(15),
-                                                    visibility: subscribeColourPickerActive(15),
-                                                }),
-                                            ]}),
-
-                                            // third row
-                                            horizontal({
-                                                spacing: 0,
-                                                content: [
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(16),
-                                                    visibility: subscribeColourPickerActive(16)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(17),
-                                                    visibility: subscribeColourPickerActive(17)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(18),
-                                                    visibility: subscribeColourPickerActive(18)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(19),
-                                                    visibility: subscribeColourPickerActive(19)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(20),
-                                                    visibility: subscribeColourPickerActive(20)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(21),
-                                                    visibility: subscribeColourPickerActive(21)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(22),
-                                                    visibility: subscribeColourPickerActive(22)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(23),
-                                                    visibility: subscribeColourPickerActive(23)
-                                                }),
-                                            ]}),
-                                            // fourth row
-                                            horizontal({
-                                                spacing: 0,
-                                                content: [
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(24),
-                                                    visibility: subscribeColourPickerActive(24)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(25),
-                                                    visibility: subscribeColourPickerActive(25)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(26),
-                                                    visibility: subscribeColourPickerActive(26)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(27),
-                                                    visibility: subscribeColourPickerActive(27)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(28),
-                                                    visibility: subscribeColourPickerActive(28)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(29),
-                                                    visibility: subscribeColourPickerActive(29)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(30),
-                                                    visibility: subscribeColourPickerActive(30)
-                                                }),
-                                                colourPicker({
-                                                    colour: subscribeColourPicker(31),
-                                                    visibility: subscribeColourPickerActive(31)
-                                                }),
-                                            ]})
-                                        ]
-                                    })
-                                }),
-
-                            ]
-
-                        }),
-                ]
-            }),
+            themeSectionElements(),
             // SECOND ROW: MODE PICKER
-            box({
-                text: '2. Pick a painting mode',
-                height: 100,
-                // padding:{bottom:5},
-                content:
-                    vertical({
-                        padding: 5,
-                        spacing: 10,
-                        content: [
-                            dropdown({
-                                padding: {top:5},
-                                items: compute(model.modes.all, (modes) => modes.map((mode)=>mode.name)),
-                                selectedIndex: model.modes.selectedIndex,
-                                disabled: compute(model.modes.all, m => m.length === 0),
-                                disabledMessage: 'No modes defined',
-                                onChange: (index:number) => {
-                                    model.modes.selectedIndex.set(index);
-                                    model.modes.selected.set(model.modes.all.get()[index]);
-                                }
-                            }),
-                            label({
-                                // height: 25,
-                                padding: {top: 5},
-                                alignment: 'centred',
-                                text: compute(model.modes.selected, mode => {
-                                    if (mode) return `${mode.description}`;
-                                    return 'No mode selected';
-                                })
-                            }),
-                            // COLOUR PICKERS
-                            horizontal([
-                                // track main
-                                colourPicker({
-                                    padding: {left: "40%"},
-                                    width: "1w",
-                                    colour: compute(model.modes.selectedCustomColours, colours => colours[0]),
-                                    disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[0]),
-                                    visibility: compute(model.modes.selected, mode => {
-                                        if (mode?.name==='Custom pattern') return "visible";
-                                        return "none"
-                                        }
-                                    ),
-                                    onChange: (colourChosen:Colour) =>{
-                                        const currentSelectedColours = model.modes.selectedCustomColours.get();
-                                        currentSelectedColours[0]=colourChosen;
-                                        model.modes.selectedCustomColours.set(currentSelectedColours)
-                                    }
-                                }),
-                                // track additional
-                                colourPicker({
-                                    padding: {left: "40%"},
-                                    width: "1w",
-                                    colour: compute(model.modes.selectedCustomColours, colours => colours[1]),
-                                    disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[1]),
-                                    visibility: compute(model.modes.selected, mode => {
-                                        if (mode?.name==='Custom pattern') return "visible";
-                                        return "none"
-                                        }
-                                    ),
-                                    onChange: (colourChosen:Colour) =>{
-                                        const currentSelectedColours = model.modes.selectedCustomColours.get();
-                                        currentSelectedColours[1]=colourChosen;
-                                        model.modes.selectedCustomColours.set(currentSelectedColours)
-                                    }
-                                }),
-                                // track supports
-                                colourPicker({
-                                    padding: {left: "40%"},
-                                    width: "1w",
-                                    colour: compute(model.modes.selectedCustomColours, colours => colours[2]),
-                                    disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[2]),
-                                    visibility: compute(model.modes.selected, mode => {
-                                        if (mode?.name==='Custom pattern') return "visible";
-                                        return "none"
-                                        }
-                                    ),
-                                    onChange: (colourChosen:Colour) =>{
-                                        const currentSelectedColours = model.modes.selectedCustomColours.get();
-                                        currentSelectedColours[2]=colourChosen;
-                                        model.modes.selectedCustomColours.set(currentSelectedColours)
-                                    }
-                                }),
-                                // car main
-                                colourPicker({
-                                    padding: {left: "40%"},
-                                    width: "1w",
-                                    colour: compute(model.modes.selectedCustomColours, colours => colours[3]),
-                                    disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[3]),
-                                    visibility: compute(model.modes.selected, mode => {
-                                        if (mode?.name==='Custom pattern') return "visible";
-                                        return "none"
-                                        }
-                                    ),
-                                    onChange: (colourChosen:Colour) =>{
-                                        const currentSelectedColours = model.modes.selectedCustomColours.get();
-                                        currentSelectedColours[3]=colourChosen;
-                                        model.modes.selectedCustomColours.set(currentSelectedColours)
-                                    }
-                                }),
-                                // car trim
-                                colourPicker({
-                                    padding: {left: "40%"},
-                                    width: "1w",
-                                    colour: compute(model.modes.selectedCustomColours, colours => colours[4]),
-                                    disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[4]),
-                                    visibility: compute(model.modes.selected, mode => {
-                                        if (mode?.name==='Custom pattern') return "visible";
-                                        return "none"
-                                        }
-                                    ),
-                                    onChange: (colourChosen:Colour) =>{
-                                        const currentSelectedColours = model.modes.selectedCustomColours.get();
-                                        currentSelectedColours[4]=colourChosen;
-                                        model.modes.selectedCustomColours.set(currentSelectedColours)
-                                    }
-                                }),
-                                // car tertiary
-                                colourPicker({
-                                    padding: {left: "40%"},
-                                    width: "1w",
-                                    colour: compute(model.modes.selectedCustomColours, colours => colours[5]),
-                                    disabled: compute(model.modes.selectedColoursEnabled, enabledColours => !enabledColours[5]),
-                                    visibility: compute(model.modes.selected, mode => {
-                                        if (mode?.name==='Custom pattern') return "visible";
-                                        return "none"
-                                        }
-                                    ),
-                                    onChange: (colourChosen:Colour) =>{
-                                        const currentSelectedColours = model.modes.selectedCustomColours.get();
-                                        currentSelectedColours[5]=colourChosen;
-                                        model.modes.selectedCustomColours.set(currentSelectedColours)
-                                    }
-                                }),
-                            ]),
-                            // TOGGLES TO ENABLE/DISABLE COLOUR PICKERS
-                            horizontal({
-                                height: 20,
-                                content: [
-                                    toggle({
-                                        text: "{BLACK}Track main",
-                                        isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[0]),
-                                        onChange: () => enableRideColourPicker(0),
-                                        visibility: compute(model.modes.selected, mode => {
-                                            if (mode?.name==='Custom pattern') return "visible";
-                                            return "none"
-                                            }
-                                        ),
-                                    }),
-                                    toggle({
-                                        text: "{BLACK}Track add'l",
-                                        isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[1]),
-                                        onChange: () => enableRideColourPicker(1),
-                                        visibility: compute(model.modes.selected, mode => {
-                                            if (mode?.name==='Custom pattern') return "visible";
-                                            return "none"
-                                            }
-                                        ),
-                                    }),
-                                    toggle({
-                                        text: "{BLACK}Track sups",
-                                        isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[2]),
-                                        onChange: () => enableRideColourPicker(2),
-                                        visibility: compute(model.modes.selected, mode => {
-                                            if (mode?.name==='Custom pattern') return "visible";
-                                            return "none"
-                                            }
-                                        ),
-                                    }),
-                                    toggle({
-                                        text: "{BLACK}Car main",
-                                        isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[3]),
-                                        onChange: () => enableRideColourPicker(3),
-                                        visibility: compute(model.modes.selected, mode => {
-                                            if (mode?.name==='Custom pattern') return "visible";
-                                            return "none"
-                                            }
-                                        ),
-                                    }),
-                                    toggle({
-                                        text: "{BLACK}Car trim",
-                                        isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[4]),
-                                        onChange: () => enableRideColourPicker(4),
-                                        visibility: compute(model.modes.selected, mode => {
-                                            if (mode?.name==='Custom pattern') return "visible";
-                                            return "none"
-                                            }
-                                        ),
-                                    }),
-                                    toggle({
-                                        text: "{BLACK}Car add'l",
-                                        isPressed: compute(model.modes.selectedColoursEnabled, enabledColours => enabledColours[5]),
-                                        onChange: () => enableRideColourPicker(5),
-                                        visibility: compute(model.modes.selected, mode => {
-                                            if (mode?.name==='Custom pattern') return "visible";
-                                            return "none"
-                                            }
-                                        ),
-                                    }),
-                                ]
-                            })
-                        ]
-                    })
-            }),
+            modeSectionElements(),
             // THIRD ROW: GROUP BY
-            horizontal({
-                height: 80,
-                content:[
-                    // GROUP PICKER
-                    box({
-                        text: '3. Paint rides together by group: (optional)',
-                        content:
-                            vertical({
-                                padding: 5,
-                                spacing: 10,
-                                content: [
-                                    dropdown({
-                                        padding: {top: 5},
-                                        items: compute(model.groupings.all, (groupings) => groupings.map((grouping)=>grouping.name)),
-                                        selectedIndex: model.groupings.selectedIndex,
-                                        disabled: compute(model.groupings.all, m => m.length === 0),
-                                        disabledMessage: 'No groupings defined',
-                                        onChange: (index:number) => {
-                                            model.groupings.selectedIndex.set(index);
-                                            model.groupings.selected.set(model.groupings.all.get()[index]);
-                                        }
-                                    }),
-                                    label({
-                                    //     height: 75,
-                                        padding: {top: 10},
-                                        alignment: 'centred',
-                                        text: compute(model.groupings.selected, grouping => {
-                                            if (grouping) return `${grouping.description}`;
-                                            return 'No mode selected';
-                                        })
-                                    })
-                                ]
-                            })
-                    }),
-                ]
-            }),
+            groupingSectionElements(),
             // FOURTH ROW: RIDE/TYPE SELECTION
-            vertical([
-                box({
-                    height: 75,
-                    text: '4. Select rides to paint',
-                    content:
-                        vertical({
-                            content: [
-                                // Select a type
-                                dropdown({
-                                    padding: {top:5},
-                                    selectedIndex: compute(model.rides.selectedIndex, index=> index),
-                                    items: compute(model.rides.allRideTypes, rideType => rideType.map(type =>
-                                            // Display the ride type and the number of those rides
-                                                `${RideType[type]} - ${model.rides.all.get().filter(ride=>ride.type===type).length}`
-                                        )),
-                                    onChange: (typeIndex) => {
-                                        const ridesOfThisType = model.rides.all.get().filter(ride=>ride.type===model.rides.allRideTypes.get()[typeIndex])
-                                        model.rides.selected.set(ridesOfThisType)
-                                        model.rides.selectedIndex.set(typeIndex)
-                                    }
-                                }),
-                                label({
-                                    padding: {top:5},
-                                    text: "{BLACK}Or select all rides:",
-                                }),
-                                horizontal({
-                                    height: 20,
-                                    content: [
-                                        // button to Select all rides
-                                        button({
-                                            width: "67%",
-                                            onClick: () => {
-                                                if (model.rides.selected.get().length === model.rides.all.get().length) {
-                                                    model.rides.selected.set([]);
-                                                }
-                                                else {
-                                                    model.rides.selected.set(model.rides.all.get());
-                                                }
-                                            },
-                                            text: '{BLACK}Select/Deselect all rides'
-                                        }),
-                                        label({
-                                            padding: {top: 5},
-                                            text: model.rides.selectedText,
-                                        }),
-                                    ]
-
-                                }),
-                            ]
-                        })
-                })
-            ]),
+            rideSelectionElements(),
             // SETTINGS
-            horizontal({
-                content:[
-                    box({
-                        text: "5. Other settings",
-                        content:
-                            vertical({
-                                content:[
-                                    horizontal({
-                                    //    width: 300,
-                                        content:[
-                                            label({
-
-                                                padding: {top: 2},
-                                                text: "{BLACK}Auto-paint selected rides:",
-                                                alignment: "left"
-                                            }),
-                                            dropdownSpinner({
-                                                items: ["never", "daily", "weekly", "monthly", "yearly"],
-                                                onChange: (index: number) => model.settings.automaticPaintFrequency.set(index),
-                                            })
-                                        ]
-                                    }),
-                                    toggle({
-                                        height: 20,
-                                        isPressed: true,
-                                        text: "{BLACK}Allow repainting of already painted rides",
-                                        onChange: (isPressed:boolean) => model.settings.repaintExistingRides.set(isPressed),
-
-                                    }),
-                                    toggle({
-                                        height: 20,
-                                        text: "{BLACK}Paint newly built rides automatically",
-                                        onChange: (isPressed:boolean) => model.settings.paintBrantNewRides.set(isPressed),
-                                    }),
-                                    toggle({
-                                        height: 20,
-                                        text: "{BLACK}Paint rides that start in the scenario",
-                                        tooltip: "In secnario play, select this to paint rides that already exist on the first day of gameplay.",
-                                        isPressed: compute(model.settings.paintScenarioStartingRides, btn => btn),
-                                        onChange: (isPressed:boolean) => model.settings.paintScenarioStartingRides.set(isPressed),
-                                    }),
-                                ]
-                        }),
-                    }),
-                ]
-            }),
+            settingsSectionElements(),
             button({
                 height: 30,
                 padding: [5,"10%"],
                 text: '6. Paint selected rides',
                 disabled: compute(model.rides.selected , (rides) => rides.length<=0),
-                onClick: () => colourRides(),
+                onClick: () => ColourChange.colourRides(),
                 tooltip: "Nothing changing? Make sure to enable 'Allow repainting of already painted rides'"
             }),
+            // STATION STYLE
+
         ]
     })
 
 /**
  * Helper to get unique ride types
  */
-function onlyUnique(value: any, index: any, self: any) {
+function onlyUnique(value: any, index: any, self: any)
+{
     return self.indexOf(value) === index;
   }
 
@@ -830,24 +274,28 @@ function onlyUnique(value: any, index: any, self: any) {
    * 1. Paint brand new rides if that option is seleced
    * 2. Repaint daily/weekly/monthly/annually based on store setting.
    */
-export const dailyUpdate = () => {
+export const dailyUpdate = () =>
+{
     // PAINT NEW RIDES BASED ON paintBrantNewRides === true
     // reset model.rides.all
     const allRides = map.rides.filter(ride=>ride.classification === "ride")
     model.rides.all.set(allRides);
     const paintedRides = model.rides.painted.get()
     // Check if new rides be painted automatically
-    if (model.settings.paintBrantNewRides.get()) {
+    if (model.settings.paintBrantNewRides.get())
+{
         // get all the rides that haven't yet been painted
         // this will repaint all rides in the park upon park load
         // todo store paintedRides in config to reference upon park load
-        const ridesToPaint = allRides.filter(ride => {
+        const ridesToPaint = allRides.filter(ride =>
+{
             const thisRideHasBeenPainted = paintedRides.filter(r=> r.id===ride.id)
             // return if it doesn't find a match in painted
             return (thisRideHasBeenPainted.length === 0)
         })
-        if (ridesToPaint.length>0) {
-            colourRides(ridesToPaint);
+        if (ridesToPaint.length>0)
+{
+            ColourChange.colourRides(ridesToPaint);
         }
     }
 
@@ -859,21 +307,24 @@ export const dailyUpdate = () => {
     if (paintFrequency===0) return;
 
     // if set to annual, check that month = 0 and day = 1 before painting
-    if (paintFrequency === 4 && date.month === 0 && date.day === 1) {
-        colourRides();
+    if (paintFrequency === 4 && date.month === 0 && date.day === 1)
+{
+        ColourChange.colourRides();
         return;
     }
     // if set to monthly, check that day = 1 before painting
-    if (paintFrequency === 3 && date.day === 1) {
-        colourRides();
+    if (paintFrequency === 3 && date.day === 1)
+{
+        ColourChange.colourRides();
         return;
     }
     // if set to weekly, check if the day remainder is 1 (will change on the 1, 8, 15, 22, 29 of the month)
-    if (paintFrequency === 2 && date.day%7===1) {
-        colourRides();
+    if (paintFrequency === 2 && date.day%7===1)
+{
+        ColourChange.colourRides();
         return;
     }
     // if set to daily
-    if (paintFrequency === 1) colourRides()
+    if (paintFrequency === 1) ColourChange.colourRides()
 }
 

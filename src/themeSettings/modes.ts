@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable max-len */
 import { Colour } from 'openrct2-flexui';
-import { debug } from './helpers/logger';
+import { debug } from '../helpers/logger';
 import { Theme, RideColours } from './themes';
 
 
@@ -16,8 +16,10 @@ export interface Mode {
 const monoChromaticMode: Mode = {
 	name: 'Monochromatic ride & track',
 	description: '{BLACK}Paint the ride & cars in one solid colour.',
-	applyTheme(theme: Theme) {
-		if (theme.colours.themeColours) {
+	applyTheme(theme: Theme)
+{
+		if (theme.colours.themeColours)
+{
 			const c = getRandomColour(theme.colours.themeColours);
 			return [c, c, c, c, c, c] as RideColours;
 		}
@@ -28,8 +30,10 @@ const monoChromaticMode: Mode = {
 const randomMode: Mode = {
 	name: 'Random colours',
 	description: '{BLACK}Paint each track and car piece in random colours from the theme palette.',
-	applyTheme(theme: Theme) {
-		if (theme.colours.themeColours) {
+	applyTheme(theme: Theme)
+{
+		if (theme.colours.themeColours)
+{
 			const colours = [
 				getRandomColour(theme.colours.themeColours),
 				getRandomColour(theme.colours.themeColours),
@@ -48,16 +52,46 @@ const randomMode: Mode = {
 const customPatternMode: Mode = {
 	name: 'Custom pattern',
 	description: `{BLACK}Paint the enabled ride parts with your chosen colour; otherwise fill from palette.`,
-	applyTheme(theme: Theme, options:{customColours:Colour[]} ) {
-		if (theme.colours.themeColours) {
+	/**
+     *
+     * @param theme contains a colour palette
+     * @param options.customColours contains the custom pattern as a RideColour[]
+     * Track parts that are active to be painted will have their colour value,
+     * Track parts deactived will be -1.
+     * e.g. a custom pattern with track main and car main enabled and set to dark purple will be
+     * [3, -1, -1, 3, -1, -1]
+     * @returns a RideColour to paint
+     */
+    applyTheme(theme: Theme, options:{
+        customColours:Colour[],
+        twoTone?: boolean
+    })
+{
+		if (theme.colours.themeColours)
+{
             // choose a random base colour from the theme
-			const col = getRandomColour(theme.colours.themeColours);
+            // if twoTone enabled, set base colour array to one base colour
+            // if twoTone disbled, set the base colour to random palette colours
+            let baseColourArray: number[] = new Array(6);
+            if (options.twoTone)
+{
+                const col = getRandomColour(theme.colours.themeColours);
+                baseColourArray = [col, col, col, col, col, col]
+            }
+            else
+{
+                for (let i=0; i<6;i+=1)
+{
+                    baseColourArray[i]=getRandomColour(theme.colours.themeColours);
+                }
+            }
             // loop through the given customColours
-            // any that were active will paint that piece
+            // any that were active (value >= 0) will paint that piece
             // otherwise it'll paint the base colour
-            const ret = [-1,-1,-1,-1,-1,-1];
-            for (let i = 0; i<6;i+=1){
-                ret[i]=(options.customColours[i]>=0 ? options.customColours[i] : col)
+            const ret = new Array(6);
+            for (let i = 0; i<6;i+=1)
+{
+                ret[i]=(options.customColours[i]>=0 ? options.customColours[i] : baseColourArray[i])
             }
             debug(`custom colour to paint: ${ret}`)
 			return ret as RideColours;
@@ -69,8 +103,10 @@ const customPatternMode: Mode = {
 const buildOrderMode: Mode = {
 	name: 'Build order',
 	description: `{BLACK}Paint rides in the order they were built. Goes especially well with the 'Rainbow' theme and selecting a ride type you have multiple of.`,
-	applyTheme(theme: Theme, { index }) {
-		if (theme.colours.partColours) {
+	applyTheme(theme: Theme, { index })
+{
+		if (theme.colours.partColours)
+{
 			const ret = [
 				theme.colours.partColours.trackColourMain[index % theme.colours.partColours.trackColourMain.length],
 				theme.colours.partColours.trackColourAdditional[
@@ -87,7 +123,8 @@ const buildOrderMode: Mode = {
 			];
 			return ret as RideColours;
 		}
-        if (theme.colours.themeColours) {
+        if (theme.colours.themeColours)
+{
             const c = theme.colours.themeColours[index%theme.colours.themeColours.length];
             return [c, c, c, c, c, c] as RideColours
         }
@@ -95,48 +132,7 @@ const buildOrderMode: Mode = {
 	},
 };
 
-// const colourByPartMode: Mode = {
-// 	name: 'colourByPart',
-// 	description: '',
-// 	applyTheme(theme: Theme) {
-// 		// Get ride parts from theme
-// 		const parts = theme.colours.partColours;
-// 		if (parts) {
-// 			// Check if there is at least one color given for each track piece
-// 			const c = doAllPartsHaveColours(parts);
-// 			if (c) {
-// 				const colours = [
-// 					getRandomColour(parts.VehicleColourBody),
-// 					getRandomColour(parts.VehicleColourTernary),
-// 					getRandomColour(parts.VehicleColourTrim),
-// 					getRandomColour(parts.trackColourAdditional),
-// 					getRandomColour(parts.trackColourMain),
-// 					getRandomColour(parts.trackColourSupports),
-// 				];
-// 				return colours as RideColours;
-// 			}
-// 		}
-// 		return null;
-// 	},
-// };
-
-// const prebuiltColoursMode: Mode = {
-// 	name: 'prebuildColours',
-// 	description: '',
-// 	applyTheme(theme: Theme) {
-// 		if (theme.colours.preferredRideColours) {
-// 			const colours = [
-// 				...theme.colours.preferredRideColours[
-// 					Math.floor(Math.random() * theme.colours.preferredRideColours.length)
-// 				],
-// 			];
-// 			return colours as RideColours;
-// 		}
-// 		return null;
-// 	},
-// };
-
-export const Modes: Mode[] = [
+export const modes: Mode[] = [
 	monoChromaticMode,
 	randomMode,
 	buildOrderMode,
