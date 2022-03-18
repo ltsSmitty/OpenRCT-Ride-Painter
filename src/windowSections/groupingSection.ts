@@ -1,5 +1,5 @@
 import { horizontal, box, vertical, dropdown, compute, label } from "openrct2-flexui";
-import { model } from "../window";
+import { model } from "../model";
 
 const groupingSectionElements = () =>
 {

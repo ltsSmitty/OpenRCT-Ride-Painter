@@ -1,5 +1,5 @@
 import { horizontal, box, vertical, label, dropdownSpinner, toggle, compute } from "openrct2-flexui"
-import { model } from "../window"
+import { model } from "../model";
 
 const settingsSectionElements = () =>
 {

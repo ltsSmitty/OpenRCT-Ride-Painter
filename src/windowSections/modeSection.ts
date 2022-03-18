@@ -1,5 +1,5 @@
 import { horizontal, colourPicker, compute, Colour, toggle, box, vertical, dropdown, label } from "openrct2-flexui";
-import { model } from "../window";
+import { model } from "../model";
 
 // Mode selection is quite straightforward except for Custom Pattern mode
 // Much of this code is specifically for helping Custom Pattern mode

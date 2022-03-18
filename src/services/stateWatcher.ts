@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { debug } from "../helpers/logger";
-import { WindowWatcher, model } from "../window";
+import { WindowWatcher } from "../window";
+
 /**
  * Watches the state of the game, and updates relevant services if necessary.
  */

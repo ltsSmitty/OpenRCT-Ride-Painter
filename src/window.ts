@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /// <reference path="../lib/openrct2.d.ts" />
 
 import { box, button, compute, colourPicker ,dropdown, horizontal, label, dropdownSpinner,
@@ -6,188 +7,17 @@ import { Mode, modes } from './themeSettings/modes';
 import { Theme, themes } from './themeSettings/themes';
 import { debug } from './helpers/logger';
 import ColourChange from './themeSettings/ColourChange';
-import { RideType } from './RideType';
+import { RideType } from './helpers/RideType';
 import { Grouping, groupings } from './themeSettings/groupings';
 import themeSectionElements from './windowSections/themeSection';
 import { modeSectionElements } from './windowSections/modeSection';
 import groupingSectionElements from './windowSections/groupingSection';
 import rideSelectionElements from './windowSections/rideSelectionSection';
 import settingsSectionElements from './windowSections/settingsSection';
+import { model } from './model';
 
 
-/**
- * Record the model information inside of stores so the values can be read/updated by the UI
- */
-export const model = {
-	// Theme data
-    themes: {
-        all: store<Theme[]>([]),
-        // the currently selected theme and dropdown index
-        selected: store<Theme | null>(null),
-        selectedIndex: store<number>(0),
-    },
-    // Mode data
-	modes: {
-        all: store<Mode[]>([]),
-        // the currently active mode and dropdown index
-        selected: store<Mode | null>(null),
-        selectedIndex: store<number>(0),
-        // used for the 'Custom Pattern' mode
-        // stores the colourPicker colours and their active state
-        selectedCustomColours: store<Colour[]>([0,0,0,0,0,0]),
-        selectedColoursEnabled: store<boolean[]>([true,true,true,true,true,true])
-    },
-    // Grouping data
-    groupings: {
-        all: store<Grouping<number | string>[]>([]),
-        // the currently active grouping and index
-        selected: store<Grouping<number | string> | null> (null),
-        selectedIndex: store<number>(0),
-    },
-    // Ride Selection data
-    rides: {
-        all: store<Ride[]>([]),
-        // stores all ride types built in park as numerical values
-        allRideTypes: store<RideType[]>([]),
-        // rides that will have the theme applied when colourRides() is called
-        selected: store<Ride[]>([]),
-        selectedIndex: store<number>(0),
-        // displays number of rides selected e.g. "4/30 rides selected"
-        selectedText: store<string>(""),
-        // rides that have already been painted using the plugin
-        painted: store<Ride[]>([])
-    },
-    // station settings
-    stations: {
-        all: store<LoadedObject[]>([]),
-        selected: store<LoadedObject|null>(null),
-        selectedIndex: store<number>(0),
-        automaticallyApply: store<boolean>(true)
-    },
-    // Settings data
-    settings: {
-        // repaint all rides at the park
-        automaticPaintFrequency: store<number>(0),
-        // allow plugin to repaint already themed rides
-        repaintExistingRides: store<boolean>(false),
-        // paint any newly built rides the day they're built
-        paintBrantNewRides: store<boolean>(false),
-        // paint rides that start the scenario
-        paintScenarioStartingRides: store<boolean>(false)
-    }
 
-};
-
-/**
- * Initializes ride data into the store. Checks the game's config to persist from one load to another
- */
-const rideTypeInit = () =>
-{
-    // get rides from map and set to model.rides.all
-    const allRides=map.rides.filter(ride => ride.classification === 'ride')
-    model.rides.all.set(allRides)
-
-    const allRideTypes = allRides.map(ride => ride.type);
-    const uniqueRideTypes = allRideTypes
-        // get the unique ride types
-        .filter(onlyUnique)
-        // get only non-zero/truthy values
-        .filter( n => n);
-    model.rides.allRideTypes.set(uniqueRideTypes);
-
-}
-
-export const initStationSettings = () =>
-{
-    const allStationStyles = context.getAllObjects("station")
-    model.stations.all.set(allStationStyles);
-    model.stations.automaticallyApply.set(false);
-}
-
-/**
- * Run on game load to set up initial plugin settings
- */
-export const initPluginSettings = () =>
-{
-    /**
-     * Initializes mode data into the store. Checks the game's config to persist from one load to another
-     */
-    const modeInit = () =>
-{
-        model.modes.all.set(modes);
-        // for spiciness, randomly choose a theme to set
-        const startingMode = context.getRandom(0,modes.length-1)
-        model.modes.selectedIndex.set(startingMode);
-        model.modes.selected.set(model.modes.all.get()[model.modes.selectedIndex.get()]);
-        // for 'Custom Pattern' mode
-        model.modes.selectedCustomColours.set([0, 0, 0, 0, 0, 0]);
-        model.modes.selectedColoursEnabled.set([true, false, true, true, false, true,]);
-    };
-
-    /**
-     * Initializes theme data into the store. Checks the game's config to persist from one load to another
-     */
-    const themeInit = () =>
-{
-        // only needed once per game load
-        model.themes.all.set(themes);
-        // for spiciness, randomly choose a theme to set
-        const startingTheme = context.getRandom(0,themes.length-1)
-        model.themes.selectedIndex.set(startingTheme);
-        // only needed once per game load
-        model.themes.selected.set(model.themes.all.get()[model.themes.selectedIndex.get()]);
-    };
-
-    /**
-     * Initializes grouping data into the store. Checks the game's config to persist from one load to another
-     */
-    const groupingInit = () =>
-{
-        model.groupings.all.set(groupings);
-        model.groupings.selectedIndex.set(0);
-        model.groupings.selected.set(model.groupings.all.get()[model.groupings.selectedIndex.get()])
-    }
-
-    /**
-     * Initializes settings data into the store. Checks the game's config to persist from one load to another
-     */
-    const settingInit = () =>
-{
-        model.settings.repaintExistingRides.set(true);
-        model.settings.paintBrantNewRides.set(true);
-        model.settings.paintScenarioStartingRides.set(true);
-    }
-    /**
-     * if it's not day 1 or the box isn't checked, don't paint the rides
-     * by adding all the existing rides to model.rides.paintedRides
-     */
-    const paintPrebuiltScenarioRides = () =>
-{
-        // if it's day 1,
-        debug(`day: ${date.day}, month: ${date.month}, year: ${date.year}, months elapsed: ${date.monthsElapsed}`)
-        if (date.day === 0 && date.month === 1 && date.year === 1)
-{
-            debug(`it's day one`);
-            // if the box is checked, do nothing
-            // if the box isn't checked, treat all rides like they've been painted
-            if (!model.settings.paintScenarioStartingRides.get())
-{
-                debug(`adding starting scenario rides to rides.painted`)
-                const startingRides = map.rides.filter(ride=> ride.classification === "ride");
-                model.rides.painted.set(startingRides);
-            }
-        }
-    }
-
-    modeInit();
-    themeInit();
-    rideTypeInit();
-    groupingInit();
-    settingInit();
-    initStationSettings();
-
-    paintPrebuiltScenarioRides();
-}
 // Set up empty methods that will be filled inside StateWatcher
 export class WindowWatcher
 {
@@ -210,13 +40,12 @@ export class WindowWatcher
 export const themeWindow = window({
 	title: 'Ride Painter',
     width: 400,
-	height: 600, maxHeight: 800,
+	height: 500, maxHeight: 800,
     spacing: 10,
 	padding: 8,
     colours: [1,24],
 	onOpen: () =>
     {
-        debug(`(window) window opened`);
         if (WindowWatcher.onWindowOpen)
         {
             WindowWatcher.onWindowOpen()
@@ -224,7 +53,6 @@ export const themeWindow = window({
     },
     onUpdate: () =>
     {
-        debug(`debug: on window update`)
         if (WindowWatcher.onWindowUpdate)
         {
             WindowWatcher.onWindowUpdate()
@@ -260,14 +88,6 @@ export const themeWindow = window({
 
         ]
     })
-
-/**
- * Helper to get unique ride types
- */
-function onlyUnique(value: any, index: any, self: any)
-{
-    return self.indexOf(value) === index;
-  }
 
   /**
    * Runs daily.

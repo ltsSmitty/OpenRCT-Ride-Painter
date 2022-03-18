@@ -1,7 +1,7 @@
 /// <reference path="../../lib/openrct2.d.ts" />
 
 import { Colour } from "openrct2-flexui";
-import { model } from "../window";
+import { model } from "../model";
 import { combineCustomColourArrays } from "../windowSections/modeSection";
 
 export default class ColourChange

@@ -1,5 +1,5 @@
 import { box, horizontal, dropdown, compute, toggle } from "openrct2-flexui";
-import { model } from "../window";
+import { model } from "../model";
 import ColourChange from "../themeSettings/ColourChange";
 
 const stationStyleElements = () =>

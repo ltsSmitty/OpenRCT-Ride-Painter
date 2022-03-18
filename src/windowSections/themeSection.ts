@@ -1,5 +1,5 @@
 import { box, vertical, dropdown, compute, horizontal, colourPicker, Colour } from "openrct2-flexui";
-import { model } from "../window";
+import { model } from "../model";
 
 /**
  * Helper for the theme section colourPickers to compute what colour to display
