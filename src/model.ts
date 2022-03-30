@@ -1,72 +1,328 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable guard-for-in */
 import { store, Store, Colour } from "openrct2-flexui";
 import { RideType } from "./helpers/RideType";
 import { Grouping, groupings } from "./themeSettings/groupings";
 import { Mode, modes } from "./themeSettings/modes";
 import { Theme, themes } from "./themeSettings/themes";
 import { debug } from "./helpers/logger";
+import { config } from './services/stateWatcher';
 
-export type IModel = {
+// Set up the model architecture
+type ModelFeatures = Theme | Mode | Grouping<string|number> | LoadedObject | Ride
+
+interface GeneralModel <T extends ModelFeatures> {
+    all: T[],
+    selected: T | null,
+    selectedIndex: number
+}
+
+interface ThemesModel extends GeneralModel<Theme> {}
+interface ThemesModelToSave extends Omit<ThemesModel,"all"|"selected"> {}
+
+interface ModesModel extends GeneralModel<Mode> {
+    selectedCustomColours: Colour[],
+    selectedColoursEnabled: boolean[]
+}
+interface ModesModelToSave extends Omit<ModesModel,"all"|"selected"> {}
+
+interface GroupingsModel extends GeneralModel<Grouping<number|string>> {}
+interface GroupingsModelToSave extends Omit<GroupingsModel,"all"|"selected"> {}
+
+// use Omit to overwrite selected to be an array
+interface RidesModel extends Omit<GeneralModel<Ride>,"selected"> {
+    selected: Ride[],
+    allRideTypes: RideType[],
+    selectedText: string,
+    painted: Ride[]
+}
+interface RidesModelToSave extends Omit<RidesModel,"all"|"allRideTypes"> {}
+
+interface StationsModel extends GeneralModel<LoadedObject> {
+    automaticallyApply: boolean
+}
+interface StationsModelToSave extends Omit<StationsModel,"all"> {}
+
+type ModelToSave = {
+    themes: ThemesModelToSave,
+    modes: ModesModelToSave,
+    rides: RidesModelToSave,
+    stations: StationsModelToSave,
+    groupings: GroupingsModelToSave
+}
+
+interface SettingsModel {
+    automaticPaintFrequency: number,
+    repaintExistingRides: boolean,
+    paintBrantNewRides: boolean
+}
+
+type SerialModel = {
+    themes: ThemesModel,
+    modes: ModesModel,
+    groupings: GroupingsModel,
+    rides: RidesModel,
+    stations: StationsModel,
+    settings: SettingsModel
+}
+
+/**
+ * Convert a serial object to a Store
+ */
+type CreateStore<T> = {
+    [Properties in keyof T]: Store<T[Properties]>
+}
+
+type StoreModel = {
+    themes: CreateStore<ThemesModel>,
+    modes: CreateStore<ModesModel>,
+    groupings: CreateStore<GroupingsModel>,
+    rides: CreateStore<RidesModel>,
+    stations: CreateStore<StationsModel>,
+    settings: CreateStore<SettingsModel>
+}
+
+const makeStoreValue = <T>(obj: T) => store<T>(obj)
+
+const createStoreFromObj = <T>(obj: T): CreateStore<T> =>
+{
+    const returner = ({ ...obj}) as unknown as CreateStore<T>
+    for (const key in obj)
+    {
+        if ({}.hasOwnProperty.call(obj,key))
+        returner[key] = makeStoreValue(obj[key])
+    }
+    return returner
+}
+
+/**
+ * Create static model
+ */
+const newModel: SerialModel = {
     themes: {
-            all: Store<Theme[]>,
-            // the currently selected theme and dropdown index
-            selected: Store<Theme | null>,
-            selectedIndex: Store<number>
-    }
-    // Mode data
-	modes: {
-        all: Store<Mode[]>,
-        // the currently active mode and dropdown index
-        selected: Store<Mode | null>,
-        selectedIndex: Store<number>,
-        // used for the 'Custom Pattern' mode
-        // stores the colourPicker colours and their active state
-        selectedCustomColours: Store<Colour[]>,
-        selectedColoursEnabled: Store<boolean[]>
-    }
-
-    // Grouping data
+        all: [],
+        selected: null, //
+        selectedIndex: 0 //
+    },
+    modes: {
+        all: [],
+        selected: null, //
+        selectedIndex: 0, //
+        selectedCustomColours: [], //
+        selectedColoursEnabled: [] //
+    },
     groupings: {
-        all: Store<Grouping<number | string>[]>,
-        // the currently active grouping and index
-        selected: Store<Grouping<number | string> | null>,
-        selectedIndex: Store<number>
-    }
-
-    // Ride Selection data
+        all: [],
+        selected: null, //
+        selectedIndex: 0 //
+    },
     rides: {
-        all: Store<Ride[]>,
-        // stores all ride types built in park as numerical values
-        allRideTypes: Store<RideType[]>,
-        // rides that will have the theme applied when colourRides() is called
-        selected: Store<Ride[]>,
-        selectedIndex: Store<number>,
-        // displays number of rides selected e.g. "4/30 rides selected"
-        selectedText: Store<string>,
-        // rides that have already been painted using the plugin
-        painted: Store<Ride[]>
-    }
-
-    // station settings
+        all: [],
+        allRideTypes: [],
+        selected: [], //
+        selectedIndex: 0, //
+        selectedText: "", //
+        painted: [] //
+    },
     stations: {
-        all: Store<LoadedObject[]>,
-        selected: Store<LoadedObject|null>,
-        selectedIndex: Store<number>,
-        automaticallyApply: Store<boolean>
-    }
-
-    // Settings data
+        all: [],
+        selected: null, //
+        selectedIndex: 0, //
+        automaticallyApply: false //
+    },
     settings: {
-        // repaint all rides at the park
-        automaticPaintFrequency: Store<number>,
-        // allow plugin to repaint already themed rides
-        repaintExistingRides: Store<boolean>,
-        // paint any newly built rides the day they're built
-        paintBrantNewRides: Store<boolean>,
-        // paint rides that start the scenario
-        paintScenarioStartingRides: Store<boolean>
+        automaticPaintFrequency: 0,
+        repaintExistingRides: false,
+        paintBrantNewRides: false
     }
 }
 
+const createNewModelStore = (serialModel:SerialModel):StoreModel =>
+({
+        themes: createStoreFromObj(serialModel.themes),
+        modes: createStoreFromObj(serialModel.modes),
+        groupings: createStoreFromObj(serialModel.groupings),
+        rides: createStoreFromObj(serialModel.rides),
+        stations: createStoreFromObj(serialModel.stations),
+        settings: createStoreFromObj(serialModel.settings)
+})
+
+
+
+const dehydrateModelForStorage = (m: StoreModel): ModelToSave =>
+({
+    themes: {
+        selectedIndex: m.themes.selectedIndex.get()
+    },
+    modes: {
+        selectedIndex: m.modes.selectedIndex.get(),
+        selectedCustomColours: m.modes.selectedCustomColours.get(),
+        selectedColoursEnabled: m.modes.selectedColoursEnabled.get()
+    },
+    groupings: {
+        selectedIndex: m.groupings.selectedIndex.get()
+    },
+    rides: {
+        selected: m.rides.selected.get(),
+        selectedIndex: m.rides.selectedIndex.get(),
+        selectedText: m.rides.selectedText.get(),
+        painted:m.rides.painted.get()
+    },
+    stations: {
+        selected: m.stations.selected.get(),
+        selectedIndex: m.stations.selectedIndex.get(),
+        automaticallyApply: m.stations.automaticallyApply.get()
+    }
+    })
+
+const model = createNewModelStore(newModel)
+
+const rehydrateModelFromStorage = (dehy: ModelToSave):SerialModel =>
+{
+    const hydratedModel = dehy as SerialModel;
+    hydratedModel.themes.all = themes;
+    hydratedModel.themes.selected = themes[dehy.themes.selectedIndex]
+    hydratedModel.modes.all = modes;
+    hydratedModel.modes.selected = modes[dehy.modes.selectedIndex];
+    hydratedModel.groupings.all = groupings;
+    hydratedModel.groupings.selected = groupings[dehy.groupings.selectedIndex];
+    hydratedModel.stations.all = context.getAllObjects("station");
+    hydratedModel.rides.all = getAllRides();
+    hydratedModel.rides.allRideTypes = getAllRideTypes();
+    hydratedModel.settings = {
+        automaticPaintFrequency: config.getAutomaticPaintFrequency(),
+        repaintExistingRides: config.getRepaintExistingRides(),
+        paintBrantNewRides: config.getPaintBrandNewRides()
+
+    }
+    return hydratedModel
+}
+/**
+ * Transform model loaded from park storage into actionable model
+ */
+const restoreLoadedModel = (dehydratedModel: ModelToSave) =>
+// Rehydrates (restore missing properties) from saved model and turns back into a store
+    createNewModelStore(rehydrateModelFromStorage(dehydratedModel))
+
+/**
+ * get rides from map and set to model.rides.all
+ */
+const getAllRides = () =>
+    map.rides.filter(ride => ride.classification === 'ride')
+
+const getAllRideTypes = () =>
+{
+    const allRideTypes = getAllRides().map(ride => ride.type);
+    return allRideTypes
+        // get the unique ride types
+        .filter(onlyUnique)
+        // get only non-zero/truthy values
+        .filter( n => n);
+}
+
+const initializeStoreModel =
+{
+    rides: () =>
+    {
+        const allRides = model.rides.all.set(getAllRides());
+        const allRideTypes = model.rides.allRideTypes.set(getAllRideTypes())
+        return {allRides,allRideTypes}
+    },
+    modes: () =>
+    {
+        const allModes = modes
+        model.modes.all.set(allModes);
+        // for spiciness, randomly choose a theme to set
+        const startingMode = context.getRandom(0,modes.length-1)
+        model.modes.selectedIndex.set(startingMode);
+        model.modes.selected.set(model.modes.all.get()[model.modes.selectedIndex.get()]);
+        // for 'Custom Pattern' mode
+        const startingCustomColours = [0, 0, 0, 0, 0, 0]
+        model.modes.selectedCustomColours.set(startingCustomColours);
+        const startingColoursEnabled = [true, false, true, true, false, true,]
+        model.modes.selectedColoursEnabled.set(startingColoursEnabled);
+        return {
+            allModes,
+            selectedMode: allModes[startingMode],
+            selectedModeIndex: startingMode,
+            selectedCustomColours: startingCustomColours,
+            selectedColoursEnabled: startingColoursEnabled
+        }
+    },
+    themes: () =>
+    {
+        const allThemes = themes;
+        model.themes.all.set(allThemes);
+        // for spiciness, randomly choose a theme to set
+        const startingTheme = context.getRandom(0,themes.length-1)
+        model.themes.selectedIndex.set(startingTheme);
+        model.themes.selected.set(model.themes.all.get()[model.themes.selectedIndex.get()]);
+        return {
+            allThemes,
+            selectedTheme: allThemes[startingTheme],
+            selectedThemeIndex: startingTheme
+        }
+    },
+    groupings: () =>
+    {
+        const allGroupings = groupings
+        model.groupings.all.set(allGroupings);
+        const startingIndex = 0
+        model.groupings.selectedIndex.set(startingIndex);
+        model.groupings.selected.set(model.groupings.all.get()[model.groupings.selectedIndex.get()])
+        return {
+            allGroupings,
+            selectedGrouping: allGroupings[startingIndex],
+            selectedGroupingIndex: startingIndex
+        }
+    },
+    stationSettings: () =>
+    {
+        const allStationStyles = context.getAllObjects("station")
+        model.stations.all.set(allStationStyles);
+        const automaticallyApplyStationStyling = false
+        model.stations.automaticallyApply.set(automaticallyApplyStationStyling);
+        return {
+            allStationStyles,
+            automaticallyApplyStationStyling
+        }
+    }
+}
+
+const updateRideStore = initializeStoreModel.rides;
+
+/**
+ * Set starting values for rides, groupings, modes, themes, and station settings
+ * Returns a serial version of the values
+ */
+const initializeStoreModelAll = () =>
+({
+    groupings: initializeStoreModel.groupings(),
+    modes: initializeStoreModel.modes(),
+    rides: initializeStoreModel.rides(),
+    stationSettings:initializeStoreModel.stationSettings(),
+    themes: initializeStoreModel.themes(),
+})
+
+const saveModelIntoParkStorage = (m: StoreModel) =>
+{
+    const modelToSave  = dehydrateModelForStorage(m);
+    context.getParkStorage().set("RidePainter.model",modelToSave);
+    debug(`value saved: ${JSON.stringify(modelToSave)}`)
+    debug(`value loaded: ${JSON.stringify(context.getParkStorage().get("RidePainter.model"))}`)
+    return context.getParkStorage().get("RidePainter.model") as ModelToSave
+}
+
+
+export {
+    saveModelIntoParkStorage,
+    updateRideStore,
+    initializeStoreModelAll,
+    restoreLoadedModel,
+    StoreModel, ModelToSave,
+    model,
+
+}
 /**
  * Helper to get unique ride types
  */
@@ -76,170 +332,62 @@ export type IModel = {
  }
 
 /**
- * Initializes ride data into the store.
+ * Explicitly define a store-based model. Not needed due to typedefs above
  */
-const rideInit = (model: IModel) =>
-{
-    // get rides from map and set to model.rides.all
-    const allRides=map.rides.filter(ride => ride.classification === 'ride')
-    model.rides.all.set(allRides)
+//  export const model = {
+// 	// Theme data
+//     themes: {
+//         all: store<Theme[]>([]),
+//         // the currently selected theme and dropdown index
+//         selected: store<Theme | null>(null),
+//         selectedIndex: store<number>(0),
+//     },
+//     // Mode data
+// 	modes: {
+//         all: store<Mode[]>([]),
+//         // the currently active mode and dropdown index
+//         selected: store<Mode | null>(null),
+//         selectedIndex: store<number>(0),
+//         // used for the 'Custom Pattern' mode
+//         // stores the colourPicker colours and their active state
+//         selectedCustomColours: store<Colour[]>([0,0,0,0,0,0]),
+//         selectedColoursEnabled: store<boolean[]>([true,true,true,true,true,true])
+//     },
+//     // Grouping data
+//     groupings: {
+//         all: store<Grouping<number | string>[]>([]),
+//         // the currently active grouping and index
+//         selected: store<Grouping<number | string> | null> (null),
+//         selectedIndex: store<number>(0),
+//     },
+//     // Ride Selection data
+//     rides: {
+//         all: store<Ride[]>([]),
+//         // stores all ride types built in park as numerical values
+//         allRideTypes: store<RideType[]>([]),
+//         // rides that will have the theme applied when colourRides() is called
+//         selected: store<Ride[]>([]),
+//         selectedIndex: store<number>(0),
+//         // displays number of rides selected e.g. "4/30 rides selected"
+//         selectedText: store<string>(""),
+//         // rides that have already been painted using the plugin
+//         painted: store<Ride[]>([])
+//     },
+//     // station settings
+//     stations: {
+//         all: store<LoadedObject[]>([]),
+//         selected: store<LoadedObject|null>(null),
+//         selectedIndex: store<number>(0),
+//         automaticallyApply: store<boolean>(true)
+//     },
+//     // Settings data
+//     settings: {
+//         // repaint all rides at the park
+//         automaticPaintFrequency: store<number>(0),
+//         // allow plugin to repaint already themed rides
+//         repaintExistingRides: store<boolean>(false),
+//         // paint any newly built rides the day they're built
+//         paintBrantNewRides: store<boolean>(false)
+//     }
 
-    const allRideTypes = allRides.map(ride => ride.type);
-    const uniqueRideTypes = allRideTypes
-        // get the unique ride types
-        .filter(onlyUnique)
-        // get only non-zero/truthy values
-        .filter( n => n);
-    model.rides.allRideTypes.set(uniqueRideTypes);
-}
-
-/**
- * Initialize station settings
- */
-export const stationSettingsInit = (model: IModel) =>
-{
-    const allStationStyles = context.getAllObjects("station")
-    model.stations.all.set(allStationStyles);
-    model.stations.automaticallyApply.set(false);
-}
-
-/**
- * Initializes mode data into the store.
- */
-const modeInit = (model: IModel) =>
-{
-    model.modes.all.set(modes);
-    // for spiciness, randomly choose a theme to set
-    const startingMode = context.getRandom(0,modes.length-1)
-    model.modes.selectedIndex.set(startingMode);
-    model.modes.selected.set(model.modes.all.get()[model.modes.selectedIndex.get()]);
-    // for 'Custom Pattern' mode
-    model.modes.selectedCustomColours.set([0, 0, 0, 0, 0, 0]);
-    model.modes.selectedColoursEnabled.set([true, false, true, true, false, true,]);
-};
-
-/**
- * Initializes theme data into the store.
- */
-const themeInit = (model: IModel) =>
-{
-    model.themes.all.set(themes);
-    // for spiciness, randomly choose a theme to set
-    const startingTheme = context.getRandom(0,themes.length-1)
-    model.themes.selectedIndex.set(startingTheme);
-    model.themes.selected.set(model.themes.all.get()[model.themes.selectedIndex.get()]);
-};
-
-/**
- * Initializes grouping data into the store. Checks the game's config to persist from one load to another
- */
-const groupingInit = (model: IModel) =>
-{
-    model.groupings.all.set(groupings);
-    model.groupings.selectedIndex.set(0);
-    model.groupings.selected.set(model.groupings.all.get()[model.groupings.selectedIndex.get()])
-}
-
-/**
- * Initializes settings data into the store. Checks the game's config to persist from one load to another
- */
-const settingInit = (model: IModel) =>
-{
-    // check if there are any setting values stored
-    // it's sufficient to check for one, because having one is as good as having all
-    if (!model.settings.automaticPaintFrequency.get())
-    {
-        model.settings.repaintExistingRides.set(true);
-        model.settings.paintBrantNewRides.set(true);
-        model.settings.paintScenarioStartingRides.set(true);
-    }
-}
-
-/**
- * To be called during plugin mount.  Paint all rides
- */
-const paintPrebuiltScenarioRides = (model: IModel) =>
-{
-    // check if painting starting rides enabled
-    if (model.settings.paintScenarioStartingRides.get())
-    {
-        debug(`adding starting scenario rides to rides.painted`)
-        const startingRides = map.rides.filter(ride=> ride.classification === "ride");
-        model.rides.painted.set(startingRides);
-    }
-
-}
-
-
-/**
- * Record the model information inside of stores so the values can be read/updated by the UI
- */
- export const model: IModel = {
-	// Theme data
-    themes: {
-        all: store<Theme[]>([]),
-        // the currently selected theme and dropdown index
-        selected: store<Theme | null>(null),
-        selectedIndex: store<number>(0),
-    },
-    // Mode data
-	modes: {
-        all: store<Mode[]>([]),
-        // the currently active mode and dropdown index
-        selected: store<Mode | null>(null),
-        selectedIndex: store<number>(0),
-        // used for the 'Custom Pattern' mode
-        // stores the colourPicker colours and their active state
-        selectedCustomColours: store<Colour[]>([0,0,0,0,0,0]),
-        selectedColoursEnabled: store<boolean[]>([true,true,true,true,true,true])
-    },
-    // Grouping data
-    groupings: {
-        all: store<Grouping<number | string>[]>([]),
-        // the currently active grouping and index
-        selected: store<Grouping<number | string> | null> (null),
-        selectedIndex: store<number>(0),
-    },
-    // Ride Selection data
-    rides: {
-        all: store<Ride[]>([]),
-        // stores all ride types built in park as numerical values
-        allRideTypes: store<RideType[]>([]),
-        // rides that will have the theme applied when colourRides() is called
-        selected: store<Ride[]>([]),
-        selectedIndex: store<number>(0),
-        // displays number of rides selected e.g. "4/30 rides selected"
-        selectedText: store<string>(""),
-        // rides that have already been painted using the plugin
-        painted: store<Ride[]>([])
-    },
-    // station settings
-    stations: {
-        all: store<LoadedObject[]>([]),
-        selected: store<LoadedObject|null>(null),
-        selectedIndex: store<number>(0),
-        automaticallyApply: store<boolean>(true)
-    },
-    // Settings data
-    settings: {
-        // repaint all rides at the park
-        automaticPaintFrequency: store<number>(0),
-        // allow plugin to repaint already themed rides
-        repaintExistingRides: store<boolean>(false),
-        // paint any newly built rides the day they're built
-        paintBrantNewRides: store<boolean>(false),
-        // paint rides that start the scenario
-        paintScenarioStartingRides: store<boolean>(false)
-    }
-
-};
-
-
-modeInit(model);
-themeInit(model);
-rideInit(model);
-groupingInit(model);
-settingInit(model);
-stationSettingsInit(model);
-
-
+// };
