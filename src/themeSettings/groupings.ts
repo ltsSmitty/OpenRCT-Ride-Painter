@@ -140,3 +140,5 @@ export const groupings = [
     GroupByCost,
     GroupByAge,
 ]
+
+export const getGrouping = (selected: number) => groupings[selected]

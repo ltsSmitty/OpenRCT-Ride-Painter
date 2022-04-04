@@ -1,67 +1,53 @@
+import { FeatureController } from './controllers/Controllers';
+/* eslint-disable guard-for-in */
 import { themeWindow, dailyUpdate } from "./window";
-import StateWatcher from "./services/stateWatcher";
-import { model, IModel } from "./model";
+import model from "./model";
 import { debug } from "./helpers/logger";
+import StateWatcher from "./services/stateWatcher";
 
-// plugin constants
-// const namespace = `ride-painter`
-// const storageKey = `${namespace}-`
-
-const initializeModel = () =>
-{
-    // Initialize model for plugin.
-    // First check if the parkStorage has an existing model
-    // If not, check for settings from sharedStorage
-    // Then use those settings or defaults to initialize the model.
-    const modelFromParkStorage = context.getParkStorage().get("model") as typeof model ;
-
-    if (modelFromParkStorage)
-    {
-        // set the active model to be this model
-        debug(`model found in parkStorage`)
-        for (const k in model)
-        {
-            if ({}.hasOwnProperty.call(model, k))
-            {
-                model[k] = modelFromParkStorage[k as keyof IModel];
-                // todo does this actually work?
-                // todo the error is wrong but i don't know how to fix it.
-            }
-        }
-    }
-    else
-    {
-        // check if there's default plugin information in
-        // todo make the key actually work
-        const defaultsInGlobalStorage = context.sharedStorage.get(`thisKey`) as IModel[`settings`] | undefined
-        if (defaultsInGlobalStorage)
-        {
-            // defaults found in sharedStorage
-            debug(`defaults found in sharedStorage`)
-            model.settings = defaultsInGlobalStorage
-        }
-        else
-        {
-            // no defaults found, initialize plugin with default values
-            debug(`no model or defaults found. using plugin default settings`)
-        }
-        //
-    }
-}
+// const loadValuesFromStorage = (tc: ThemeController) =>
+// {
+//     debug(`Loading themeController`)
+//     const loadedTheme = context.getParkStorage().get(("RidePainter.themeModel")) as {[keys:string]:any}[];
+//     debug(`loadedTheme from parkStorage: ${JSON.stringify(loadedTheme)}`)
+//     if (!loadedTheme) return
+//     tc.applyValuesFromSave(loadedTheme)
+//     debug(`loaded values. checking theme values`)
+//     tc.debug()
+// }
 
 const main = () =>
 {
-    initializeModel();
-    const watcher = new StateWatcher();
-    ui.registerMenuItem("Ride Painter", () => themeWindow.open())
-    context.subscribe('interval.day', () =>
-{
-        dailyUpdate();
-    });
-    // initPluginSettings();
-    dailyUpdate();
+    const featureController = new FeatureController
+    featureController.load()
+    const watcher = new StateWatcher(featureController);
+    const window = themeWindow(featureController);
+    ui.registerMenuItem("Ride Painter", () => window.open())
+    // context.subscribe('interval.day', () =>
+    // {
+        // dailyUpdate(featureController);
+    // });
+    // // initPluginSettings();
+    // dailyUpdate();
 
     //
 }
 
 export default main
+
+
+
+export const debugModel = () =>
+{
+    debug(`<debugModel> model:`)
+    let str ="";
+    Object.keys(model).forEach(key =>
+        {
+            str += (`\n\t-${key} length: ${Object.keys(key).length}`)
+            Object.keys(key).forEach(k=>
+                {
+                    str+=(`\n\tk: ${k}`)
+                })
+        })
+    debug(str)
+}

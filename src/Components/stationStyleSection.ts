@@ -1,8 +1,8 @@
 import { box, horizontal, dropdown, compute, toggle } from "openrct2-flexui";
-import { model } from "../model";
 import ColourChange from "../themeSettings/ColourChange";
+import { StationController, RideController } from '../controllers/Controllers';
 
-const stationStyleElements = () =>
+const stationStyleElements = (sc: StationController, rc: RideController) =>
 {
     const layout =
     box({
@@ -12,22 +12,22 @@ const stationStyleElements = () =>
                 height: 10,
                 content: [
                     dropdown({
-                        items: compute(model.stations.all,(stations) => stations.map((station) => station.name)),
-                        selectedIndex: model.stations.selectedIndex,
-                        disabled: compute(model.stations.all, (s) => s.length === 0),
+                        items: compute(sc.all,(stations) => stations.map((station) => station.name)),
+                        selectedIndex: sc.selectedIndex,
+                        disabled: compute(sc.all, (s) => s.length === 0),
                         disabledMessage: 'No station styles defined.',
                         onChange: (index: number) =>
                         {
-                            model.stations.selectedIndex.set(index);
-                            model.stations.selected.set(model.stations.all.get()[index]);
+                            sc.selectedIndex.set(index);
+                            sc.selected.set(sc.all.get()[index]);
                         }
                     }),
                     toggle({
-                        isPressed:compute(model.stations.automaticallyApply,(enabled)=>enabled),
+                        isPressed:compute(sc.automaticallyApply,(enabled)=>enabled),
                         onChange: (isPressed) =>
                         {
-                            model.stations.automaticallyApply.set(isPressed)
-                            if (isPressed) ColourChange.changeRideStationStyle(model.rides.all.get())
+                            sc.automaticallyApply.set(isPressed)
+                            if (isPressed) ColourChange.changeRideStationStyle(rc.all.get(), sc)
                         }
                     })
                 ]

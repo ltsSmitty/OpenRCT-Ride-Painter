@@ -1,6 +1,9 @@
+/* eslint-disable lines-between-class-members */
+/* eslint-disable no-use-before-define */
 /* eslint-disable import/no-extraneous-dependencies */
 // eslint-disable-next-line import/no-unresolved
 import { Colour } from 'openrct2-flexui';
+
 
 export type RideColours = [number, number, number, number, number, number];
 

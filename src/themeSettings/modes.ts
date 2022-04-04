@@ -138,3 +138,5 @@ export const modes: Mode[] = [
 	buildOrderMode,
 	customPatternMode,
 ];
+
+export const getMode = (selected: number) => modes[selected]

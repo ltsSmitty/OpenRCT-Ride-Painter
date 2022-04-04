@@ -1,8 +1,8 @@
 import { vertical, box, dropdown, compute, label, horizontal, button } from "openrct2-flexui"
 import { RideType } from "../helpers/RideType"
-import { model } from "../model";
+import { RideController } from "../controllers/Controllers";
 
-const rideSelectionElements = () =>
+const rideSelectionElements = (rc: RideController) =>
 {
     const layout =
     vertical([
@@ -15,18 +15,18 @@ const rideSelectionElements = () =>
                         // Select a type
                         dropdown({
                             padding: {top:5},
-                            selectedIndex: compute(model.rides.selectedIndex, index=> index),
-                            items: compute(model.rides.allRideTypes, rideType => rideType.map(type =>
+                            selectedIndex: compute(rc.selectedIndex, index=> index),
+                            items: compute(rc.allRideTypes, rideType => rideType.map(type =>
                                     // Display the ride type and the number of those rides
-                                        `${RideType[type]} - ${model.rides.all.get()
+                                        `${RideType[type]} - ${rc.all.get()
                                             .filter(ride=>ride.type===type).length}`
                                 )),
                             onChange: (typeIndex) =>
                             {
-                                const ridesOfThisType = model.rides.all.get()
-                                    .filter(ride=>ride.type===model.rides.allRideTypes.get()[typeIndex])
-                                model.rides.selected.set(ridesOfThisType)
-                                model.rides.selectedIndex.set(typeIndex)
+                                const ridesOfThisType = rc.all.get()
+                                    .filter(ride=>ride.type===rc.allRideTypes.get()[typeIndex])
+                                rc.selectedRides.set(ridesOfThisType)
+                                rc.selectedIndex.set(typeIndex)
                             }
                         }),
                         label({
@@ -41,20 +41,20 @@ const rideSelectionElements = () =>
                                     width: "67%",
                                     onClick: () =>
                                     {
-                                        if (model.rides.selected.get().length === model.rides.all.get().length)
-                                    {
-                                            model.rides.selected.set([]);
+                                        if (rc.selectedRides.get()?.length === rc.all.get().length)
+                                        {
+                                            rc.selectedRides.set([]);
                                         }
                                         else
-                                    {
-                                            model.rides.selected.set(model.rides.all.get());
+                                        {
+                                            rc.selectedRides.set(rc.all.get());
                                         }
                                     },
                                     text: '{BLACK}Select/Deselect all rides'
                                 }),
                                 label({
                                     padding: {top: 5},
-                                    text: model.rides.selectedText,
+                                    text: rc.selectedText,
                                 }),
                             ]
 

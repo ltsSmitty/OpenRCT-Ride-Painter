@@ -2,8 +2,8 @@
 import main from './main';
 
 registerPlugin({
-  name: 'Random Ride Colours',
-  version: '1.0',
+  name: 'Ride Painter',
+  version: '1.2',
   authors: ['ltsSmitty'],
   type: 'remote',
   licence: 'GPL-3.0',

@@ -1,6 +1,7 @@
-/* eslint-disable no-param-reassign */
+/* eslint-disable no-use-before-define */
 import { debug } from "../helpers/logger";
 import { WindowWatcher } from "../window";
+import { FeatureController, RideController, SettingsController } from '../controllers/Controllers';
 
 /**
  * Watches the state of the game, and updates relevant services if necessary.
@@ -13,13 +14,20 @@ import { WindowWatcher } from "../window";
 
      private isDisposed: boolean = false;
 
+     private onSaveHook: IDisposable;
 
-     constructor(
-     )
+     featureController: FeatureController;
+
+
+     constructor(fc: FeatureController)
      {
-         debug("(watcher) Watcher initialized");
-         this.onActionHook = context.subscribe("action.execute", e => this.onActionExecuted(e));
-         this.onUpdateHook = context.subscribe("interval.tick", () => this.onGameTickUpdate());
+        this.featureController = fc;
+        debug("(watcher) Watcher initialized");
+        this.onActionHook = context.subscribe("action.execute", e => this.onActionExecuted(e));
+        this.onUpdateHook = context.subscribe("interval.tick", () => this.onGameTickUpdate());
+        this.onSaveHook = context.subscribe("map.save",() => this.onSave())
+         // intentionally param-reassign WindowWatcher and therefore window functions
+         /* eslint-disable no-param-reassign */
          WindowWatcher.onWindowUpdate = ():void => this.onWindowUpdate();
          WindowWatcher.onWindowOpen = ():void => this.onWindowOpen();
      }
@@ -32,6 +40,11 @@ import { WindowWatcher } from "../window";
          this.isDisposed = true;
      }
 
+     private onSave(): void
+     {
+        if (this.isDisposed) return;
+        this.featureController.save()
+     }
 
      /**
       * Triggers for every executed player action.
@@ -49,7 +62,9 @@ import { WindowWatcher } from "../window";
              case "ridedemolish":
              case "ridesetname":
              {
-                // todo update model.rides.all
+                // updateRideStore();
+                // todo is there more to do here?
+
                 break;
              }
              default: {return}
@@ -77,15 +92,46 @@ import { WindowWatcher } from "../window";
       */
      private onWindowUpdate(): void
      {
-         if (this.isDisposed) return;
-         debug(`window updated`)
+        if (this.isDisposed) return;
 
-        // todo is this necessary?
+        // update how many rides are selected
+        setSelectedRidesText(this.featureController.rideController);
      }
 
      private onWindowOpen(): void
      {
         if (this.isDisposed) return;
          debug(`window opened`);
+         subToSettingsChange(this.featureController.settingsController)
      }
+
  }
+
+const setSelectedRidesText = (rc: RideController) =>
+{
+ // Page picker text output
+ const selectedRides = rc.selectedRides.get() || []
+ // set the text for number of rides selectedß
+ rc.selectedText.set(`{BLACK}${selectedRides.length}/${rc.all.get().length} rides selected`)
+}
+
+const subToSettingsChange =(sc: SettingsController) =>
+{
+    debug(`subbing to settings changes`)
+    sc.automaticPaintFrequency.subscribe((freq) =>
+    {
+        debug(`sharedStoreage, ${sc.lookupKeys.automaticPaintFrequency}: ${freq}`)
+        sc.setAutomaticPaintFrequency(freq)
+    });
+    sc.paintBrantNewRides.subscribe((toggle) =>
+    {
+        debug(`sharedStoreage, ${sc.lookupKeys.paintBrantNewRides}: ${toggle}`)
+        sc.setPaintBrandNewRides(toggle);
+    });
+    sc.repaintExistingRides.subscribe((toggle) =>
+    {
+        debug(`sharedStoreage, ${sc.lookupKeys.repaintExistingRides}: ${toggle}`)
+        sc.setRepaintExistingRides(toggle);
+    })
+}
+
