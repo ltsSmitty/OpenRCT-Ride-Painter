@@ -3,20 +3,14 @@
 
 import { box, button, compute, colourPicker ,dropdown, horizontal, label, dropdownSpinner,
     store, window, vertical, toggle, Colour } from 'openrct2-flexui';
-import { Mode, modes } from './themeSettings/modes';
-import { Theme, themes } from './themeSettings/themes';
 import { debug } from './helpers/logger';
 import ColourChange from './themeSettings/ColourChange';
-import { RideType } from './helpers/RideType';
-import { Grouping, groupings } from './themeSettings/groupings';
 import themeSectionElements from './Components/themeSection';
 import { modeSectionElements } from './Components/modeSection';
 import groupingSectionElements from './Components/groupingSection';
 import rideSelectionElements from './Components/rideSelectionSection';
 import settingsSectionElements from './Components/settingsSection';
-// import model from './model';
 import stationStyleElements from './Components/stationStyleSection';
-import { debugModel } from './main';
 import {FeatureController} from './controllers/Controllers';
 
 
@@ -39,7 +33,8 @@ export const themeWindow = (
 {
     debug(`<themeWindow>`);
     featureController.debug();
-    const {rideController, themeController, groupingController, modeController, stationController} = featureController
+    const {rideController, themeController, groupingController,
+        modeController, stationController, settingsController} = featureController
 
     return window({
         title: 'Ride Painter',
@@ -79,7 +74,7 @@ export const themeWindow = (
                 // // FOURTH ROW: RIDE/TYPE SELECTION
                 rideSelectionElements(rideController),
                 // // SETTINGS
-                // settingsSectionElements(),
+                settingsSectionElements(settingsController),
                 stationStyleElements(stationController, rideController),
                 button({
                     height: 30,

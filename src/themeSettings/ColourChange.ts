@@ -1,7 +1,7 @@
 /// <reference path="../../lib/openrct2.d.ts" />
-import { Colour } from "openrct2-flexui";
 import { combineCustomColourArrays } from "../Components/modeSection";
 import { FeatureController, RideController, StationController } from '../controllers/Controllers';
+import { debug } from "../helpers/logger";
 
 export default class ColourChange
 {
@@ -44,7 +44,7 @@ export default class ColourChange
     /**
      * Set a ride's colour. To not change a colour for a param, input -1 for the param.
      */
-    public static setRideColour = (
+    private static setRideColour = (
         ride: Ride,
         mainColour:number = -1,
         additionalColour: number = -1,
@@ -96,7 +96,7 @@ export default class ColourChange
         {
             // get the 6 ride colours based on the theme and mode
             const colours = currentMode.applyTheme(currentTheme,{
-                customColours: combineCustomColourArrays(modeController) as Colour[],
+                customColours: combineCustomColourArrays(modeController),
                 index: i
             });
             if (!colours) return;
@@ -111,6 +111,7 @@ export default class ColourChange
 
                 // Actually do the painting!
                 this.setRideColour(ride, ...colours);
+                debug(`about to mark ride as being painted`)
                 this.markRideAsHavingBeenPainted(ride, rideController)
             })
 
@@ -124,11 +125,14 @@ export default class ColourChange
     public static markRideAsHavingBeenPainted = (ride: Ride, rc:RideController) =>
     {
         const previouslyPaintedRides = rc.paintedRides.get() || []
+        debug(`previously painted rides: ${previouslyPaintedRides.map(r=>r.name)}`)
         // if the ride isn't already on the list
         if (previouslyPaintedRides.indexOf(ride)===-1)
         {
             previouslyPaintedRides.push(ride)
+            debug(`about to set to previouslyPaintedRides: ${previouslyPaintedRides.map(r=>r.name)}`)
             rc.paintedRides.set(previouslyPaintedRides);
+            debug(`get previouslyPaintedRides: ${rc.paintedRides.get()?.map(r=>r.name)}`)
         }
     }
 

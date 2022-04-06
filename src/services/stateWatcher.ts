@@ -1,7 +1,9 @@
+/* eslint-disable lines-between-class-members */
 /* eslint-disable no-use-before-define */
 import { debug } from "../helpers/logger";
 import { WindowWatcher } from "../window";
 import { FeatureController, RideController, SettingsController } from '../controllers/Controllers';
+import ColourChange from "../themeSettings/ColourChange";
 
 /**
  * Watches the state of the game, and updates relevant services if necessary.
@@ -9,15 +11,10 @@ import { FeatureController, RideController, SettingsController } from '../contro
  export default class StateWatcher implements IDisposable
  {
      private onActionHook: IDisposable;
-
      private onUpdateHook: IDisposable;
-
      private isDisposed: boolean = false;
-
      private onSaveHook: IDisposable;
-
      featureController: FeatureController;
-
 
      constructor(fc: FeatureController)
      {
@@ -52,19 +49,29 @@ import { FeatureController, RideController, SettingsController } from '../contro
       */
      private onActionExecuted(event: GameActionEventArgs): void
      {
-         if (this.isDisposed)
-             return;
+         if (this.isDisposed) return;
 
          const action = event.action as ActionType;
          switch (action)
          {
-             case "ridecreate":
-             case "ridedemolish":
-             case "ridesetname":
-             {
-                // updateRideStore();
-                // todo is there more to do here?
 
+            case "ridecreate":
+            case "ridedemolish":
+            case "ridesetname":
+            // 1. update list of all rides
+            // 2. check if paintBrandNewRides is active and paint the new ride if so
+            {
+                this.featureController.rideController.updateRideModel()
+                this.featureController.settingsController.debug()
+                const newRideID = (event.result as {ride:number}).ride // but might be undefined
+                // need to guard in case rideID === 0
+                if (typeof newRideID !== 'undefined' &&
+                    this.featureController.settingsController.getPaintBrandNewRides())
+                    {
+                        const newRide = map.getRide(newRideID);
+                        ColourChange.colourRides(this.featureController,[newRide])
+                        // todo build order isn't working any more
+                    }
                 break;
              }
              default: {return}
@@ -80,9 +87,9 @@ import { FeatureController, RideController, SettingsController } from '../contro
       */
      private onGameTickUpdate(): void
      {
-         if (this.isDisposed)
-             return;
-
+        // eslint-disable-next-line no-useless-return
+        if (this.isDisposed) return
+        // debug(`number of rides: ${this.featureController.rideController.all.get().length}`)
         // todo is this needed?
      }
 
@@ -95,43 +102,17 @@ import { FeatureController, RideController, SettingsController } from '../contro
         if (this.isDisposed) return;
 
         // update how many rides are selected
-        setSelectedRidesText(this.featureController.rideController);
+        this.featureController.rideController.setSelectedRidesText()
      }
 
      private onWindowOpen(): void
      {
         if (this.isDisposed) return;
          debug(`window opened`);
-         subToSettingsChange(this.featureController.settingsController)
+         // moved this line into the settings controller itself. see if this works better.
+        //  this.featureController.settingsController.subToSettingsChange()
      }
 
  }
 
-const setSelectedRidesText = (rc: RideController) =>
-{
- // Page picker text output
- const selectedRides = rc.selectedRides.get() || []
- // set the text for number of rides selectedß
- rc.selectedText.set(`{BLACK}${selectedRides.length}/${rc.all.get().length} rides selected`)
-}
-
-const subToSettingsChange =(sc: SettingsController) =>
-{
-    debug(`subbing to settings changes`)
-    sc.automaticPaintFrequency.subscribe((freq) =>
-    {
-        debug(`sharedStoreage, ${sc.lookupKeys.automaticPaintFrequency}: ${freq}`)
-        sc.setAutomaticPaintFrequency(freq)
-    });
-    sc.paintBrantNewRides.subscribe((toggle) =>
-    {
-        debug(`sharedStoreage, ${sc.lookupKeys.paintBrantNewRides}: ${toggle}`)
-        sc.setPaintBrandNewRides(toggle);
-    });
-    sc.repaintExistingRides.subscribe((toggle) =>
-    {
-        debug(`sharedStoreage, ${sc.lookupKeys.repaintExistingRides}: ${toggle}`)
-        sc.setRepaintExistingRides(toggle);
-    })
-}
 

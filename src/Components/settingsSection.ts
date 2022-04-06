@@ -1,7 +1,7 @@
 import { horizontal, box, vertical, label, dropdownSpinner, toggle, compute } from "openrct2-flexui"
-import model from "../model";
+import { SettingsController } from '../controllers/Controllers';
 
-const settingsSectionElements = () =>
+const settingsSectionElements = (sc: SettingsController) =>
 {
     const layout =
     horizontal({
@@ -21,24 +21,24 @@ const settingsSectionElements = () =>
                                         alignment: "left"
                                     }),
                                     dropdownSpinner({
-                                        selectedIndex: model.settings.automaticPaintFrequency,
+                                        selectedIndex: sc.automaticPaintFrequency,
                                         items: ["never", "daily", "weekly", "monthly", "yearly"],
-                                        onChange: (index: number) => model.settings.automaticPaintFrequency.set(index),
+                                        onChange: (index: number) => sc.automaticPaintFrequency.set(index),
                                     })
                                 ]
                             }),
                             toggle({
                                 height: 20,
-                                isPressed: model.settings.repaintExistingRides,
+                                isPressed: sc.repaintExistingRides,
                                 text: "{BLACK}Allow repainting of already painted rides",
-                                onChange: (isPressed:boolean) => model.settings.repaintExistingRides.set(isPressed),
+                                onChange: (isPressed:boolean) => sc.repaintExistingRides.set(isPressed),
 
                             }),
                             toggle({
                                 height: 20,
                                 text: "{BLACK}Paint newly built rides automatically",
-                                isPressed: model.settings.paintBrantNewRides,
-                                onChange: (isPressed:boolean) => model.settings.paintBrantNewRides.set(isPressed),
+                                isPressed: sc.paintBrantNewRides,
+                                onChange: (isPressed:boolean) => sc.paintBrantNewRides.set(isPressed),
                             }),
                         ]
                 }),

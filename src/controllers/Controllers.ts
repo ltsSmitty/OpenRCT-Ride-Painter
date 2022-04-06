@@ -9,22 +9,6 @@ import { RideType } from '../helpers/RideType';
 import { sharedStorageNamespace } from '../helpers/environment';
 import PluginNamespace from '../helpers/config';
 
-// class Saveable
-// {
-//     controllerKeys: {[props:string]:Store<any>};
-//     namespaceKey: string;
-
-//     constructor()
-//     {
-//         this.namespaceKey = `${this.constructor.name}`
-//         // example controller keys
-//         this.controllerKeys = {
-//             "baseControllerKey1":this.all,
-//             "baseControllerKey2":this.selectedIndex
-//         }
-//     }
-// }
-
 export class BaseController<T>
 {
     all!: Store<T[]>;
@@ -66,19 +50,30 @@ export class BaseController<T>
         return this.all
     }
 
-    // save(vals: {[x: string]: any}[])
-    // {
-
-    // }
-
-    getValuesToSave()
+    private getValuesToSave()
     {
         const vals = Object.keys(this.controllerKeys).map(key=>
             ({[key]: this.controllerKeys[key].get()}))
         return vals
     }
 
-    applyValuesFromSave(loadedVals: {[keys:string]:any}[])
+    saveFeatures()
+    {
+        const valToSave = this.getValuesToSave()
+        context.getParkStorage().set(`${PluginNamespace}.${this.namespaceKey}`,valToSave)
+        debug(`${this.constructor.name} saved.`)
+    }
+
+    loadValuesFromStorage()
+    {
+        const loadedController = context.getParkStorage()
+            .get((`RidePainter.${this.namespaceKey}`)) as {[keys:string]:any}[];
+        if (!loadedController) return
+        this.applyValuesFromSave(loadedController)
+        this.debug()
+    }
+
+    private applyValuesFromSave(loadedVals: {[keys:string]:any}[])
     {
         // why do this?
         this.updateLibrary(this.library);
@@ -186,11 +181,13 @@ export class RideController extends BaseController<Ride>
         this.selectedText = store<string>("");
 
     }
-
+    /**
+     * Update the model's values for rideController.all and rideController.allRideTypes
+     */
     updateRideModel()
     {
-        this.updateAllRideTypes();
         this.updateAllRides()
+        this.updateAllRideTypes();
     }
 
     private updateAllRides()
@@ -203,13 +200,13 @@ export class RideController extends BaseController<Ride>
     private updateAllRideTypes()
     {
         const allRideTypes = this.all.get().map(ride => ride.type);
-        debug(`All ride types: ${allRideTypes}`)
         const uniqueRideTypes = allRideTypes
             // get the unique ride types
             .filter(onlyUnique)
             // get only non-zero/truthy values
             .filter( n => n);
         this.allRideTypes.set(uniqueRideTypes);
+        debug(`<Controller>rc.allRideTypes updated: ${uniqueRideTypes}`)
         return uniqueRideTypes;
         /**
          * Helper to get unique ride types
@@ -218,6 +215,15 @@ export class RideController extends BaseController<Ride>
         {
             return self.indexOf(value) === index;
         }
+    }
+
+    /**
+     * Set this.selectedText to display which rides are selected, e.g. "3/10 rides selected"
+     */
+    setSelectedRidesText()
+    {
+    const selectedRides = this.selectedRides.get() || []
+    this.selectedText.set(`{BLACK}${selectedRides.length}/${this.all.get().length} rides selected`)
     }
 
     override getActive()
@@ -251,20 +257,22 @@ export class StationController extends BaseController<LoadedObject>
 
 export class SettingsController extends BaseController<string>
 {
-    automaticPaintFrequency!: Store<number>;
-    paintBrantNewRides!: Store<boolean>;
-    repaintExistingRides!: Store<boolean>;
+    automaticPaintFrequency!: Store<number>
+    paintBrantNewRides!: Store<boolean>
+    repaintExistingRides!: Store<boolean>
     lookupKeys;
 
     constructor()
     {
         super({library:[]})
-        this.setDefaults();
+        this.setDefaults()
         this.lookupKeys = {
             automaticPaintFrequency: `${sharedStorageNamespace}.automaticPaintFrequency`,
             paintBrantNewRides: `${sharedStorageNamespace}.paintBrantNewRides`,
             repaintExistingRides: `${sharedStorageNamespace}.repaintExistingRides`
         }
+        this.loadValuesFromStorage()
+        this.subToSettingsChange()
     }
 
     setDefaults()
@@ -272,6 +280,15 @@ export class SettingsController extends BaseController<string>
         this.automaticPaintFrequency = store<number>(0);
         this.paintBrantNewRides = store<boolean>(true);
         this.repaintExistingRides = store<boolean>(true);
+    }
+
+    override loadValuesFromStorage()
+    {
+        this.automaticPaintFrequency = store<number>(this.getAutomaticPaintFrequency())
+        this.paintBrantNewRides = store<boolean>(this.getPaintBrandNewRides())
+        this.repaintExistingRides = store<boolean>(this.getRepaintExistingRides())
+
+        this.debug()
     }
     /**
      * Repaints selected rides every time period
@@ -282,6 +299,10 @@ export class SettingsController extends BaseController<string>
         return context.sharedStorage.get(this.lookupKeys.automaticPaintFrequency ,this.automaticPaintFrequency.get())
     }
 
+    /**
+     * Repaints selected rides every time period
+     * [never, daily, weekly, monthly, annually]
+     */
     setAutomaticPaintFrequency(v:number)
     {
         return context.sharedStorage.set(this.lookupKeys.automaticPaintFrequency,v);
@@ -296,24 +317,63 @@ export class SettingsController extends BaseController<string>
         return context.sharedStorage.get(this.lookupKeys.paintBrantNewRides,this.paintBrantNewRides.get())
     }
 
+    /**
+     * Paint rides as soon as their built.
+     * Enabling helps theme continuity feel
+     */
     setPaintBrandNewRides(v:boolean)
     {
         return context.sharedStorage.set(this.lookupKeys.paintBrantNewRides,v);
     }
 
     /**
-     * Toggles whether rides that have already been painted can be painted again
+     * Toggles whether rides that have already been painted can be painted again.
      * Gives flexibility if you're manually theming rides/ride types
      */
     getRepaintExistingRides(): boolean
     {
-        return context.sharedStorage.get(this.lookupKeys.paintBrantNewRides, this.repaintExistingRides.get())
+        return context.sharedStorage.get(this.lookupKeys.repaintExistingRides, this.repaintExistingRides.get())
     }
 
+    /**
+     * Toggles whether rides that have already been painted can be painted again.
+     * Gives flexibility if you're manually theming rides/ride types
+     */
     setRepaintExistingRides(v:boolean)
     {
-        return context.sharedStorage.set(this.lookupKeys.paintBrantNewRides,v);
+        return context.sharedStorage.set(this.lookupKeys.repaintExistingRides,v);
     }
+
+    override debug()
+    {
+        debug(
+            `Debugging SettingsController
+            automaticPaintFrequency: ${this.getAutomaticPaintFrequency()},
+            paintBrandNewRides: ${this.getPaintBrandNewRides()},
+            repaintExistingRides: ${this.getRepaintExistingRides()}`
+        )
+    }
+
+    subToSettingsChange()
+    {
+        debug(`Subscribing to settings changes.`)
+        this.automaticPaintFrequency.subscribe((freq) =>
+        {
+            debug(`Updated setting in sharedStoreage: ${this.lookupKeys.automaticPaintFrequency}: ${freq}`)
+            this.setAutomaticPaintFrequency(freq)
+        });
+        this.paintBrantNewRides.subscribe((toggle) =>
+        {
+            debug(`Updated setting in sharedStoreage: ${this.lookupKeys.paintBrantNewRides}: ${toggle}`)
+            this.setPaintBrandNewRides(toggle);
+        });
+        this.repaintExistingRides.subscribe((toggle) =>
+        {
+            debug(`Updated setting in sharedStoreage: ${this.lookupKeys.repaintExistingRides}: ${toggle}`)
+            this.setRepaintExistingRides(toggle);
+        })
+    }
+
 }
 
 export class FeatureController
@@ -335,53 +395,30 @@ export class FeatureController
         this.settingsController = new SettingsController
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    private saveFeatures(controller: BaseController<any>)
-    {
-        const valToSave = controller.getValuesToSave()
-        context.getParkStorage().set(`${PluginNamespace}.${controller.namespaceKey}`,valToSave)
-        debug(`${controller.constructor.name} saved.`)
-    }
-
     save()
     {
-        debug(`<FeatureController>>onSave>\n\t`)
-        this.saveFeatures(this.themeController)
-        this.saveFeatures(this.rideController)
-        this.saveFeatures(this.modeController)
-        this.saveFeatures(this.stationController)
-        this.saveFeatures(this.groupingController)
+        this.themeController.saveFeatures()
+        this.rideController.saveFeatures()
+        this.modeController.saveFeatures()
+        this.stationController.saveFeatures()
+        this.groupingController.saveFeatures()
     }
 
     load()
     {
-        this.loadValuesFromStorage(this.themeController);
-        debug(`Theme loaded.`)
-        this.loadValuesFromStorage(this.groupingController);
-        debug(`Grouping Loaded.`)
-        this.loadValuesFromStorage(this.rideController);
-        debug(`Ride Loaded.`)
-        this.loadValuesFromStorage(this.modeController);
-        debug(`Mode Loaded.`)
-        this.loadValuesFromStorage(this.settingsController);
-        debug(`Station Loaded.`)
-        debug(`Loading Complete.`)
-    }
-
-    private loadValuesFromStorage = <T extends BaseController<unknown>>(controller: T) =>
-    {
-        debug(`<loadValuesFromStorage> \tLoading ${controller.constructor.name}.`)
-        const loadedController = context.getParkStorage()
-            .get((`RidePainter.${controller.namespaceKey}`)) as {[keys:string]:any}[];
-        if (!loadedController) return
-        controller.applyValuesFromSave(loadedController)
-        controller.debug()
+        this.themeController.loadValuesFromStorage()
+        this.groupingController.loadValuesFromStorage()
+        this.rideController.loadValuesFromStorage()
+        this.rideController.loadValuesFromStorage()
+        this.modeController.loadValuesFromStorage()
+        this.settingsController.loadValuesFromStorage()
+        debug(`Theme, Grouping, Ride, Mode, and Setting Loaded. Loading Complete.`)
     }
 
     // eslint-disable-next-line class-methods-use-this
     debug()
     {
-        debug(`<FeatureController.debug>`);
         // todo implement something more here
+        debug(`FeatureController debug: //nothing here! implement something`)
     }
 }
