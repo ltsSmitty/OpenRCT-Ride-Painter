@@ -70,7 +70,6 @@ export class BaseController<T>
             .get((`RidePainter.${this.namespaceKey}`)) as {[keys:string]:any}[];
         if (!loadedController) return
         this.applyValuesFromSave(loadedController)
-        this.debug()
     }
 
     private applyValuesFromSave(loadedVals: {[keys:string]:any}[])
@@ -84,10 +83,10 @@ export class BaseController<T>
                 debug(`<applyValuesFromSave> \n Loaded Prop: ${JSON.stringify(prop)}`)
                 Object.keys(prop).forEach(key =>
                     {
-                        debug(`this.controllerKeys[${key}].get(): ${JSON.stringify(this.controllerKeys[key].get())}`)
-                        debug(`changing value to ${prop[key]}`)
+                        // debug(`this.controllerKeys[${key}].get(): ${JSON.stringify(this.controllerKeys[key].get())}`)
+                        // debug(`changing value to ${JSON.stringify(prop[key])}`)
                         this.controllerKeys[key].set(prop[key])
-                        debug(`new value: ${this.controllerKeys[key].get()}`)
+                        // debug(`new value: ${JSON.stringify(this.controllerKeys[key].get())}`)
                     })
                 this.controllerKeys[prop[0]] = store<unknown>(loadedVals[prop[0]])
             })
@@ -163,7 +162,7 @@ export class ModeController extends BaseController<Mode>
 
 export class RideController extends BaseController<Ride>
 {
-    selectedRides: Store<Ride[] | null>;
+    selectedRides: Store<Ride[]>;
     selectedText: Store<string>;
     paintedRides: Store<Ride[] | null>;
     allRideTypes!: Store<RideType[]>
@@ -176,7 +175,7 @@ export class RideController extends BaseController<Ride>
         this.allRideTypes = store<RideType[]>([]);
         this.updateAllRideTypes()
         this.selected = store<Ride|null>(null);
-        this.selectedRides = store<Ride[] | null>([]);
+        this.selectedRides = store<Ride[]>([]);
         this.paintedRides = store<Ride[] | null>([]);
         this.selectedText = store<string>("");
 
@@ -272,7 +271,6 @@ export class SettingsController extends BaseController<string>
             repaintExistingRides: `${sharedStorageNamespace}.repaintExistingRides`
         }
         this.loadValuesFromStorage()
-        this.subToSettingsChange()
     }
 
     setDefaults()
@@ -287,8 +285,6 @@ export class SettingsController extends BaseController<string>
         this.automaticPaintFrequency = store<number>(this.getAutomaticPaintFrequency())
         this.paintBrantNewRides = store<boolean>(this.getPaintBrandNewRides())
         this.repaintExistingRides = store<boolean>(this.getRepaintExistingRides())
-
-        this.debug()
     }
     /**
      * Repaints selected rides every time period
@@ -354,11 +350,15 @@ export class SettingsController extends BaseController<string>
         )
     }
 
+    /**
+     * Subscribe to settings UI changes to update context.sharedStorage values
+     */
     subToSettingsChange()
     {
         debug(`Subscribing to settings changes.`)
         this.automaticPaintFrequency.subscribe((freq) =>
         {
+            // eslint-disable-next-line max-len
             debug(`Updated setting in sharedStoreage: ${this.lookupKeys.automaticPaintFrequency}: ${freq}`)
             this.setAutomaticPaintFrequency(freq)
         });
@@ -374,6 +374,43 @@ export class SettingsController extends BaseController<string>
         })
     }
 
+
+  /**
+   * Design to be run in daily. Checks automaticPaintFrquency vs what day it is.
+   * Returns true if rides should be repainted today
+   */
+     shouldAutomaticallyPaintToday(): boolean
+    {
+    // PAINT RIDES BASED ON AUTOMATIC PAINT FREQUENCY
+    //  values: ["never", "daily", "weekly", "monthly", "yearly"],
+    const paintFrequency = this.getAutomaticPaintFrequency();
+    // if set to never, return
+    if (paintFrequency===0) return false;
+
+    // if set to annual, check that month = 0 and day = 1 before painting
+    if (paintFrequency === 4 && date.month === 0 && date.day === 1)
+    {
+        // ColourChange.colourRides(featureController);
+        return true;
+    }
+    // if set to monthly, check that day = 1 before painting
+    if (paintFrequency === 3 && date.day === 1)
+{
+        // ColourChange.colourRides(featureController);
+        return true;
+    }
+    // if set to weekly, check if the day remainder is 1 (will change on the 1, 8, 15, 22, 29 of the month)
+    if (paintFrequency === 2 && date.day%7===1)
+{
+        // ColourChange.colourRides(featureController);
+        return true;
+    }
+    // if set to daily
+    if (paintFrequency === 1) return true
+    // ColourChange.colourRides(featureController)
+    return false
+}
+
 }
 
 export class FeatureController
@@ -382,8 +419,8 @@ export class FeatureController
     themeController: ThemeController;
     rideController: RideController;
     modeController: ModeController;
-    stationController: StationController
-    settingsController: SettingsController
+    stationController: StationController;
+    settingsController: SettingsController;
 
     constructor()
     {
@@ -409,10 +446,10 @@ export class FeatureController
         this.themeController.loadValuesFromStorage()
         this.groupingController.loadValuesFromStorage()
         this.rideController.loadValuesFromStorage()
-        this.rideController.loadValuesFromStorage()
+        this.stationController.loadValuesFromStorage()
         this.modeController.loadValuesFromStorage()
         this.settingsController.loadValuesFromStorage()
-        debug(`Theme, Grouping, Ride, Mode, and Setting Loaded. Loading Complete.`)
+        debug(`Theme, Grouping, Ride, Mode, Station, and Setting Loaded. Loading Complete.`)
     }
 
     // eslint-disable-next-line class-methods-use-this

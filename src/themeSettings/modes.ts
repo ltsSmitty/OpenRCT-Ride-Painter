@@ -93,7 +93,6 @@ const customPatternMode: Mode = {
 {
                 ret[i]=(options.customColours[i]>=0 ? options.customColours[i] : baseColourArray[i])
             }
-            debug(`custom colour to paint: ${ret}`)
 			return ret as RideColours;
 		}
 		return null;

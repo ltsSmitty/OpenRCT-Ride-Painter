@@ -1,4 +1,4 @@
-import { horizontal, box, vertical, label, dropdownSpinner, toggle, compute } from "openrct2-flexui"
+import { horizontal, box, vertical, label, dropdownSpinner, toggle, compute, checkbox } from "openrct2-flexui"
 import { SettingsController } from '../controllers/Controllers';
 
 const settingsSectionElements = (sc: SettingsController) =>
@@ -27,17 +27,17 @@ const settingsSectionElements = (sc: SettingsController) =>
                                     })
                                 ]
                             }),
-                            toggle({
+                            checkbox({
                                 height: 20,
-                                isPressed: sc.repaintExistingRides,
+                                isChecked: sc.repaintExistingRides,
                                 text: "{BLACK}Allow repainting of already painted rides",
                                 onChange: (isPressed:boolean) => sc.repaintExistingRides.set(isPressed),
 
                             }),
-                            toggle({
+                            checkbox({
                                 height: 20,
                                 text: "{BLACK}Paint newly built rides automatically",
-                                isPressed: sc.paintBrantNewRides,
+                                isChecked: sc.paintBrantNewRides,
                                 onChange: (isPressed:boolean) => sc.paintBrantNewRides.set(isPressed),
                             }),
                         ]

@@ -45,15 +45,15 @@ const modeSectionElements = (mc: ModeController) =>
             colour: compute(mc.selectedCustomColours, colours => colours[partNumber]),
             disabled: compute(mc.selectedColoursEnabled, enabledColours => !enabledColours[partNumber]),
             visibility: compute(mc.selected, mode =>
-    {
+            {
                 if (mode?.name==='Custom pattern') return "visible";
                 return "none"
                 }
             ),
             onChange: (colourChosen:Colour) =>
-    {
+            {
                 const currentSelectedColours = mc.selectedCustomColours.get();
-                currentSelectedColours[0]=colourChosen;
+                currentSelectedColours[partNumber]=colourChosen;
                 mc.selectedCustomColours.set(currentSelectedColours)
             }
         })

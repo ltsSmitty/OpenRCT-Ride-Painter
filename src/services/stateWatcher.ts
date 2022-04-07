@@ -2,7 +2,7 @@
 /* eslint-disable no-use-before-define */
 import { debug } from "../helpers/logger";
 import { WindowWatcher } from "../window";
-import { FeatureController, RideController, SettingsController } from '../controllers/Controllers';
+import { FeatureController } from '../controllers/Controllers';
 import ColourChange from "../themeSettings/ColourChange";
 
 /**
@@ -14,19 +14,22 @@ import ColourChange from "../themeSettings/ColourChange";
      private onUpdateHook: IDisposable;
      private isDisposed: boolean = false;
      private onSaveHook: IDisposable;
+     private dayHook;
      featureController: FeatureController;
 
      constructor(fc: FeatureController)
      {
-        this.featureController = fc;
         debug("(watcher) Watcher initialized");
+        this.featureController = fc;
         this.onActionHook = context.subscribe("action.execute", e => this.onActionExecuted(e));
         this.onUpdateHook = context.subscribe("interval.tick", () => this.onGameTickUpdate());
         this.onSaveHook = context.subscribe("map.save",() => this.onSave())
-         // intentionally param-reassign WindowWatcher and therefore window functions
-         /* eslint-disable no-param-reassign */
-         WindowWatcher.onWindowUpdate = ():void => this.onWindowUpdate();
-         WindowWatcher.onWindowOpen = ():void => this.onWindowOpen();
+
+            // intentionally param-reassign WindowWatcher and therefore window functions
+        /* eslint-disable no-param-reassign */
+        WindowWatcher.onWindowUpdate = ():void => this.onWindowUpdate();
+        WindowWatcher.onWindowOpen = ():void => this.onWindowOpen();
+        this.dayHook = context.subscribe('interval.day', () => this.onDayHook())
      }
 
 
@@ -62,7 +65,6 @@ import ColourChange from "../themeSettings/ColourChange";
             // 2. check if paintBrandNewRides is active and paint the new ride if so
             {
                 this.featureController.rideController.updateRideModel()
-                this.featureController.settingsController.debug()
                 const newRideID = (event.result as {ride:number}).ride // but might be undefined
                 // need to guard in case rideID === 0
                 if (typeof newRideID !== 'undefined' &&
@@ -109,8 +111,16 @@ import ColourChange from "../themeSettings/ColourChange";
      {
         if (this.isDisposed) return;
          debug(`window opened`);
-         // moved this line into the settings controller itself. see if this works better.
-        //  this.featureController.settingsController.subToSettingsChange()
+         this.featureController.settingsController.subToSettingsChange()
+     }
+
+     private onDayHook()
+     {
+         if (this.featureController.settingsController.shouldAutomaticallyPaintToday())
+         {
+            debug(`Repainting all rides today`)
+            ColourChange.colourRides(this.featureController, this.featureController.rideController.all.get())
+         }
      }
 
  }

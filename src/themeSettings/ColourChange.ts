@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 /// <reference path="../../lib/openrct2.d.ts" />
 import { combineCustomColourArrays } from "../Components/modeSection";
 import { FeatureController, RideController, StationController } from '../controllers/Controllers';
@@ -69,7 +70,9 @@ export default class ColourChange
 
     public static colourRides = (fc: FeatureController, ridesToPaint?:Ride[],) =>
     {
-        const {rideController, themeController, groupingController, modeController, settingsController} = fc
+        const {
+            rideController, themeController, groupingController,
+            modeController, settingsController, stationController} = fc
         const currentTheme = themeController.selected.get();
         const currentMode = modeController.selected.get();
         const currentGrouping = groupingController.selected.get();
@@ -77,19 +80,26 @@ export default class ColourChange
         // guard to make sure there's a theme, mode and grouping.
         if (!(currentTheme && currentMode && currentGrouping)) return;
 
-        // check if all rides should be painted, or only unpainted rides
-        const initialRidesToTheme = (ridesToPaint) || rideController.selectedRides.get() || []
-        let finalRidesToTheme;
-        if (settingsController.getRepaintExistingRides()===false)
+        /**
+         * Filter given rides based on repaintedExistingRides value
+         * @returns rides to be painted
+         */
+        const filterRidesToTheme = (initialRidesToTheme = (ridesToPaint) || rideController.selectedRides.get() || []) =>
         {
-            finalRidesToTheme = initialRidesToTheme?.filter(ride => (
-                rideController.paintedRides.get()?.indexOf(ride)===-1)
-                )
+            let finalRidesToTheme: Ride[];
+            if (settingsController.getRepaintExistingRides()===false)
+            {
+                finalRidesToTheme = initialRidesToTheme?.filter(ride => (
+                        rideController.paintedRides.get()?.indexOf(ride)===-1))
+            }
+            else finalRidesToTheme = initialRidesToTheme
+            return finalRidesToTheme
         }
-        else finalRidesToTheme = initialRidesToTheme
+
+        const ridesToTheme = filterRidesToTheme(ridesToPaint)
 
         // group rides together so they're painted identically
-        const groupedRides = currentGrouping.applyGrouping(finalRidesToTheme);
+        const groupedRides = currentGrouping.applyGrouping(ridesToTheme);
 
         // for each group of rides
         Object.keys(groupedRides).forEach((group, i) =>
@@ -111,11 +121,18 @@ export default class ColourChange
 
                 // Actually do the painting!
                 this.setRideColour(ride, ...colours);
-                debug(`about to mark ride as being painted`)
                 this.markRideAsHavingBeenPainted(ride, rideController)
+
+                // if station is set to update automatically, do it
+                debug(`should this station get painted? ${stationController.automaticallyApply.get()}`)
+                if (stationController.automaticallyApply.get())
+                {
+                    this.setRideStationStyle(ride,stationController.selectedIndex.get())
+                }
             })
 
         });
+
     }
 
     /**
@@ -125,27 +142,26 @@ export default class ColourChange
     public static markRideAsHavingBeenPainted = (ride: Ride, rc:RideController) =>
     {
         const previouslyPaintedRides = rc.paintedRides.get() || []
-        debug(`previously painted rides: ${previouslyPaintedRides.map(r=>r.name)}`)
         // if the ride isn't already on the list
         if (previouslyPaintedRides.indexOf(ride)===-1)
         {
             previouslyPaintedRides.push(ride)
-            debug(`about to set to previouslyPaintedRides: ${previouslyPaintedRides.map(r=>r.name)}`)
             rc.paintedRides.set(previouslyPaintedRides);
-            debug(`get previouslyPaintedRides: ${rc.paintedRides.get()?.map(r=>r.name)}`)
         }
     }
 
-
     public static changeRideStationStyle = (rides: Ride[], sc:StationController) =>
-{
+    {
         const newStationStyle = sc.selected.get() || sc.all.get()[0];
         rides.forEach(ride=>
-{
+        {
             ColourChange.setRideStationStyle(ride,newStationStyle.index)
         })
     }
   // end of class
 }
+
+
+
 
 
