@@ -86,9 +86,6 @@ export const themeWindow = (
                     onClick: () => ColourChange.colourRides(featureController),
                     tooltip: "Nothing changing? Make sure to enable 'Allow repainting of already painted rides'"
                 }),
-                // listElement(featureController)
-                // ...rideController.all.get().map(ride=> label({text: ride.name}))
-                // generateRidePaintLayout(featureController.rideController.selectedRides).get()
                 rpc.layoutTest(rideController),
 
 
