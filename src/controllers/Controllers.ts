@@ -8,6 +8,7 @@ import { Mode, modes } from '../themeSettings/modes';
 import { RideType } from '../helpers/RideType';
 import { sharedStorageNamespace } from '../helpers/environment';
 import PluginNamespace from '../helpers/config';
+import
 
 export class BaseController<T>
 {
