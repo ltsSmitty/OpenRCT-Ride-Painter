@@ -12,7 +12,8 @@ import rideSelectionElements from './Components/rideSelectionSection';
 import settingsSectionElements from './Components/settingsSection';
 import stationStyleElements from './Components/stationStyleSection';
 import {FeatureController} from './controllers/Controllers';
-import listElement from './Components/listSection';
+// import listElement from './Components/listSection';
+import RidePaintController from './Components/RideRepaintSection';
 
 
 
@@ -34,6 +35,7 @@ export const themeWindow = (
 {
     const {rideController, themeController, groupingController,
         modeController, stationController, settingsController} = featureController
+        const rpc = new RidePaintController(rideController, 5, 2);
 
     return window({
         title: 'Ride Painter',
@@ -84,7 +86,13 @@ export const themeWindow = (
                     onClick: () => ColourChange.colourRides(featureController),
                     tooltip: "Nothing changing? Make sure to enable 'Allow repainting of already painted rides'"
                 }),
-                listElement(featureController)
+                // listElement(featureController)
+                // ...rideController.all.get().map(ride=> label({text: ride.name}))
+                // generateRidePaintLayout(featureController.rideController.selectedRides).get()
+                rpc.layoutTest(rideController),
+
+
+
             ]
         })
 }

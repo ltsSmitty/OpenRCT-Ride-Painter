@@ -45,7 +45,7 @@ export default class ColourChange
     /**
      * Set a ride's colour. To not change a colour for a param, input -1 for the param.
      */
-    private static setRideColour = (
+    static setRideColour = (
         ride: Ride,
         mainColour:number = -1,
         additionalColour: number = -1,
@@ -124,7 +124,6 @@ export default class ColourChange
                 this.markRideAsHavingBeenPainted(ride, rideController)
 
                 // if station is set to update automatically, do it
-                debug(`should this station get painted? ${stationController.automaticallyApply.get()}`)
                 if (stationController.automaticallyApply.get())
                 {
                     this.setRideStationStyle(ride,stationController.selectedIndex.get())
