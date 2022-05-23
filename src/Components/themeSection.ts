@@ -1,5 +1,5 @@
 import { box, vertical, dropdown, compute, horizontal, colourPicker, Colour } from "openrct2-flexui";
-import {ThemeController} from "../controllers/Controllers";
+import {ThemeController} from "../controllers/BaseController";
 
 const themeSectionElements = (themeController:ThemeController) =>
 {

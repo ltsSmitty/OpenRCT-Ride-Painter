@@ -4,7 +4,7 @@
 import { horizontal, vertical, label, colourPicker, Colour, box, Store, compute, store } from "openrct2-flexui";
 import ColourChange from "../themeSettings/ColourChange";
 import { debug } from "../helpers/logger";
-import { RideController } from '../controllers/Controllers';
+import { RideController } from '../controllers/BaseController';
 
 // const rows: number;
 // const columns: number;
@@ -39,7 +39,7 @@ class RidePaintController
     computeVisibility(index: number)
     {
         return compute(this.selectedRides, rides=>
-            rides[index] ? "visible" : "none")
+            rides[index] ? "visible" : "hidden")
     }
 
     generateNameElement(index: number)

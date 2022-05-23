@@ -7,19 +7,28 @@ import { Theme, RideColours } from './themes';
 
 const getRandomColour = (colours: number[]) => colours[Math.floor(Math.random() * colours.length)];
 
+interface ThemeApplication {
+
+}
+
 export interface Mode {
 	readonly name: string;
 	description: string;
-	applyTheme(theme: Theme, options: { [key: string]: any }): RideColours | null;
+	applyTheme(
+        theme: Theme,
+        options?: {
+            [key:string]: any
+            }): RideColours | null;
 }
+
 
 const monoChromaticMode: Mode = {
 	name: 'Monochromatic ride & track',
 	description: '{BLACK}Paint the ride & cars in one solid colour.',
-	applyTheme(theme: Theme)
-{
+	applyTheme(theme: Theme, )
+    {
 		if (theme.colours.themeColours)
-{
+    {
 			const c = getRandomColour(theme.colours.themeColours);
 			return [c, c, c, c, c, c] as RideColours;
 		}
@@ -66,7 +75,7 @@ const customPatternMode: Mode = {
         customColours:Colour[],
         twoTone?: boolean
     })
-{
+    {
 		if (theme.colours.themeColours)
 {
             // choose a random base colour from the theme
@@ -102,10 +111,13 @@ const customPatternMode: Mode = {
 const buildOrderMode: Mode = {
 	name: 'Build order',
 	description: `{BLACK}Paint rides in the order they were built. Goes especially well with the 'Rainbow' theme and selecting a ride type you have multiple of.`,
-	applyTheme(theme: Theme, { index })
-{
+	applyTheme(
+        theme: Theme,
+        options: {index: number })
+    {
+        const {index} = options;
 		if (theme.colours.partColours)
-{
+        {
 			const ret = [
 				theme.colours.partColours.trackColourMain[index % theme.colours.partColours.trackColourMain.length],
 				theme.colours.partColours.trackColourAdditional[
@@ -131,11 +143,29 @@ const buildOrderMode: Mode = {
 	},
 };
 
+const shuffleMode: Mode = {
+    name: "Shuffle",
+    description: `{BLACK}Shuffle and choose a random of the other painting modes.`,
+    applyTheme(
+        theme: Theme,
+        options: {
+            index?: number,
+            customColours?: Colour[]
+        })
+    {
+        const r = Math.floor(context.getRandom(0,4));
+        // eslint-disable-next-line no-use-before-define
+        const chosenMode = getMode(r);
+        return chosenMode.applyTheme(theme,options)
+    }
+}
+
 export const modes: Mode[] = [
 	monoChromaticMode,
 	randomMode,
 	buildOrderMode,
 	customPatternMode,
+    shuffleMode
 ];
 
 export const getMode = (selected: number) => modes[selected]

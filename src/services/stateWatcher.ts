@@ -2,7 +2,7 @@
 /* eslint-disable no-use-before-define */
 import { debug } from "../helpers/logger";
 import { WindowWatcher } from "../window";
-import { FeatureController } from '../controllers/Controllers';
+import { FeatureController } from '../controllers/BaseController';
 import ColourChange from "../themeSettings/ColourChange";
 
 /**
@@ -25,7 +25,7 @@ import ColourChange from "../themeSettings/ColourChange";
         this.onUpdateHook = context.subscribe("interval.tick", () => this.onGameTickUpdate());
         this.onSaveHook = context.subscribe("map.save",() => this.onSave())
 
-            // intentionally param-reassign WindowWatcher and therefore window functions
+        // intentionally param-reassign WindowWatcher and therefore window functions
         /* eslint-disable no-param-reassign */
         WindowWatcher.onWindowUpdate = ():void => this.onWindowUpdate();
         WindowWatcher.onWindowOpen = ():void => this.onWindowOpen();
@@ -89,9 +89,9 @@ import ColourChange from "../themeSettings/ColourChange";
       */
      private onGameTickUpdate(): void
      {
-        // eslint-disable-next-line no-useless-return
+
         if (this.isDisposed) return
-        // debug(`number of rides: ${this.featureController.rideController.all.get().length}`)
+
         // todo is this needed?
      }
 

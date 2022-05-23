@@ -1,7 +1,7 @@
-import { RideController } from './../controllers/Controllers';
+import { RideController } from '../controllers/BaseController';
 import { horizontal, colourPicker, compute, listview, Colour, Store,
     toggle, box, vertical, dropdown, label } from "openrct2-flexui";
-import { FeatureController } from "../controllers/Controllers";
+import { FeatureController } from "../controllers/BaseController";
 import { debug } from "../helpers/logger";
 
 const getRideColours = (ride: Ride) =>

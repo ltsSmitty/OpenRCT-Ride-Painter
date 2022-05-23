@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 /// <reference path="../../lib/openrct2.d.ts" />
 import { combineCustomColourArrays } from "../Components/modeSection";
-import { FeatureController, RideController, StationController } from '../controllers/Controllers';
+import { FeatureController, RideController, StationController } from '../controllers/BaseController';
 import { debug } from "../helpers/logger";
 
 export default class ColourChange
@@ -105,10 +105,12 @@ export default class ColourChange
         Object.keys(groupedRides).forEach((group, i) =>
         {
             // get the 6 ride colours based on the theme and mode
-            const colours = currentMode.applyTheme(currentTheme,{
-                customColours: combineCustomColourArrays(modeController),
-                index: i
-            });
+            const colours = currentMode.applyTheme(
+                currentTheme,
+                {
+                    customColours: combineCustomColourArrays(modeController),
+                    index: i
+                });
             if (!colours) return;
 
             // apply the colour to each ride

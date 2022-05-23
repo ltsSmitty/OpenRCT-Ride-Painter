@@ -1,5 +1,6 @@
 import { horizontal, colourPicker, compute, Colour, toggle, box, vertical, dropdown, label } from "openrct2-flexui";
-import { ModeController } from "../controllers/Controllers";
+import { ModeController } from "../controllers/BaseController";
+import { debug } from "../helpers/logger";
 
 // Mode selection is quite straightforward except for Custom Pattern mode
 // Much of this code is specifically for helping Custom Pattern mode
@@ -47,9 +48,8 @@ const modeSectionElements = (mc: ModeController) =>
             visibility: compute(mc.selected, mode =>
             {
                 if (mode?.name==='Custom pattern') return "visible";
-                return "none"
-                }
-            ),
+                return "hidden"
+            }),
             onChange: (colourChosen:Colour) =>
             {
                 const currentSelectedColours = mc.selectedCustomColours.get();
@@ -87,7 +87,7 @@ const modeSectionElements = (mc: ModeController) =>
                 visibility: compute(mc.selected, mode =>
                 {
                     if (mode?.name==='Custom pattern') return "visible";
-                    return "none"
+                    return "hidden"
                     }
                 ),
             }),
@@ -98,7 +98,7 @@ const modeSectionElements = (mc: ModeController) =>
                 visibility: compute(mc.selected, mode =>
                 {
                     if (mode?.name==='Custom pattern') return "visible";
-                    return "none"
+                    return "hidden"
                     }
                 ),
             }),
@@ -109,7 +109,7 @@ const modeSectionElements = (mc: ModeController) =>
                 visibility: compute(mc.selected, mode =>
                 {
                     if (mode?.name==='Custom pattern') return "visible";
-                    return "none"
+                    return "hidden"
                     }
                 ),
             }),
@@ -120,7 +120,7 @@ const modeSectionElements = (mc: ModeController) =>
                 visibility: compute(mc.selected, mode =>
     {
                     if (mode?.name==='Custom pattern') return "visible";
-                    return "none"
+                    return "hidden"
                     }
                 ),
             }),
@@ -131,7 +131,7 @@ const modeSectionElements = (mc: ModeController) =>
                 visibility: compute(mc.selected, mode =>
                 {
                     if (mode?.name==='Custom pattern') return "visible";
-                    return "none"
+                    return "hidden"
                     }
                 ),
             }),
@@ -142,7 +142,7 @@ const modeSectionElements = (mc: ModeController) =>
                 visibility: compute(mc.selected, mode =>
                 {
                     if (mode?.name==='Custom pattern') return "visible";
-                    return "none"
+                    return "hidden"
                     }
                 ),
             }),
@@ -152,7 +152,7 @@ const modeSectionElements = (mc: ModeController) =>
     const layout =
     box({
         text: '2. Pick a painting mode',
-        height: 100,
+        // height: 100,
         // padding:{bottom:5},
         content:
             vertical({

@@ -1,6 +1,6 @@
 import { box, button, horizontal, dropdown, compute, toggle } from "openrct2-flexui";
 import ColourChange from "../themeSettings/ColourChange";
-import { StationController, RideController } from '../controllers/Controllers';
+import { StationController, RideController } from '../controllers/BaseController';
 
 const stationStyleElements = (sc: StationController, rc: RideController) =>
 {

@@ -11,7 +11,7 @@ import groupingSectionElements from './Components/groupingSection';
 import rideSelectionElements from './Components/rideSelectionSection';
 import settingsSectionElements from './Components/settingsSection';
 import stationStyleElements from './Components/stationStyleSection';
-import {FeatureController} from './controllers/Controllers';
+import {FeatureController} from './controllers/BaseController';
 // import listElement from './Components/listSection';
 import RidePaintController from './Components/RideRepaintSection';
 
@@ -30,11 +30,11 @@ export class WindowWatcher
     static onWindowClose?: () => void
 }
 
-export const themeWindow = (
-    featureController: FeatureController) =>
+export const themeWindow = ( featureController: FeatureController) =>
 {
     const {rideController, themeController, groupingController,
         modeController, stationController, settingsController} = featureController
+
         const rpc = new RidePaintController(rideController, 5, 2);
 
     return window({
@@ -66,17 +66,17 @@ export const themeWindow = (
             }
         },
         content: [
-                // // TOP ROW: THEME PICKER
-                // themeSectionElements(themeController),
-                // // SECOND ROW: MODE PICKER
-                // modeSectionElements(modeController),
-                // // THIRD ROW: GROUP BY
-                // groupingSectionElements(groupingController),
-                // // FOURTH ROW: RIDE/TYPE SELECTION
+                // TOP ROW: THEME PICKER
+                themeSectionElements(themeController),
+                // SECOND ROW: MODE PICKER
+                modeSectionElements(modeController),
+                // THIRD ROW: GROUP BY
+                groupingSectionElements(groupingController),
+                // FOURTH ROW: RIDE/TYPE SELECTION
                 rideSelectionElements(rideController),
-                // // SETTINGS
-                // settingsSectionElements(settingsController),
-                // stationStyleElements(stationController, rideController),
+                // SETTINGS
+                settingsSectionElements(settingsController),
+                stationStyleElements(stationController, rideController),
                 button({
                     height: 30,
                     padding: [5,"10%"],
@@ -86,7 +86,7 @@ export const themeWindow = (
                     onClick: () => ColourChange.colourRides(featureController),
                     tooltip: "Nothing changing? Make sure to enable 'Allow repainting of already painted rides'"
                 }),
-                rpc.layoutTest(rideController),
+                // rpc.layoutTest(rideController),
 
 
 
