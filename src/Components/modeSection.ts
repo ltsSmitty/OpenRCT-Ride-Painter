@@ -1,5 +1,5 @@
 import { horizontal, colourPicker, compute, Colour, toggle, box, vertical, dropdown, label } from "openrct2-flexui";
-import { ModeController } from "../controllers/BaseController";
+import ModeController from "../controllers/ModeController";
 import { debug } from "../helpers/logger";
 
 // Mode selection is quite straightforward except for Custom Pattern mode

@@ -1,4 +1,4 @@
-import { FeatureController } from './controllers/BaseController';
+import FeatureController from "./controllers/FeatureController";
 import { themeWindow } from "./window";
 import { debug } from "./helpers/logger";
 import StateWatcher from "./services/stateWatcher";

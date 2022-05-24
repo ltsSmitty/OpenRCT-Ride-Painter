@@ -1,7 +1,7 @@
-import { RideController } from '../controllers/BaseController';
+import RideController from "../controllers/RideController";
 import { horizontal, colourPicker, compute, listview, Colour, Store,
     toggle, box, vertical, dropdown, label } from "openrct2-flexui";
-import { FeatureController } from "../controllers/BaseController";
+import FeatureController from "../controllers/FeatureController";
 import { debug } from "../helpers/logger";
 
 const getRideColours = (ride: Ride) =>
@@ -29,7 +29,7 @@ const rideRowElement = (ride: Store<Ride>) =>
             // 1. label
             label({
                 text: rideColours.name
-            })
+            }),
             // 2,3,4,5,6,7 - colour pickers
             displayRidePartColourPicker(ride,rideColours.main),
             displayRidePartColourPicker(ride,rideColours.additional),

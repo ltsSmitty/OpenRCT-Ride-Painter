@@ -1,5 +1,5 @@
 import { horizontal, box, vertical, label, dropdownSpinner, toggle, compute, checkbox, Colour } from "openrct2-flexui"
-import { SettingsController } from '../controllers/BaseController';
+import SettingsController from "../controllers/SettingsController"
 
 const settingsSectionElements = (sc: SettingsController) =>
 {

@@ -78,10 +78,7 @@ export default class BaseController<T>
                 debug(`<applyValuesFromSave> \n Loaded Prop: ${JSON.stringify(prop)}`)
                 Object.keys(prop).forEach(key =>
                     {
-                        // debug(`this.controllerKeys[${key}].get(): ${JSON.stringify(this.controllerKeys[key].get())}`)
-                        // debug(`changing value to ${JSON.stringify(prop[key])}`)
                         this.controllerKeys[key].set(prop[key])
-                        // debug(`new value: ${JSON.stringify(this.controllerKeys[key].get())}`)
                     })
                 this.controllerKeys[prop[0]] = store<unknown>(loadedVals[prop[0]])
             })

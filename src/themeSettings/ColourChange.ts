@@ -1,7 +1,9 @@
 /* eslint-disable no-use-before-define */
 /// <reference path="../../lib/openrct2.d.ts" />
 import { combineCustomColourArrays } from "../Components/modeSection";
-import { FeatureController, RideController, StationController } from '../controllers/BaseController';
+import FeatureController from "../controllers/FeatureController";
+import RideController from "../controllers/RideController";
+import StationController from "../controllers/StationController";
 import { debug } from "../helpers/logger";
 
 export default class ColourChange

@@ -11,8 +11,7 @@ import groupingSectionElements from './Components/groupingSection';
 import rideSelectionElements from './Components/rideSelectionSection';
 import settingsSectionElements from './Components/settingsSection';
 import stationStyleElements from './Components/stationStyleSection';
-import {FeatureController} from './controllers/BaseController';
-// import listElement from './Components/listSection';
+import FeatureController from './controllers/FeatureController';
 import RidePaintController from './Components/RideRepaintSection';
 
 
@@ -39,7 +38,7 @@ export const themeWindow = ( featureController: FeatureController) =>
 
     return window({
         title: 'Ride Painter',
-        width: 400, maxWidth: 700, minWidth: 0,
+        width: 700, maxWidth: 700, minWidth: 500,
         height: 600, maxHeight: 600, minHeight: 600,
         spacing: 10,
         padding: 8,
@@ -66,27 +65,51 @@ export const themeWindow = ( featureController: FeatureController) =>
             }
         },
         content: [
-                // TOP ROW: THEME PICKER
-                themeSectionElements(themeController),
-                // SECOND ROW: MODE PICKER
-                modeSectionElements(modeController),
-                // THIRD ROW: GROUP BY
-                groupingSectionElements(groupingController),
-                // FOURTH ROW: RIDE/TYPE SELECTION
-                rideSelectionElements(rideController),
-                // SETTINGS
-                settingsSectionElements(settingsController),
-                stationStyleElements(stationController, rideController),
-                button({
-                    height: 30,
-                    padding: [5,"10%"],
-                    text: '6. Paint selected rides',
-                    disabled: compute(rideController.selectedRides, (rides) =>
-                        (rides?.length||-1)<=0),
-                    onClick: () => ColourChange.colourRides(featureController),
-                    tooltip: "Nothing changing? Make sure to enable 'Allow repainting of already painted rides'"
-                }),
-                // rpc.layoutTest(rideController),
+            // split into two columns
+            horizontal({
+                content:[
+                    // left column
+                    vertical({
+                        width: 400,
+                        content:[
+
+                             // TOP ROW: THEME PICKER
+                            themeSectionElements(themeController),
+                            // SECOND ROW: MODE PICKER
+                            modeSectionElements(modeController),
+                            // THIRD ROW: GROUP BY
+                            groupingSectionElements(groupingController),
+                            // FOURTH ROW: RIDE/TYPE SELECTION
+                            rideSelectionElements(rideController),
+                            // SETTINGS
+                            settingsSectionElements(settingsController),
+                            stationStyleElements(stationController, rideController),
+                            button({
+                                height: 30,
+                                padding: [5,"10%"],
+                                text: '6. Paint selected rides',
+                                disabled: compute(rideController.selectedRides, (rides) =>
+                                    (rides?.length||-1)<=0),
+                                onClick: () => ColourChange.colourRides(featureController),
+                                tooltip: `Nothing changing?
+                                    Make sure to enable 'Allow repainting of already painted rides'`
+                            }),
+                        ]
+                    }),
+                    // right column
+                    vertical({
+                        content:[
+                            label({
+                                text: "right column"
+                            })
+                        ]
+                    })
+                ]
+            })
+
+
+
+            // rpc.layoutTest(rideController),
 
 
 

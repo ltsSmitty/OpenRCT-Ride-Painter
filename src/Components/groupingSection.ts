@@ -1,5 +1,5 @@
 import { horizontal, box, vertical, dropdown, compute, label } from "openrct2-flexui";
-import { GroupingController } from '../controllers/BaseController';
+import GroupingController from "../controllers/GroupingController";
 
 const groupingSectionElements = (groupingController: GroupingController) =>
 {

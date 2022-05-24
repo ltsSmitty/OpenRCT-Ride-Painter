@@ -1,6 +1,6 @@
 import { vertical, box, dropdown, compute, label, horizontal, button } from "openrct2-flexui"
 import { RideType } from "../helpers/RideType"
-import { RideController } from "../controllers/BaseController";
+import RideController from "../controllers/RideController"
 
 const rideSelectionElements = (rc: RideController) =>
 {

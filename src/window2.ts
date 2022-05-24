@@ -2,7 +2,7 @@
 /* eslint-disable import/prefer-default-export */
 import { window, vertical, box, horizontal, toggle, label,
     compute, dropdown, button, colourPicker, Colour } from "openrct2-flexui"
-import { FeatureController } from "./controllers/BaseController"
+import FeatureController from "./controllers/FeatureController"
 import { debug } from "./helpers/logger"
 import { RideType } from "./helpers/RideType"
 import { WindowWatcher } from "./window"

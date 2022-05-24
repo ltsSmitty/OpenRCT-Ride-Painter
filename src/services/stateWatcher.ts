@@ -2,7 +2,7 @@
 /* eslint-disable no-use-before-define */
 import { debug } from "../helpers/logger";
 import { WindowWatcher } from "../window";
-import { FeatureController } from '../controllers/BaseController';
+import FeatureController from "../controllers/FeatureController";
 import ColourChange from "../themeSettings/ColourChange";
 
 /**

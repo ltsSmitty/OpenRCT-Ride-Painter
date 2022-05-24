@@ -4,7 +4,7 @@
 import { horizontal, vertical, label, colourPicker, Colour, box, Store, compute, store } from "openrct2-flexui";
 import ColourChange from "../themeSettings/ColourChange";
 import { debug } from "../helpers/logger";
-import { RideController } from '../controllers/BaseController';
+import RideController from "../controllers/RideController";
 
 // const rows: number;
 // const columns: number;
@@ -98,7 +98,7 @@ class RidePaintController
             label({text: compute(rc.all, rides =>
                 rides[k]?.name || "no ride")});
         }
-        // debug(`layout: ${JSON.stringify(rideLayout)}`)
+        debug(`layout: ${JSON.stringify(rideLayout)}`)
         return vertical({
             content: [...rideLayout]
         })
