@@ -16,7 +16,7 @@ const rideSelectionElements = (rc: RideController) =>
                         dropdown({
                             padding: {top:5},
                             disabled: compute(rc.all, rides=>(rides.length<=0)),
-                            selectedIndex: compute(rc.selectedIndex, index=> index),
+                            selectedIndex: compute(rc.selectedIndex, index => index),
                             items: compute(rc.allRideTypes, rideType => rideType.map(type =>
                                     // Display the ride type and the number of those rides
                                         `${RideType[type]} - ${rc.all.get()

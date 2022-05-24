@@ -12,7 +12,9 @@ export default class RideController extends BaseController<Ride>
 
     paintedRides: Store<Ride[] | null>;
 
-    allRideTypes!: Store<RideType[]>
+    allRideTypes!: Store<RideType[]>;
+
+    paintToggle: Store<boolean>;
 
     constructor()
     {
@@ -25,7 +27,7 @@ export default class RideController extends BaseController<Ride>
         this.selectedRides = store<Ride[]>([]);
         this.paintedRides = store<Ride[] | null>([]);
         this.selectedText = store<string>("");
-
+        this.paintToggle = store<boolean>(false);
     }
 
     /**

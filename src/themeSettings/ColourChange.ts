@@ -133,9 +133,12 @@ export default class ColourChange
                     this.setRideStationStyle(ride,stationController.selectedIndex.get())
                 }
             })
-
         });
 
+        // Flip the toggle on the RideController paint toggle to let the UI know that painting has happened
+        // this trigger is referenced in RideRepaintSection to cause the right column of the UI to update
+        rideController.paintToggle.set(!rideController.paintToggle.get());
+        debug(`paint toggle has changed to ${rideController.paintToggle.get()}`)
     }
 
     /**

@@ -1,28 +1,27 @@
 /* eslint-disable consistent-return */
 /* eslint-disable no-use-before-define */
-/* eslint-disable lines-between-class-members */
 import { horizontal, vertical, label, colourPicker, Colour, box, Store, compute, store } from "openrct2-flexui";
 import ColourChange from "../themeSettings/ColourChange";
 import { debug } from "../helpers/logger";
 import RideController from "../controllers/RideController";
 
-// const rows: number;
-// const columns: number;
-// const numRidesInView: number;
-// const currentPage: Store<number>;
-// const totalPages: Store<number>;
-// const visibleRides: Store<Ride[]>;
-// const selectedRides: Store<Ride[]>;
-
 class RidePaintController
 {
     rows: number;
+
     columns: number;
+
     numRidesInView: number;
+
     currentPage: Store<number>;
+
     totalPages: Store<number>;
+
     visibleRides: Store<Ride[]>;
+
     selectedRides: Store<Ride[]>;
+
+    paintToggle: Store<boolean>;
 
 
     constructor(rc: RideController, numRows: number = 5, numCols: number = 2)
@@ -34,6 +33,7 @@ class RidePaintController
         this.selectedRides = rc.selectedRides;
         this.totalPages = store<number>(1);
         this.visibleRides = store<Ride[]>([]);
+        this.paintToggle = rc.paintToggle;
     }
 
     computeVisibility(index: number)
@@ -56,9 +56,8 @@ class RidePaintController
     {
         const element = colourPicker({
             visibility: this.computeVisibility(index),
-            colour: compute(this.selectedRides, rides=>
-                rides[index] ? getRideColourPart(rides[index], ridePieceNumber) : 0
-                ),
+            colour: compute(this.selectedRides, this.paintToggle, selectedRides =>
+            selectedRides[index] ? getRideColourPart(selectedRides[index], ridePieceNumber) : 0),
             onChange: newColour => compute(this.selectedRides, rides =>
                 {
                     if (rides[index])
@@ -89,7 +88,7 @@ class RidePaintController
 
     layoutTest(rc: RideController)
     {
-        const rideLayout = new Array(25);
+        const rideLayout = new Array(5);
         // const rideLayout = new Array(this.numRidesInView);
 
         for (let k = 0; k<rideLayout.length;k+=1)
@@ -98,7 +97,7 @@ class RidePaintController
             label({text: compute(rc.all, rides =>
                 rides[k]?.name || "no ride")});
         }
-        debug(`layout: ${JSON.stringify(rideLayout)}`)
+        // debug(`layout: ${JSON.stringify(rideLayout)}`)
         return vertical({
             content: [...rideLayout]
         })

@@ -101,15 +101,13 @@ export const themeWindow = ( featureController: FeatureController) =>
                         content:[
                             label({
                                 text: "right column"
-                            })
+                            }),
+                            rpc.layoutTest(rideController),
                         ]
                     })
                 ]
             })
 
-
-
-            // rpc.layoutTest(rideController),
 
 
 
