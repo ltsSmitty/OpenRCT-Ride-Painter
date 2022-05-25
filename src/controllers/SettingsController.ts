@@ -6,11 +6,29 @@ import { debug } from "../helpers/logger";
 
 export default class SettingsController extends BaseController<string>
 {
+    /**
+    * Repaints selected rides every time period:
+    * never, daily, weekly, monthly, annually
+    */
     automaticPaintFrequency!: Store<number>
 
+    /**
+     * Paint rides as soon as their built.
+     * Enabling helps theme continuity feel
+     */
     paintBrantNewRides!: Store<boolean>
 
+    /**
+     * Toggles whether rides that have already been painted can be painted again.
+     * Gives flexibility if you're manually theming rides/ride types
+     */
     repaintExistingRides!: Store<boolean>
+
+    /**
+     * Toggle whether to paint the supports according to the theme,
+     * or to use natural (white, grey, black, brown) supports
+     */
+    naturalSupports!: Store<boolean>
 
     lookupKeys;
 
@@ -21,7 +39,8 @@ export default class SettingsController extends BaseController<string>
         this.lookupKeys = {
             automaticPaintFrequency: `${sharedStorageNamespace}.automaticPaintFrequency`,
             paintBrantNewRides: `${sharedStorageNamespace}.paintBrantNewRides`,
-            repaintExistingRides: `${sharedStorageNamespace}.repaintExistingRides`
+            repaintExistingRides: `${sharedStorageNamespace}.repaintExistingRides`,
+            naturalSupports: `${sharedStorageNamespace}.naturalSupports`
         }
         this.loadValuesFromStorage()
     }
@@ -31,76 +50,36 @@ export default class SettingsController extends BaseController<string>
         this.automaticPaintFrequency = store<number>(0);
         this.paintBrantNewRides = store<boolean>(true);
         this.repaintExistingRides = store<boolean>(true);
+        this.naturalSupports = store<boolean>(true);
     }
 
     override loadValuesFromStorage()
     {
-        this.automaticPaintFrequency = store<number>(this.getAutomaticPaintFrequency())
-        this.paintBrantNewRides = store<boolean>(this.getPaintBrandNewRides())
-        this.repaintExistingRides = store<boolean>(this.getRepaintExistingRides())
+        this.automaticPaintFrequency = store<number>(this.getValue('automaticPaintFrequency') as number)
+        this.paintBrantNewRides = store<boolean>(this.getValue('paintBrantNewRides') as boolean)
+        this.repaintExistingRides = store<boolean>(this.getValue('repaintExistingRides') as boolean)
+        this.naturalSupports = store<boolean>(this.getValue('naturalSupports') as boolean)
+
     }
 
-    /**
-     * Repaints selected rides every time period
-     * [never, daily, weekly, monthly, annually]
-     */
-    getAutomaticPaintFrequency(): number
+    getValue(value: keyof typeof this.lookupKeys)
     {
-        return context.sharedStorage.get(this.lookupKeys.automaticPaintFrequency ,this.automaticPaintFrequency.get())
+        return context.sharedStorage.get(this.lookupKeys[value], this[value].get());
     }
 
-    /**
-     * Repaints selected rides every time period
-     * [never, daily, weekly, monthly, annually]
-     */
-    setAutomaticPaintFrequency(v:number)
+    setValue<T>(key: keyof typeof this.lookupKeys, value: T)
     {
-        return context.sharedStorage.set(this.lookupKeys.automaticPaintFrequency,v);
-    }
-
-    /**
-     * Paint rides as soon as their built.
-     * Enabling helps theme continuity feel
-     */
-    getPaintBrandNewRides(): boolean
-    {
-        return context.sharedStorage.get(this.lookupKeys.paintBrantNewRides,this.paintBrantNewRides.get())
-    }
-
-    /**
-     * Paint rides as soon as their built.
-     * Enabling helps theme continuity feel
-     */
-    setPaintBrandNewRides(v:boolean)
-    {
-        return context.sharedStorage.set(this.lookupKeys.paintBrantNewRides,v);
-    }
-
-    /**
-     * Toggles whether rides that have already been painted can be painted again.
-     * Gives flexibility if you're manually theming rides/ride types
-     */
-    getRepaintExistingRides(): boolean
-    {
-        return context.sharedStorage.get(this.lookupKeys.repaintExistingRides, this.repaintExistingRides.get())
-    }
-
-    /**
-     * Toggles whether rides that have already been painted can be painted again.
-     * Gives flexibility if you're manually theming rides/ride types
-     */
-    setRepaintExistingRides(v:boolean)
-    {
-        return context.sharedStorage.set(this.lookupKeys.repaintExistingRides,v);
+        context.sharedStorage.set(this.lookupKeys[key],value);
     }
 
     override debug()
     {
         debug(
             `Debugging SettingsController
-            automaticPaintFrequency: ${this.getAutomaticPaintFrequency()},
-            paintBrandNewRides: ${this.getPaintBrandNewRides()},
-            repaintExistingRides: ${this.getRepaintExistingRides()}`
+            automaticPaintFrequency: ${this.getValue('automaticPaintFrequency')},
+            paintBrandNewRides: ${this.getValue('paintBrantNewRides')},
+            repaintExistingRides: ${this.getValue('repaintExistingRides')},
+            naturalSupports: ${this.getValue('naturalSupports')}`,
         )
     }
 
@@ -112,19 +91,23 @@ export default class SettingsController extends BaseController<string>
         debug(`Subscribing to settings changes.`)
         this.automaticPaintFrequency.subscribe((freq) =>
         {
-            // eslint-disable-next-line max-len
             debug(`Updated setting in sharedStoreage: ${this.lookupKeys.automaticPaintFrequency}: ${freq}`)
-            this.setAutomaticPaintFrequency(freq)
+            this.setValue('automaticPaintFrequency', freq);
         });
         this.paintBrantNewRides.subscribe((toggle) =>
         {
             debug(`Updated setting in sharedStoreage: ${this.lookupKeys.paintBrantNewRides}: ${toggle}`)
-            this.setPaintBrandNewRides(toggle);
+            this.setValue('paintBrantNewRides', toggle)
         });
         this.repaintExistingRides.subscribe((toggle) =>
         {
             debug(`Updated setting in sharedStoreage: ${this.lookupKeys.repaintExistingRides}: ${toggle}`)
-            this.setRepaintExistingRides(toggle);
+            this.setValue('repaintExistingRides', toggle)
+        })
+        this.naturalSupports.subscribe((toggle) =>
+        {
+            debug(`Updated settings in sharedStorage: ${this.lookupKeys.naturalSupports}: ${toggle}`)
+            this.setValue('naturalSupports', toggle)
         })
     }
 
@@ -137,7 +120,7 @@ export default class SettingsController extends BaseController<string>
     {
     // PAINT RIDES BASED ON AUTOMATIC PAINT FREQUENCY
     //  values: ["never", "daily", "weekly", "monthly", "yearly"],
-    const paintFrequency = this.getAutomaticPaintFrequency();
+    const paintFrequency = this.getValue('automaticPaintFrequency');
     // if set to never, return
     if (paintFrequency===0) return false;
 

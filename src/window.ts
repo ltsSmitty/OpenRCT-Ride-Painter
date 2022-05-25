@@ -68,6 +68,7 @@ export const themeWindow = ( featureController: FeatureController) =>
             // split into two columns
             horizontal({
                 content:[
+
                     // left column
                     vertical({
                         width: 400,
@@ -96,13 +97,14 @@ export const themeWindow = ( featureController: FeatureController) =>
                             }),
                         ]
                     }),
+
                     // right column
                     vertical({
                         content:[
                             label({
                                 text: "right column"
                             }),
-                            rpc.layoutTest(rideController),
+                            rpc.layoutTest(),
                         ]
                     })
                 ]
