@@ -1,5 +1,4 @@
 /* eslint-disable no-restricted-syntax */
-/* eslint-disable max-len */
 import { Colour } from "openrct2-flexui";
 import { debug } from "../helpers/logger";
 import { Theme, RideColours } from "./themes";
@@ -7,26 +6,58 @@ import { Theme, RideColours } from "./themes";
 const getRandomColour = (colours: number[]) =>
     colours[Math.floor(Math.random() * colours.length)];
 
+const naturalSupportColours: Colour[] = [0, 1, 2, 22, 23, 24];
+
 export interface Mode {
     readonly name: string;
     description: string;
     applyTheme(
         theme: Theme,
-        options?: {
+        options: {
             customColours?: Colour[];
             index?: number;
-            naturalSupports?: boolean;
+            naturalSupports: boolean;
         }
     ): RideColours | null;
 }
 
+/**
+ * if naturalSupports is marked as true, return a natural colour for the supports; otherwise return original colour
+ */
+const getSupportColour = (
+    initialColour: Colour,
+    naturalSupportsBool: boolean
+) => {
+    if (naturalSupportsBool === false) return initialColour;
+    // TODO check the theme for which colours are acceptable
+    return getRandomColour(naturalSupportColours) as Colour;
+};
+
+/**
+ * Run the mode's chosen colours through this function to reassign
+ * the support colour if the naturalSupports setting is active
+ */
+const checkAndAssignNaturalSupports = (
+    rideColours: RideColours,
+    naturalSupportsBool: boolean
+) => {
+    if (rideColours.length !== 6) return rideColours;
+    // eslint-disable-next-line no-param-reassign
+    rideColours[2] = getSupportColour(rideColours[2], naturalSupportsBool);
+    return rideColours as RideColours;
+};
+
 const monoChromaticMode: Mode = {
     name: "Monochromatic ride & track",
     description: "{BLACK}Paint the ride & cars in one solid colour.",
-    applyTheme(theme: Theme) {
+    applyTheme(theme: Theme, options: { naturalSupports: boolean }) {
         if (theme.colours.themeColours) {
             const c = getRandomColour(theme.colours.themeColours);
-            return [c, c, c, c, c, c] as RideColours;
+            const initialColours = [c, c, c, c, c, c] as RideColours;
+            return checkAndAssignNaturalSupports(
+                initialColours,
+                options.naturalSupports
+            );
         }
         return null;
     },
@@ -36,7 +67,7 @@ const randomMode: Mode = {
     name: "Random colours",
     description:
         "{BLACK}Paint each track and car piece in random colours from the theme palette.",
-    applyTheme(theme: Theme) {
+    applyTheme(theme: Theme, options: { naturalSupports: boolean }) {
         if (theme.colours.themeColours) {
             const colours = [
                 getRandomColour(theme.colours.themeColours),
@@ -45,9 +76,12 @@ const randomMode: Mode = {
                 getRandomColour(theme.colours.themeColours),
                 getRandomColour(theme.colours.themeColours),
                 getRandomColour(theme.colours.themeColours),
-            ];
+            ] as RideColours;
 
-            return colours as RideColours;
+            return checkAndAssignNaturalSupports(
+                colours,
+                options.naturalSupports
+            );
         }
         return null;
     },
@@ -70,24 +104,20 @@ const customPatternMode: Mode = {
         theme: Theme,
         options: {
             customColours: Colour[];
-            twoTone?: boolean;
+            naturalSupports: boolean;
         }
     ) {
         if (theme.colours.themeColours) {
             // choose a random base colour from the theme
             // if twoTone enabled, set base colour array to one base colour
             // if twoTone disbled, set the base colour to random palette colours
-            let baseColourArray: number[] = new Array(6);
-            if (options.twoTone) {
-                const col = getRandomColour(theme.colours.themeColours);
-                baseColourArray = [col, col, col, col, col, col];
-            } else {
-                for (let i = 0; i < 6; i += 1) {
-                    baseColourArray[i] = getRandomColour(
-                        theme.colours.themeColours
-                    );
-                }
+            const baseColourArray: number[] = new Array(6);
+            for (let i = 0; i < 6; i += 1) {
+                baseColourArray[i] = getRandomColour(
+                    theme.colours.themeColours
+                );
             }
+
             // loop through the given customColours
             // any that were active (value >= 0) will paint that piece
             // otherwise it'll paint the base colour
@@ -98,7 +128,10 @@ const customPatternMode: Mode = {
                         ? options.customColours[i]
                         : baseColourArray[i];
             }
-            return ret as RideColours;
+            return checkAndAssignNaturalSupports(
+                ret as RideColours,
+                options.naturalSupports
+            );
         }
         return null;
     },
@@ -106,8 +139,15 @@ const customPatternMode: Mode = {
 
 const buildOrderMode: Mode = {
     name: "Build order",
+    // eslint-disable-next-line max-len
     description: `{BLACK}Paint rides in the order they were built. Goes especially well with the 'Rainbow' theme and selecting a ride type you have multiple of.`,
-    applyTheme(theme: Theme, options: { index: number }) {
+    applyTheme(
+        theme: Theme,
+        options: {
+            index: number;
+            naturalSupports: boolean;
+        }
+    ) {
         const { index } = options;
         if (theme.colours.partColours) {
             const ret = [
@@ -132,14 +172,20 @@ const buildOrderMode: Mode = {
                         theme.colours.partColours.VehicleColourTernary.length
                 ],
             ];
-            return ret as RideColours;
+            return checkAndAssignNaturalSupports(
+                ret as RideColours,
+                options.naturalSupports
+            );
         }
         if (theme.colours.themeColours) {
             const c =
                 theme.colours.themeColours[
                     index % theme.colours.themeColours.length
                 ];
-            return [c, c, c, c, c, c] as RideColours;
+            return checkAndAssignNaturalSupports(
+                [c, c, c, c, c, c] as RideColours,
+                options.naturalSupports
+            );
         }
         return null;
     },
@@ -153,6 +199,7 @@ const shuffleMode: Mode = {
         options: {
             index?: number;
             customColours?: Colour[];
+            naturalSupports: boolean;
         }
     ) {
         const r = Math.floor(context.getRandom(0, 4));

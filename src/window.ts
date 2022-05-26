@@ -49,7 +49,7 @@ export const themeWindow = (featureController: FeatureController) => {
         settingsController,
     } = featureController;
 
-    const rpc = new RidePaintController(rideController, 5, 2);
+    const rpc = new RidePaintController(featureController, 5, 2);
 
     return window({
         title: "Ride Painter",

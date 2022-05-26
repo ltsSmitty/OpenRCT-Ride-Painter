@@ -1,52 +1,73 @@
-import { horizontal, box, vertical, label, dropdownSpinner, toggle, compute, checkbox, Colour } from "openrct2-flexui"
-import SettingsController from "../controllers/SettingsController"
+import {
+    horizontal,
+    box,
+    vertical,
+    label,
+    dropdownSpinner,
+    toggle,
+    compute,
+    checkbox,
+    Colour,
+} from "openrct2-flexui";
+import SettingsController from "../controllers/SettingsController";
 
-const settingsSectionElements = (sc: SettingsController) =>
-{
-    const layout =
-    horizontal({
-        content:[
+const settingsSectionElements = (sc: SettingsController) => {
+    const layout = horizontal({
+        content: [
             box({
                 text: "5. Other settings",
-                content:
-                    vertical({
-                        content:[
-                            horizontal({
+                content: vertical({
+                    content: [
+                        horizontal({
                             //    width: 300,
-                                content:[
-                                    label({
-
-                                        padding: {top: 2},
-                                        text: "{BLACK}Auto-paint selected rides:",
-                                        alignment: "left"
-                                    }),
-                                    dropdownSpinner({
-                                        selectedIndex: sc.automaticPaintFrequency,
-                                        items: ["never", "daily", "weekly", "monthly", "yearly"],
-                                        onChange: (index: number) => sc.automaticPaintFrequency.set(index),
-                                    })
-                                ]
-                            }),
-                            checkbox({
-                                height: 20,
-                                isChecked: sc.repaintExistingRides,
-                                text: "{BLACK}Allow repainting of already painted rides",
-                                onChange: (isPressed:boolean) => sc.repaintExistingRides.set(isPressed),
-
-                            }),
-                            checkbox({
-                                height: 20,
-                                text: "{BLACK}Paint newly built rides automatically",
-                                isChecked: sc.paintBrantNewRides,
-                                onChange: (isPressed:boolean) => sc.paintBrantNewRides.set(isPressed),
-                            }),
-                        ]
+                            content: [
+                                label({
+                                    padding: { top: 2 },
+                                    text: "{BLACK}Auto-paint selected rides:",
+                                    alignment: "left",
+                                }),
+                                dropdownSpinner({
+                                    selectedIndex: sc.automaticPaintFrequency,
+                                    items: [
+                                        "never",
+                                        "daily",
+                                        "weekly",
+                                        "monthly",
+                                        "yearly",
+                                    ],
+                                    onChange: (index: number) =>
+                                        sc.automaticPaintFrequency.set(index),
+                                }),
+                            ],
+                        }),
+                        checkbox({
+                            height: 20,
+                            isChecked: sc.repaintExistingRides,
+                            text: "{BLACK}Allow repainting of already painted rides",
+                            onChange: (isPressed: boolean) =>
+                                sc.repaintExistingRides.set(isPressed),
+                        }),
+                        checkbox({
+                            height: 20,
+                            text: "{BLACK}Paint newly built rides automatically",
+                            isChecked: sc.paintBrantNewRides,
+                            onChange: (isPressed: boolean) =>
+                                sc.paintBrantNewRides.set(isPressed),
+                        }),
+                        checkbox({
+                            height: 20,
+                            text: "{BLACK}Paint supports in natural colours",
+                            isChecked: sc.naturalSupports,
+                            onChange: (isPressed: boolean) =>
+                                sc.naturalSupports.set(isPressed),
+                        }),
+                    ],
                 }),
             }),
-        ]
-    })
+        ],
+    });
 
-    return layout
-}
+    return layout;
+};
 
-export default settingsSectionElements
+export default settingsSectionElements;

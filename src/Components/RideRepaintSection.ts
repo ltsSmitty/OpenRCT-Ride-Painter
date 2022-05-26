@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable no-use-before-define */
 import {
+    button,
     horizontal,
     vertical,
     label,
@@ -14,6 +15,7 @@ import {
 import ColourChange from "../themeSettings/ColourChange";
 import { debug } from "../helpers/logger";
 import RideController from "../controllers/RideController";
+import FeatureController from "../controllers/FeatureController";
 
 class RidePaintController {
     rows: number;
@@ -32,23 +34,42 @@ class RidePaintController {
 
     paintToggle: Store<boolean>;
 
-    constructor(rc: RideController, numRows: number = 5, numCols: number = 2) {
+    featureController: FeatureController;
+
+    constructor(
+        fc: FeatureController,
+        numRows: number = 5,
+        numCols: number = 2
+    ) {
         this.rows = numRows;
         this.columns = numCols;
         this.numRidesInView = this.rows * this.columns;
         this.currentPage = store<number>(0);
-        this.selectedRides = compute(rc.selectedRides, (rides) =>
+        this.featureController = fc;
+        this.selectedRides = compute(fc.rideController.selectedRides, (rides) =>
             [...rides].reverse()
         );
         this.totalPages = store<number>(1);
         this.visibleRides = store<Ride[]>([]);
-        this.paintToggle = rc.paintToggle;
+        this.paintToggle = fc.rideController.paintToggle;
     }
 
     computeVisibility(index: number) {
         return compute(this.selectedRides, (rides) =>
             rides[index] ? "visible" : "hidden"
         );
+    }
+
+    generateRideRepaintElement(index: number) {
+        const element = button({
+            image: 5173,
+            onClick: () =>
+                ColourChange.colourRides(this.featureController, [
+                    this.selectedRides.get()[index],
+                ]),
+            visibility: this.computeVisibility(index),
+        });
+        return element;
     }
 
     generateNameElement(index: number) {
@@ -100,13 +121,14 @@ class RidePaintController {
                 this.generateRidePieceElement(index, 3),
                 this.generateRidePieceElement(index, 4),
                 this.generateRidePieceElement(index, 5),
+                this.generateRideRepaintElement(index),
             ],
         });
         return element;
     }
 
     layoutTest() {
-        const rideLayout = new Array(5);
+        const rideLayout = new Array(30);
         // const rideLayout = new Array(this.numRidesInView);
 
         for (let k = 0; k < rideLayout.length; k += 1) {
