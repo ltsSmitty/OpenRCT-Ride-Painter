@@ -1,80 +1,91 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /// <reference path="../lib/openrct2.d.ts" />
 
-import { box, button, compute, colourPicker ,dropdown, horizontal, label, dropdownSpinner,
-    store, window, vertical, toggle, Colour } from 'openrct2-flexui';
-import { debug } from './helpers/logger';
-import ColourChange from './themeSettings/ColourChange';
-import themeSectionElements from './Components/themeSection';
-import { modeSectionElements } from './Components/modeSection';
-import groupingSectionElements from './Components/groupingSection';
-import rideSelectionElements from './Components/rideSelectionSection';
-import settingsSectionElements from './Components/settingsSection';
-import stationStyleElements from './Components/stationStyleSection';
-import FeatureController from './controllers/FeatureController';
-import RidePaintController from './Components/RideRepaintSection';
-
-
+import {
+    box,
+    button,
+    compute,
+    colourPicker,
+    dropdown,
+    horizontal,
+    label,
+    dropdownSpinner,
+    store,
+    window,
+    vertical,
+    toggle,
+    Colour,
+} from "openrct2-flexui";
+import { debug } from "./helpers/logger";
+import ColourChange from "./themeSettings/ColourChange";
+import themeSectionElements from "./Components/themeSection";
+import { modeSectionElements } from "./Components/modeSection";
+import groupingSectionElements from "./Components/groupingSection";
+import rideSelectionElements from "./Components/rideSelectionSection";
+import settingsSectionElements from "./Components/settingsSection";
+import stationStyleElements from "./Components/stationStyleSection";
+import FeatureController from "./controllers/FeatureController";
+import RidePaintController from "./Components/RideRepaintSection";
 
 // Set up empty methods that will be overwritten inside StateWatcher
-export class WindowWatcher
-{
+export class WindowWatcher {
     // Event that triggers on window open
-    static onWindowOpen?: () => void
+    static onWindowOpen?: () => void;
 
     // Event that triggers every frame update of the window
-    static onWindowUpdate?: () => void
+    static onWindowUpdate?: () => void;
 
     // Event that triggers on window close
-    static onWindowClose?: () => void
+    static onWindowClose?: () => void;
 }
 
-export const themeWindow = ( featureController: FeatureController) =>
-{
-    const {rideController, themeController, groupingController,
-        modeController, stationController, settingsController} = featureController
+export const themeWindow = (featureController: FeatureController) => {
+    const {
+        rideController,
+        themeController,
+        groupingController,
+        modeController,
+        stationController,
+        settingsController,
+    } = featureController;
 
-        const rpc = new RidePaintController(rideController, 5, 2);
+    const rpc = new RidePaintController(rideController, 5, 2);
 
     return window({
-        title: 'Ride Painter',
-        width: 700, maxWidth: 700, minWidth: 500,
-        height: 600, maxHeight: 600, minHeight: 600,
+        title: "Ride Painter",
+        width: 700,
+        maxWidth: 700,
+        minWidth: 500,
+        height: 600,
+        maxHeight: 600,
+        minHeight: 600,
         spacing: 10,
         padding: 8,
-        colours: [20,7],
-        onOpen: () =>
-        {
-            if (WindowWatcher.onWindowOpen)
-            {
-                WindowWatcher.onWindowOpen()
+        colours: [20, 7],
+        onOpen: () => {
+            if (WindowWatcher.onWindowOpen) {
+                WindowWatcher.onWindowOpen();
             }
         },
-        onUpdate: () =>
-        {
-            if (WindowWatcher.onWindowUpdate)
-            {
-                WindowWatcher.onWindowUpdate()
+        onUpdate: () => {
+            if (WindowWatcher.onWindowUpdate) {
+                WindowWatcher.onWindowUpdate();
             }
         },
-        onClose: () =>
-        {
-            if (WindowWatcher.onWindowClose)
-            {
-                WindowWatcher.onWindowClose()
+        onClose: () => {
+            if (WindowWatcher.onWindowClose) {
+                WindowWatcher.onWindowClose();
             }
         },
         content: [
             // split into two columns
             horizontal({
-                content:[
-
+                content: [
                     // left column
                     vertical({
                         width: 400,
-                        content:[
-
-                             // TOP ROW: THEME PICKER
+                        content: [
+                            // TOP ROW: THEME PICKER
                             themeSectionElements(themeController),
                             // SECOND ROW: MODE PICKER
                             modeSectionElements(modeController),
@@ -84,38 +95,37 @@ export const themeWindow = ( featureController: FeatureController) =>
                             rideSelectionElements(rideController),
                             // SETTINGS
                             settingsSectionElements(settingsController),
-                            stationStyleElements(stationController, rideController),
+                            stationStyleElements(
+                                stationController,
+                                rideController
+                            ),
                             button({
                                 height: 30,
-                                padding: [5,"10%"],
-                                text: '6. Paint selected rides',
-                                disabled: compute(rideController.selectedRides, (rides) =>
-                                    (rides?.length||-1)<=0),
-                                onClick: () => ColourChange.colourRides(featureController),
+                                padding: [5, "10%"],
+                                text: "6. Paint selected rides",
+                                disabled: compute(
+                                    rideController.selectedRides,
+                                    (rides) => (rides?.length || -1) <= 0
+                                ),
+                                onClick: () =>
+                                    ColourChange.colourRides(featureController),
                                 tooltip: `Nothing changing?
-                                    Make sure to enable 'Allow repainting of already painted rides'`
+                                    Make sure to enable 'Allow repainting of already painted rides'`,
                             }),
-                        ]
+                        ],
                     }),
 
                     // right column
                     vertical({
-                        content:[
+                        content: [
                             label({
-                                text: "right column"
+                                text: "right column",
                             }),
                             rpc.layoutTest(),
-                        ]
-                    })
-                ]
-            })
-
-
-
-
-            ]
-        })
-}
-
-
-
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    });
+};

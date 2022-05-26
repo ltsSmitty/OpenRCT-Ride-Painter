@@ -1,12 +1,21 @@
 /* eslint-disable consistent-return */
 /* eslint-disable no-use-before-define */
-import { horizontal, vertical, label, colourPicker, Colour, box, Store, compute, store } from "openrct2-flexui";
+import {
+    horizontal,
+    vertical,
+    label,
+    colourPicker,
+    Colour,
+    box,
+    Store,
+    compute,
+    store,
+} from "openrct2-flexui";
 import ColourChange from "../themeSettings/ColourChange";
 import { debug } from "../helpers/logger";
 import RideController from "../controllers/RideController";
 
-class RidePaintController
-{
+class RidePaintController {
     rows: number;
 
     columns: number;
@@ -23,54 +32,65 @@ class RidePaintController
 
     paintToggle: Store<boolean>;
 
-
-    constructor(rc: RideController, numRows: number = 5, numCols: number = 2)
-    {
+    constructor(rc: RideController, numRows: number = 5, numCols: number = 2) {
         this.rows = numRows;
         this.columns = numCols;
-        this.numRidesInView = this.rows * this.columns
+        this.numRidesInView = this.rows * this.columns;
         this.currentPage = store<number>(0);
-        this.selectedRides = rc.selectedRides;
+        this.selectedRides = compute(rc.selectedRides, (rides) =>
+            [...rides].reverse()
+        );
         this.totalPages = store<number>(1);
         this.visibleRides = store<Ride[]>([]);
         this.paintToggle = rc.paintToggle;
     }
 
-    computeVisibility(index: number)
-    {
-        return compute(this.selectedRides, rides=>
-            rides[index] ? "visible" : "hidden")
+    computeVisibility(index: number) {
+        return compute(this.selectedRides, (rides) =>
+            rides[index] ? "visible" : "hidden"
+        );
     }
 
-    generateNameElement(index: number)
-    {
+    generateNameElement(index: number) {
         const element = label({
-            text: compute(this.selectedRides, rides =>
-                rides[index]?.name || "No selected ride"),
-            visibility: this.computeVisibility(index)
-        })
-        return element
+            text: compute(
+                this.selectedRides,
+                (rides) => rides[index]?.name || "No selected ride"
+            ),
+            visibility: this.computeVisibility(index),
+        });
+        return element;
     }
 
-    generateRidePieceElement(index: number, ridePieceNumber:number)
-    {
+    generateRidePieceElement(index: number, ridePieceNumber: number) {
         const element = colourPicker({
             visibility: this.computeVisibility(index),
-            colour: compute(this.selectedRides, this.paintToggle, selectedRides =>
-            selectedRides[index] ? getRideColourPart(selectedRides[index], ridePieceNumber) : 0),
-            onChange: newColour => compute(this.selectedRides, rides =>
-                {
-                    if (rides[index])
-                    {
-                        setRideColourPart(rides[index], ridePieceNumber, newColour)
+            colour: compute(
+                this.selectedRides,
+                this.paintToggle,
+                (selectedRides) =>
+                    selectedRides[index]
+                        ? getRideColourPart(
+                              selectedRides[index],
+                              ridePieceNumber
+                          )
+                        : 0
+            ),
+            onChange: (newColour) =>
+                compute(this.selectedRides, (rides) => {
+                    if (rides[index]) {
+                        setRideColourPart(
+                            rides[index],
+                            ridePieceNumber,
+                            newColour
+                        );
                     }
-                })
-        })
-    return element
+                }),
+        });
+        return element;
     }
 
-    generateRidePaintRowComponent(index: number)
-    {
+    generateRidePaintRowComponent(index: number) {
         const element = horizontal({
             content: [
                 this.generateNameElement(index),
@@ -80,59 +100,68 @@ class RidePaintController
                 this.generateRidePieceElement(index, 3),
                 this.generateRidePieceElement(index, 4),
                 this.generateRidePieceElement(index, 5),
-            ]
+            ],
         });
-        return element
+        return element;
     }
 
-
-    layoutTest(rc: RideController)
-    {
+    layoutTest() {
         const rideLayout = new Array(5);
         // const rideLayout = new Array(this.numRidesInView);
 
-        for (let k = 0; k<rideLayout.length;k+=1)
-        {
-            rideLayout[k] = this.generateRidePaintRowComponent(k)
-            label({text: compute(rc.all, rides =>
-                rides[k]?.name || "no ride")});
+        for (let k = 0; k < rideLayout.length; k += 1) {
+            rideLayout[k] = this.generateRidePaintRowComponent(k);
         }
-        // debug(`layout: ${JSON.stringify(rideLayout)}`)
         return vertical({
-            content: [...rideLayout]
-        })
+            content: [...rideLayout],
+        });
     }
-// END OF CLASS
+    // END OF CLASS
 }
 
-const setRideColourPart = (ride: Ride, partNumber: number, colour: number) =>
-{
-    switch(partNumber)
-    {
-        case 0: ColourChange.setRideColour(ride, colour, -1, -1, -1, -1, -1); break;
-        case 1: ColourChange.setRideColour(ride, -1, colour, -1, -1, -1, -1); break;
-        case 2: ColourChange.setRideColour(ride, -1, -1, colour, -1, -1, -1); break;
-        case 3: ColourChange.setRideColour(ride, -1, -1, -1, colour, -1, -1); break;
-        case 4: ColourChange.setRideColour(ride, -1, -1, -1, -1, colour, -1); break;
-        case 5: ColourChange.setRideColour(ride, -1, -1, -1, -1, -1, colour); break;
-        default: break;
+const setRideColourPart = (ride: Ride, partNumber: number, colour: number) => {
+    switch (partNumber) {
+        case 0:
+            ColourChange.setRideColour(ride, colour, -1, -1, -1, -1, -1);
+            break;
+        case 1:
+            ColourChange.setRideColour(ride, -1, colour, -1, -1, -1, -1);
+            break;
+        case 2:
+            ColourChange.setRideColour(ride, -1, -1, colour, -1, -1, -1);
+            break;
+        case 3:
+            ColourChange.setRideColour(ride, -1, -1, -1, colour, -1, -1);
+            break;
+        case 4:
+            ColourChange.setRideColour(ride, -1, -1, -1, -1, colour, -1);
+            break;
+        case 5:
+            ColourChange.setRideColour(ride, -1, -1, -1, -1, -1, colour);
+            break;
+        default:
+            break;
     }
-}
+};
 
-const getRideColourPart = (ride: Ride,  partNumber: number ) =>
-{
-    switch(partNumber)
-    {
-        case 0: return ride.colourSchemes[0].main;
-        case 1: return ride.colourSchemes[0].additional;
-        case 2: return ride.colourSchemes[0].supports;
-        case 3: return ride.vehicleColours[0].body;
-        case 4: return ride.vehicleColours[0].trim;
-        case 5: return ride.vehicleColours[0].ternary;
-        default: { return 9}
+const getRideColourPart = (ride: Ride, partNumber: number) => {
+    switch (partNumber) {
+        case 0:
+            return ride.colourSchemes[0].main;
+        case 1:
+            return ride.colourSchemes[0].additional;
+        case 2:
+            return ride.colourSchemes[0].supports;
+        case 3:
+            return ride.vehicleColours[0].body;
+        case 4:
+            return ride.vehicleColours[0].trim;
+        case 5:
+            return ride.vehicleColours[0].ternary;
+        default: {
+            return 9;
+        }
     }
-}
+};
 
-export default RidePaintController
-
-
+export default RidePaintController;
