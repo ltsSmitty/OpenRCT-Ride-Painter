@@ -14,7 +14,6 @@ import {
 } from "openrct2-flexui";
 import ColourChange from "../themeSettings/ColourChange";
 import { debug } from "../helpers/logger";
-import RideController from "../controllers/RideController";
 import FeatureController from "../controllers/FeatureController";
 
 class RidePaintController {
@@ -63,6 +62,8 @@ class RidePaintController {
     generateRideRepaintElement(index: number) {
         const element = button({
             image: 5173,
+            border: true,
+            width: 25,
             onClick: () =>
                 ColourChange.colourRides(this.featureController, [
                     this.selectedRides.get()[index],
@@ -74,6 +75,7 @@ class RidePaintController {
 
     generateNameElement(index: number) {
         const element = label({
+            padding: { top: 5 },
             text: compute(
                 this.selectedRides,
                 (rides) => rides[index]?.name || "No selected ride"
@@ -86,6 +88,7 @@ class RidePaintController {
     generateRidePieceElement(index: number, ridePieceNumber: number) {
         const element = colourPicker({
             visibility: this.computeVisibility(index),
+            padding: { top: 5 },
             colour: compute(
                 this.selectedRides,
                 this.paintToggle,
@@ -113,6 +116,7 @@ class RidePaintController {
 
     generateRidePaintRowComponent(index: number) {
         const element = horizontal({
+            height: 25,
             content: [
                 this.generateNameElement(index),
                 this.generateRidePieceElement(index, 0),
@@ -128,7 +132,7 @@ class RidePaintController {
     }
 
     layoutTest() {
-        const rideLayout = new Array(30);
+        const rideLayout = new Array(15);
         // const rideLayout = new Array(this.numRidesInView);
 
         for (let k = 0; k < rideLayout.length; k += 1) {
