@@ -146,9 +146,9 @@ export default class ColourChange {
 
         // Flip the toggle on the RideController paint toggle to let the UI know that painting has happened
         // this trigger is referenced in RideRepaintSection to cause the right column of the UI to update
-        rideController.paintToggle.set(!rideController.paintToggle.get());
+        rideController.paintToggle.set(rideController.paintToggle.get() + 1);
         debug(
-            `paint toggle has changed to ${rideController.paintToggle.get()}`
+            `paint toggle has been touched ${rideController.paintToggle.get()} times.`
         );
     };
 

@@ -31,7 +31,7 @@ class RidePaintController {
 
     selectedRides: Store<Ride[]>;
 
-    paintToggle: Store<boolean>;
+    paintToggle: Store<number>;
 
     featureController: FeatureController;
 
