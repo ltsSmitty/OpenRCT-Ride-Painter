@@ -1,20 +1,26 @@
-/* eslint-disable lines-between-class-members */
 /* eslint-disable no-use-before-define */
 import { debug } from "../helpers/logger";
 import { WindowWatcher } from "../window";
 import FeatureController from "../controllers/FeatureController";
 import ColourChange from "../themeSettings/ColourChange";
+import arrayEquals from "../helpers/ArrayHelpers";
 
 /**
  * Watches the state of the game, and updates relevant services if necessary.
  */
 export default class StateWatcher implements IDisposable {
     private onActionHook: IDisposable;
+
     private onUpdateHook: IDisposable;
+
     private isDisposed: boolean = false;
+
     private onSaveHook: IDisposable;
+
     private dayHook;
+
     private eventStack: ActionType[];
+
     featureController: FeatureController;
 
     constructor(fc: FeatureController) {
@@ -50,10 +56,28 @@ export default class StateWatcher implements IDisposable {
         this.featureController.save();
     }
 
+    /**
+     * Adds a given GameAction to a stack of length 4.
+     * The stack is used to understand whether a ride's name was set manually or via creating a preset ride.
+     * See {@link StateWatcher.onActionExecuted} case "ridesetname".
+     */
     private addToEventStack(action: ActionType) {
         this.eventStack.push(action);
         if (this.eventStack.length > 4) this.eventStack.shift();
         debug(`Event Stack: ${this.eventStack}`);
+    }
+
+    private attemptToPaintNewRide(newRideID: number) {
+        // guard in case rideID === 0 so it doesn't misinterpret a falsy value
+        if (
+            typeof newRideID !== "undefined" &&
+            this.featureController.settingsController.getValue(
+                "paintBrantNewRides"
+            )
+        ) {
+            const newRide = map.getRide(newRideID);
+            ColourChange.colourRides(this.featureController, [newRide]);
+        }
     }
 
     /**
@@ -65,53 +89,51 @@ export default class StateWatcher implements IDisposable {
 
         const action = event.action as ActionType;
         switch (action) {
+            // if a ride was created or demolished, update the rideModel
+            // if a new ride was created, paint it if "paintBrandNewRides" is true
             case "ridecreate":
             case "ridedemolish": {
-                // track which event this was to see if an upcoming "ridesetname" should trigger a ride paint
-                // 1 update list of all rides
                 this.featureController.rideController.updateRideModel();
+                // if the event's flags are nonzero, it means they weren't actually executed and should be ignored
                 const args = event.args as { flags: number };
                 if (args?.flags > 0) {
-                    debug(`flag ${args.flags} > 0. building`);
                     return;
                 }
-                debug(`flag ${args.flags} !>0, so continuing`);
 
                 this.addToEventStack(action);
                 const newRideID = (event.result as { ride: number }).ride;
-                // but might be undefined
-                // need to guard in case rideID === 0
-                if (
-                    typeof newRideID !== "undefined" &&
-                    this.featureController.settingsController.getValue(
-                        "paintBrantNewRides"
-                    )
-                ) {
-                    // 2 check if paintBrandNewRides is active and paint the new ride if so
-                    const newRide = map.getRide(newRideID);
-                    ColourChange.colourRides(this.featureController, [newRide]);
-                    // todo build order isn't working any more
-                }
+                this.attemptToPaintNewRide(newRideID);
                 break;
             }
+            // if a ride was created from a pre-built design, the paint needs to be done after "ridesetname" instead of
+            // during "ridecreate" due to things
             case "ridesetname": {
+                // if this event's flags are nonzero, it means they weren't actually executed and should be ignored
                 const args = event.args as { flags: number };
                 if (args?.flags > 0) {
                     return;
                 }
-                debug(`flag ${args.flags} !>0, so continuing`);
-                debug(`<${action}>\n\t- type: ${event.type}
-                 \t- args: ${JSON.stringify(
-                     event.args
-                 )}\n\t- result: ${JSON.stringify(event.result)}`);
                 this.addToEventStack(action);
+
+                // check if the ride's name was set as part of the build process
+                // for some reason, this specific set of actions happens every time when building a premade track
+                if (
+                    arrayEquals(this.eventStack, [
+                        "ridecreate",
+                        "ridedemolish",
+                        "ridecreate",
+                        "ridesetname",
+                    ])
+                ) {
+                    const newRideID = (event.args as { ride: number }).ride;
+                    this.attemptToPaintNewRide(newRideID);
+                }
                 break;
             }
             default: {
                 // return;
             }
         }
-
         // debug(`<${action}>\n\t- type: ${event.type}
         //  \t- args: ${JSON.stringify(event.args)}\n\t- result: ${JSON.stringify(
         //     event.result
