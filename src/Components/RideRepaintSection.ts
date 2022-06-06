@@ -8,6 +8,7 @@ import {
     colourPicker,
     Colour,
     box,
+    Scale,
     Store,
     compute,
     store,
@@ -20,7 +21,7 @@ import FeatureController from "../controllers/FeatureController";
 class RidePaintController {
     rows: number;
 
-    columns: number;
+    columnWidths: Scale[] = ["1w", "1w", "1w"];
 
     numRidesInView: number;
 
@@ -36,14 +37,9 @@ class RidePaintController {
 
     featureController: FeatureController;
 
-    constructor(
-        fc: FeatureController,
-        numRows: number = 5,
-        numCols: number = 2
-    ) {
+    constructor(fc: FeatureController, numRows: number = 15) {
         this.rows = numRows;
-        this.columns = numCols;
-        this.numRidesInView = this.rows * this.columns;
+        this.numRidesInView = this.rows;
         this.currentPage = store<number>(0);
         this.featureController = fc;
         this.selectedRides = compute(
@@ -73,6 +69,24 @@ class RidePaintController {
         });
     }
 
+    // eslint-disable-next-line class-methods-use-this
+    generateHeaderElement() {
+        const element = horizontal({
+            content: [
+                label({
+                    text: "Ride",
+                }),
+                label({
+                    text: "Track",
+                }),
+                label({
+                    text: "Cars",
+                }),
+            ],
+        });
+        return element;
+    }
+
     generateRideRepaintElement(index: number) {
         const element = button({
             image: 5173,
@@ -89,6 +103,7 @@ class RidePaintController {
 
     generateNameElement(index: number) {
         const element = button({
+            width: this.columnWidths[0],
             border: false,
             padding: { top: 5 },
             text: compute(
@@ -97,6 +112,30 @@ class RidePaintController {
             ),
             visibility: this.computeVisibility(index),
             onClick: () => this.openRideWindow(index),
+        });
+        return element;
+    }
+
+    generateTrackColourElements(index: number) {
+        const element = horizontal({
+            width: this.columnWidths[1],
+            content: [
+                this.generateRidePieceElement(index, 0),
+                this.generateRidePieceElement(index, 1),
+                this.generateRidePieceElement(index, 2),
+            ],
+        });
+        return element;
+    }
+
+    generateCarColourElements(index: number) {
+        const element = horizontal({
+            width: this.columnWidths[2],
+            content: [
+                this.generateRidePieceElement(index, 3),
+                this.generateRidePieceElement(index, 4),
+                this.generateRidePieceElement(index, 5),
+            ],
         });
         return element;
     }
@@ -135,12 +174,8 @@ class RidePaintController {
             height: 25,
             content: [
                 this.generateNameElement(index),
-                this.generateRidePieceElement(index, 0),
-                this.generateRidePieceElement(index, 1),
-                this.generateRidePieceElement(index, 2),
-                this.generateRidePieceElement(index, 3),
-                this.generateRidePieceElement(index, 4),
-                this.generateRidePieceElement(index, 5),
+                this.generateTrackColourElements(index),
+                this.generateCarColourElements(index),
                 this.generateRideRepaintElement(index),
             ],
         });
@@ -155,7 +190,7 @@ class RidePaintController {
             rideLayout[k] = this.generateRidePaintRowComponent(k);
         }
         return vertical({
-            content: [...rideLayout],
+            content: [this.generateHeaderElement(), ...rideLayout],
         });
     }
     // END OF CLASS

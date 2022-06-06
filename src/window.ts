@@ -49,7 +49,7 @@ export const themeWindow = (featureController: FeatureController) => {
         settingsController,
     } = featureController;
 
-    const rpc = new RidePaintController(featureController, 5, 2);
+    const rpc = new RidePaintController(featureController, 15);
 
     return window({
         title: "Ride Painter",
@@ -117,12 +117,7 @@ export const themeWindow = (featureController: FeatureController) => {
 
                     // right column
                     vertical({
-                        content: [
-                            label({
-                                text: "right column",
-                            }),
-                            rpc.layoutTest(),
-                        ],
+                        content: [rpc.layoutTest()],
                     }),
                 ],
             }),
