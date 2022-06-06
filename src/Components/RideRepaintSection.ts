@@ -11,6 +11,7 @@ import {
     Store,
     compute,
     store,
+    window,
 } from "openrct2-flexui";
 import ColourChange from "../themeSettings/ColourChange";
 import { debug } from "../helpers/logger";
@@ -45,8 +46,9 @@ class RidePaintController {
         this.numRidesInView = this.rows * this.columns;
         this.currentPage = store<number>(0);
         this.featureController = fc;
-        this.selectedRides = compute(fc.rideController.selectedRides, (rides) =>
-            [...rides].reverse()
+        this.selectedRides = compute(
+            fc.rideController.selectedRides,
+            (rides) => rides
         );
         this.totalPages = store<number>(1);
         this.visibleRides = store<Ride[]>([]);
@@ -57,6 +59,18 @@ class RidePaintController {
         return compute(this.selectedRides, (rides) =>
             rides[index] ? "visible" : "hidden"
         );
+    }
+
+    openRideWindow(index: number) {
+        const thisRide = this.selectedRides.get()[index];
+        const { start } = thisRide.stations[0];
+        if (!start) return;
+        debug(`scrollto ${thisRide.name}`);
+        ui.mainViewport.scrollTo({
+            x: start.x,
+            y: start.y,
+            z: start.z,
+        });
     }
 
     generateRideRepaintElement(index: number) {
@@ -74,13 +88,15 @@ class RidePaintController {
     }
 
     generateNameElement(index: number) {
-        const element = label({
+        const element = button({
+            border: false,
             padding: { top: 5 },
             text: compute(
                 this.selectedRides,
                 (rides) => rides[index]?.name || "No selected ride"
             ),
             visibility: this.computeVisibility(index),
+            onClick: () => this.openRideWindow(index),
         });
         return element;
     }

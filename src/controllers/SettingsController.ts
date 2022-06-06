@@ -3,6 +3,10 @@ import BaseController from "./BaseController";
 import { sharedStorageNamespace } from "../helpers/environment";
 import { debug } from "../helpers/logger";
 
+// eslint-disable-next-line no-use-before-define
+type settingsKeys = Record<keyof SettingsController, string>;
+type LookupKeyType = Partial<settingsKeys>;
+
 export default class SettingsController extends BaseController<string> {
     /**
      * Repaints selected rides every time period:
@@ -28,7 +32,8 @@ export default class SettingsController extends BaseController<string> {
      */
     naturalSupports!: Store<boolean>;
 
-    lookupKeys;
+    // lookupKeys: {[key: keyof SettingsController]: string};
+    lookupKeys: LookupKeyType;
 
     constructor() {
         super({ library: [] });
@@ -65,14 +70,15 @@ export default class SettingsController extends BaseController<string> {
     }
 
     getValue(value: keyof typeof this.lookupKeys) {
-        return context.sharedStorage.get(
-            this.lookupKeys[value],
-            this[value].get()
-        );
+        // the typeof lookupKeys is suggesting that it might be undefined, but it won't be.
+        // casting it to string to avoid i think a 'never' case
+        const thisKey = this.lookupKeys[value] as string;
+        return context.sharedStorage.get(thisKey, this[value].get());
     }
 
     setValue<T>(key: keyof typeof this.lookupKeys, value: T) {
-        context.sharedStorage.set(this.lookupKeys[key], value);
+        const thisKey = this.lookupKeys[key] as string;
+        context.sharedStorage.set(thisKey, value);
     }
 
     override debug() {
@@ -93,29 +99,35 @@ export default class SettingsController extends BaseController<string> {
     subToSettingsChange() {
         debug(`Subscribing to settings changes.`);
         this.automaticPaintFrequency.subscribe((freq) => {
-            debug(
-                `Updated setting in sharedStoreage: ${this.lookupKeys.automaticPaintFrequency}: ${freq}`
+            this.debugSettingsChange(
+                this.lookupKeys.automaticPaintFrequency,
+                freq
             );
             this.setValue("automaticPaintFrequency", freq);
         });
         this.paintBrantNewRides.subscribe((toggle) => {
-            debug(
-                `Updated setting in sharedStoreage: ${this.lookupKeys.paintBrantNewRides}: ${toggle}`
+            this.debugSettingsChange(
+                this.lookupKeys.paintBrantNewRides,
+                toggle
             );
             this.setValue("paintBrantNewRides", toggle);
         });
         this.repaintExistingRides.subscribe((toggle) => {
-            debug(
-                `Updated setting in sharedStoreage: ${this.lookupKeys.repaintExistingRides}: ${toggle}`
+            this.debugSettingsChange(
+                this.lookupKeys.repaintExistingRides,
+                toggle
             );
             this.setValue("repaintExistingRides", toggle);
         });
         this.naturalSupports.subscribe((toggle) => {
-            debug(
-                `Updated settings in sharedStorage: ${this.lookupKeys.naturalSupports}: ${toggle}`
-            );
+            this.debugSettingsChange(this.lookupKeys.naturalSupports, toggle);
             this.setValue("naturalSupports", toggle);
         });
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    debugSettingsChange(key: any, value: any) {
+        debug(`Updated setting in sharedStoreage: ${key}: ${value}`);
     }
 
     /**
