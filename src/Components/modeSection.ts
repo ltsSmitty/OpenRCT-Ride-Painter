@@ -34,10 +34,18 @@ const modeSectionElements = (mc: ModeController) => {
      * Helper for 'Custom Pattern' mode. Flip the active state of the colourPicker widgets onClick/onChange
      */
     const enableRideColourPicker = (index: number) => {
+        // ! new code, doesn't work as expected.
+        // mc.selectedColoursEnabled.update(
+        //     index,
+        //     !mc.selectedColoursEnabled.get()[index]
+        // );
+        // debug(JSON.stringify(mc.selectedColoursEnabled.get()));
+
+        // !  old code, worked
         const enabledColours = mc.selectedColoursEnabled.get();
-        debug(`${enabledColours}`);
         enabledColours[index] = !enabledColours[index];
         mc.selectedColoursEnabled.set(enabledColours.map((val) => val));
+        debug(`${enabledColours}`);
     };
 
     /**
@@ -46,7 +54,7 @@ const modeSectionElements = (mc: ModeController) => {
      */
     const customPatternColourPickerElement = (partNumber: number) => {
         const element = colourPicker({
-            padding: { left: "40%" },
+            padding: { left: `1w` },
             width: "1w",
             colour: compute(
                 mc.selectedCustomColours,
@@ -70,20 +78,22 @@ const modeSectionElements = (mc: ModeController) => {
     };
 
     const customPatternColourPickerElements = () =>
-        horizontal([
-            // track main
-            customPatternColourPickerElement(0),
-            // track additional
-            customPatternColourPickerElement(1),
-            // track supports
-            customPatternColourPickerElement(2),
-            // car main
-            customPatternColourPickerElement(3),
-            // car trim
-            customPatternColourPickerElement(4),
-            // car tertiary
-            customPatternColourPickerElement(5),
-        ]);
+        horizontal({
+            content: [
+                // track main
+                customPatternColourPickerElement(0),
+                // track additional
+                customPatternColourPickerElement(1),
+                // track supports
+                customPatternColourPickerElement(2),
+                // car main
+                customPatternColourPickerElement(3),
+                // car trim
+                customPatternColourPickerElement(4),
+                // car tertiary
+                customPatternColourPickerElement(5),
+            ],
+        });
 
     const customPatternToggleElements = () =>
         // TOGGLES TO ENABLE/DISABLE COLOUR PICKERS

@@ -3,10 +3,6 @@ import BaseController from "./BaseController";
 import { sharedStorageNamespace } from "../helpers/environment";
 import { debug } from "../helpers/logger";
 
-// eslint-disable-next-line no-use-before-define
-type settingsKeys = Record<keyof SettingsController, string>;
-type LookupKeyType = Partial<settingsKeys>;
-
 export default class SettingsController extends BaseController<string> {
     /**
      * Repaints selected rides every time period:
@@ -32,11 +28,10 @@ export default class SettingsController extends BaseController<string> {
      */
     naturalSupports!: Store<boolean>;
 
-    // lookupKeys: {[key: keyof SettingsController]: string};
-    lookupKeys: LookupKeyType;
+    lookupKeys;
 
     constructor() {
-        super({ library: [] });
+        super([]);
         this.setDefaults();
         this.lookupKeys = {
             automaticPaintFrequency: `${sharedStorageNamespace}.automaticPaintFrequency`,

@@ -21,7 +21,9 @@ import FeatureController from "../controllers/FeatureController";
 class RidePaintController {
     rows: number;
 
-    columnWidths: Scale[] = ["1w", "1w", "1w"];
+    columnWidths: Scale[] = ["3w", "1w", "1w"];
+
+    rideRepaintElementWidth = 25;
 
     numRidesInView: number;
 
@@ -42,10 +44,7 @@ class RidePaintController {
         this.numRidesInView = this.rows;
         this.currentPage = store<number>(0);
         this.featureController = fc;
-        this.selectedRides = compute(
-            fc.rideController.selectedRides,
-            (rides) => rides
-        );
+        this.selectedRides = fc.rideController.selectedRides;
         this.totalPages = store<number>(1);
         this.visibleRides = store<Ride[]>([]);
         this.paintToggle = fc.rideController.paintToggle;
@@ -57,7 +56,7 @@ class RidePaintController {
         );
     }
 
-    openRideWindow(index: number) {
+    scrollToRide(index: number) {
         const thisRide = this.selectedRides.get()[index];
         const { start } = thisRide.stations[0];
         if (!start) return;
@@ -74,13 +73,24 @@ class RidePaintController {
         const element = horizontal({
             content: [
                 label({
+                    alignment: "centred",
+                    width: this.columnWidths[0],
                     text: "Ride",
                 }),
                 label({
-                    text: "Track",
+                    alignment: "centred",
+                    width: this.columnWidths[1],
+                    text: "Track ", // extra space added for alignment reasons
                 }),
                 label({
+                    alignment: "centred",
+                    width: this.columnWidths[2],
                     text: "Cars",
+                }),
+                label({
+                    text: "repaint",
+                    visibility: "hidden",
+                    width: this.rideRepaintElementWidth,
                 }),
             ],
         });
@@ -91,7 +101,7 @@ class RidePaintController {
         const element = button({
             image: 5173,
             border: true,
-            width: 25,
+            width: this.rideRepaintElementWidth,
             onClick: () =>
                 ColourChange.colourRides(this.featureController, [
                     this.selectedRides.get()[index],
@@ -111,7 +121,7 @@ class RidePaintController {
                 (rides) => rides[index]?.name || "No selected ride"
             ),
             visibility: this.computeVisibility(index),
-            onClick: () => this.openRideWindow(index),
+            onClick: () => this.scrollToRide(index),
         });
         return element;
     }
@@ -234,7 +244,7 @@ const getRideColourPart = (ride: Ride, partNumber: number) => {
         case 4:
             return ride.vehicleColours[0].trim;
         case 5:
-            return ride.vehicleColours[0].ternary;
+            return ride.vehicleColours[0].tertiary;
         default: {
             return 9;
         }

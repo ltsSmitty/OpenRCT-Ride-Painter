@@ -1,16 +1,16 @@
-import { Store, store } from "openrct2-flexui";
+import { Store, store, ArrayStore, arrayStore } from "openrct2-flexui";
 import BaseController from "./BaseController";
 import { RideType } from "../helpers/RideType";
 import { debug } from "../helpers/logger";
 
 export default class RideController extends BaseController<Ride> {
-    selectedRides: Store<Ride[]>;
+    selectedRides: ArrayStore<Ride>;
 
     selectedText: Store<string>;
 
-    paintedRides: Store<Ride[] | null>;
+    paintedRides: ArrayStore<Ride | null>;
 
-    allRideTypes!: Store<RideType[]>;
+    allRideTypes!: ArrayStore<RideType>;
 
     paintToggle: Store<number>;
 
@@ -18,13 +18,13 @@ export default class RideController extends BaseController<Ride> {
         const allRides = map.rides.filter(
             (ride) => ride.classification === "ride"
         );
-        super({ library: allRides });
+        super(allRides);
         // set the ride types
-        this.allRideTypes = store<RideType[]>([]);
+        this.allRideTypes = arrayStore<RideType>([]);
         this.updateAllRideTypes();
         this.selected = store<Ride | null>(null);
-        this.selectedRides = store<Ride[]>([]);
-        this.paintedRides = store<Ride[] | null>([]);
+        this.selectedRides = arrayStore<Ride>([]);
+        this.paintedRides = arrayStore<Ride | null>([]);
         this.selectedText = store<string>("");
         this.paintToggle = store<number>(0);
     }
@@ -41,7 +41,6 @@ export default class RideController extends BaseController<Ride> {
         const allRides = map.rides.filter(
             (ride) => ride.classification === "ride"
         );
-        this.library = [allRides];
         this.all.set(allRides);
     }
 

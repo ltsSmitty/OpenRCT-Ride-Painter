@@ -26,6 +26,7 @@ import settingsSectionElements from "./Components/settingsSection";
 import stationStyleElements from "./Components/stationStyleSection";
 import FeatureController from "./controllers/FeatureController";
 import RidePaintController from "./Components/RideRepaintSection";
+import ThemeCreationController from "./Components/ThemeCreationSection";
 
 // Set up empty methods that will be overwritten inside StateWatcher
 export class WindowWatcher {
@@ -50,6 +51,7 @@ export const themeWindow = (featureController: FeatureController) => {
     } = featureController;
 
     const rpc = new RidePaintController(featureController, 15);
+    const tcs = new ThemeCreationController(themeController);
 
     return window({
         title: "Ride Painter",
@@ -87,31 +89,34 @@ export const themeWindow = (featureController: FeatureController) => {
                         content: [
                             // TOP ROW: THEME PICKER
                             themeSectionElements(themeController),
-                            // SECOND ROW: MODE PICKER
-                            modeSectionElements(modeController),
-                            // THIRD ROW: GROUP BY
-                            groupingSectionElements(groupingController),
-                            // FOURTH ROW: RIDE/TYPE SELECTION
-                            rideSelectionElements(rideController),
-                            // SETTINGS
-                            settingsSectionElements(settingsController),
-                            stationStyleElements(
-                                stationController,
-                                rideController
-                            ),
-                            button({
-                                height: 30,
-                                padding: [5, "10%"],
-                                text: "6. Paint selected rides",
-                                disabled: compute(
-                                    rideController.selectedRides,
-                                    (rides) => (rides?.length || -1) <= 0
-                                ),
-                                onClick: () =>
-                                    ColourChange.colourRides(featureController),
-                                tooltip: `Nothing changing?
-                                    Make sure to enable 'Allow repainting of already painted rides'`,
-                            }),
+                            // Theme creation section
+                            tcs.generateLayout(),
+                            // // SECOND ROW: MODE PICKER
+                            // modeSectionElements(modeController),
+                            // // THIRD ROW: GROUP BY
+                            // groupingSectionElements(groupingController),
+                            // // FOURTH ROW: RIDE/TYPE SELECTION
+                            // rideSelectionElements(rideController),
+                            // // SETTINGS
+                            // settingsSectionElements(settingsController),
+                            // stationStyleElements(
+                            //     stationController,
+                            //     rideController
+                            // ),
+                            // button({
+                            //     height: 30,
+                            //     padding: "5px",
+                            //     // width: "80%",
+                            //     text: "6. Paint selected rides",
+                            //     disabled: compute(
+                            //         rideController.selectedRides,
+                            //         (rides) => (rides?.length || -1) <= 0
+                            //     ),
+                            //     onClick: () =>
+                            //         ColourChange.colourRides(featureController),
+                            //     tooltip: `Nothing changing?
+                            //         Make sure to enable 'Allow repainting of already painted rides'`,
+                            // }),
                         ],
                     }),
 

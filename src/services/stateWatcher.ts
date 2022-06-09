@@ -66,7 +66,7 @@ export default class StateWatcher implements IDisposable {
     private addToEventStack(action: ActionType) {
         this.eventStack.push(action);
         if (this.eventStack.length > 4) this.eventStack.shift();
-        debug(`Event Stack: ${this.eventStack}`);
+        // debug(`Event Stack: ${this.eventStack}`);
     }
 
     private attemptToPaintNewRide(newRideID: number) {
@@ -145,14 +145,7 @@ export default class StateWatcher implements IDisposable {
                         .get()
                         .indexOf(deletedRide);
                     if (deletedRideIndex > -1) {
-                        // creating new array since Array.slice mutates the original rather than returning what we want
-                        const currentSelectedRides = rc.selectedRides.get();
-                        currentSelectedRides.splice(deletedRideIndex, 1);
-                        rc.selectedRides.set(
-                            // honestly not sure why this map worked where just putting in the array raw didn't,
-                            // but for some reason it doesn't work with just putting in currentlSelectedRides
-                            currentSelectedRides.map((ride) => ride)
-                        );
+                        rc.selectedRides.splice(deletedRideIndex, 1);
                     }
                 }
                 break;
