@@ -19,6 +19,10 @@ export default class RideController extends BaseController<Ride> {
             (ride) => ride.classification === "ride"
         );
         super(allRides);
+
+        debug(
+            `RideController, all: ${this.all.get().map((ride) => ride.name)}`
+        );
         // set the ride types
         this.allRideTypes = arrayStore<RideType>([]);
         this.updateAllRideTypes();

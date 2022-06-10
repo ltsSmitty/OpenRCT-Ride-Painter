@@ -10,9 +10,15 @@ import {
     vertical,
     Store,
     store,
+    label,
+    Scale,
+    toggle,
 } from "openrct2-flexui";
 import ThemeController from "../controllers/ThemeController";
 import { debug } from "../helpers/logger";
+
+const buttonWidth: Scale = "1w";
+
 /**
  * Goals
  * 1. Be able to create an new arbitrary theme and pick the colours you want
@@ -32,11 +38,27 @@ class ThemeCreationController {
 
     themeController: ThemeController;
 
+    manageThemesActive: Store<boolean>;
+
     nameInputFields: TextInputDesc = {
         title: "Set theme name",
         description: "Choose a good theme name.",
         callback: (name) => {
             this.themeName = name;
+            if (
+                this.themeName.length === 0 ||
+                this.selectedColours.get().length === 0
+            ) {
+                debug(`Attempted to save theme with a name of "${name}" and a length of ${
+                    this.selectedColours.get().length
+                }.
+                Both need to be >0. Not able to save theme.`);
+                return;
+            }
+            this.themeController.addNewThemeToModel({
+                name: this.themeName,
+                colours: { themeColours: this.selectedColours.get() },
+            });
         },
     };
 
@@ -45,9 +67,8 @@ class ThemeCreationController {
         this.selectedColours = arrayStore<Colour>();
         this.currentColour = store<Colour>(0);
         this.currentColourIndex = store<number>(0);
-
         this.themeName = "";
-        this.nameInputFields.callback(this.themeName);
+        this.manageThemesActive = store<boolean>(false);
     }
 
     private getColourForIndex = (index: number) =>
@@ -134,8 +155,7 @@ class ThemeCreationController {
 
     generateLayout() {
         const element = box({
-            width: 400,
-            text: "Create a theme.",
+            text: "Create a new theme",
             content: vertical({
                 content: [
                     horizontal({
@@ -144,7 +164,7 @@ class ThemeCreationController {
                         content: [
                             // the main colour picker
                             colourPicker({
-                                padding: [0, "5%"],
+                                padding: { top: "5px" },
                                 colour: 0,
                                 onChange: (newColour) => {
                                     debug(
@@ -156,50 +176,111 @@ class ThemeCreationController {
                             }),
                             // plus button
                             button({
-                                image: 5161,
+                                width: buttonWidth,
+                                text: "Add colour",
                                 onClick: () => this.addCurrentColourToTheme(),
                             }),
                             // remove button
                             button({
-                                image: 5160,
+                                width: buttonWidth,
+                                text: "Remove colour",
                                 onClick: () =>
                                     this.removeCurrentColourFromTheme(),
                             }),
                         ],
                     }),
-                    // 32 colour pickers
-                    vertical({
+                    horizontal({
                         content: [
-                            // top row
-                            horizontal({
+                            // THEME COLOUR SECTION
+                            vertical({
                                 spacing: 0,
                                 content: [
-                                    // first 8
-                                    ...this.generateColourPickers(0, 7),
+                                    // top row
+                                    horizontal({
+                                        spacing: 0,
+                                        content: [
+                                            // first 8
+                                            ...this.generateColourPickers(0, 7),
+                                        ],
+                                    }),
+                                    horizontal({
+                                        spacing: 0,
+                                        content: [
+                                            // second 8
+                                            ...this.generateColourPickers(
+                                                8,
+                                                15
+                                            ),
+                                        ],
+                                    }),
+                                    horizontal({
+                                        spacing: 0,
+                                        content: [
+                                            // third 8
+                                            ...this.generateColourPickers(
+                                                16,
+                                                23
+                                            ),
+                                        ],
+                                    }),
+                                    horizontal({
+                                        spacing: 0,
+                                        content: [
+                                            // fourth 8
+                                            ...this.generateColourPickers(
+                                                24,
+                                                31
+                                            ),
+                                        ],
+                                    }),
                                 ],
                             }),
-                            horizontal({
-                                spacing: 0,
+                            vertical({
                                 content: [
-                                    // second 8
-                                    ...this.generateColourPickers(8, 15),
-                                ],
-                            }),
-                            horizontal({
-                                spacing: 0,
-                                content: [
-                                    // third 8
-                                    ...this.generateColourPickers(16, 23),
-                                ],
-                            }),
-                            horizontal({
-                                spacing: 0,
-                                content: [
-                                    // fourth 8
-                                    ...this.generateColourPickers(24, 31),
+                                    // SAVE BUTTON
+                                    button({
+                                        text: "Save",
+                                        width: buttonWidth,
+                                        height: 25,
+                                        onClick: () => {
+                                            ui.showTextInput(
+                                                this.nameInputFields
+                                            );
+                                        },
+                                    }),
+                                    // DELETE THEME BUTTON
+                                    toggle({
+                                        text: "> Manage",
+                                        width: buttonWidth,
+                                        height: 25,
+                                        onChange: (t) => {
+                                            this.manageThemesActive.set(t);
+                                        },
+                                    }),
                                 ],
                             }),
                         ],
+                    }),
+                    // MANAGE THEMES
+                    box({
+                        visibility: compute(this.manageThemesActive, (val) => {
+                            if (val) return "visible";
+                            return "none";
+                        }),
+                        content: horizontal({
+                            content: [
+                                label({
+                                    visibility: compute(
+                                        this.manageThemesActive,
+                                        (val) => {
+                                            if (val) return "visible";
+                                            return "none";
+                                        }
+                                    ),
+                                    text: "managing themes",
+                                }),
+                            ],
+                        }),
                     }),
                 ],
             }),
@@ -209,7 +290,3 @@ class ThemeCreationController {
 }
 
 export default ThemeCreationController;
-
-// ui.showTextInput(nameInputFields);
-
-// const ThemeCreationElement;

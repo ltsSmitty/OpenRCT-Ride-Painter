@@ -19,8 +19,8 @@ export default class BaseController<T> {
         this.namespaceKey = `${this.constructor.name}`;
         // example controller keys
         this.controllerKeys = {
-            baseControllerKey1: this.all,
-            baseControllerKey2: this.selectedIndex,
+            // baseControllerKey1: this.all,
+            // baseControllerKey2: this.selectedIndex,
         };
     }
 
@@ -39,37 +39,18 @@ export default class BaseController<T> {
         return vals;
     }
 
-    saveFeatures(storageChoice: "park" | "global" = "park") {
+    saveFeatures() {
         const valToSave = this.getValuesToSave();
-        if (storageChoice === "park") {
-            context
-                .getParkStorage()
-                .set(`${PluginNamespace}.${this.namespaceKey}`, valToSave);
-            debug(`${this.constructor.name} saved to park storage.`);
-            return;
-        }
-        context.sharedStorage.set(
-            `${PluginNamespace}.${this.namespaceKey}`,
-            valToSave
-        );
-        debug(`${this.constructor.name} saved to global storage.`);
+        context
+            .getParkStorage()
+            .set(`${PluginNamespace}.${this.namespaceKey}`, valToSave);
+        debug(`${this.constructor.name} saved to park storage.`);
     }
 
-    loadValuesFromStorage(storageChoice: "park" | "global" = "park") {
-        let loadedController;
-        if (storageChoice === "park") {
-            loadedController = context
-                .getParkStorage()
-                .get(`RidePainter.${this.namespaceKey}`) as {
-                [keys: string]: any;
-            }[];
-            if (!loadedController) return;
-            this.applyValuesFromSave(loadedController);
-            return;
-        }
-        loadedController = context.sharedStorage.get(
-            `RidePainter.${this.namespaceKey}`
-        ) as {
+    loadValuesFromStorage() {
+        const loadedController = context
+            .getParkStorage()
+            .get(`RidePainter.${this.namespaceKey}`) as {
             [keys: string]: any;
         }[];
         if (!loadedController) return;
@@ -79,17 +60,44 @@ export default class BaseController<T> {
     private applyValuesFromSave(loadedVals: { [keys: string]: any }[]) {
         // re-apply each loaded prop to the right value
         loadedVals.forEach((prop) => {
-            debug(
-                `<applyValuesFromSave> \n Loaded Prop: ${JSON.stringify(prop)}`
-            );
             Object.keys(prop).forEach((key) => {
-                this.controllerKeys[key].set(prop[key]);
+                if (!this.controllerKeys[key]) {
+                    debug(
+                        `${
+                            this.constructor.name
+                        }.controllerKeys[${key}] doesn't exist for prop ${JSON.stringify(
+                            prop
+                        )}`
+                    );
+                    // remove it from
+                    this.removeInvalidKeyFromStorage(key);
+                }
+                this.controllerKeys[key]?.set(prop[key]);
             });
             this.controllerKeys[prop[0]] = store<unknown>(loadedVals[prop[0]]);
         });
-        //
         this.setSelectedFromSelectedIndex();
         return this.getActive;
+    }
+
+    /**
+     * If a key's name changes in development, it'll languish in storage and prevent the plugin from loading
+     * This will solve that problem by removing the improper prop name
+     * @param key
+     */
+    removeInvalidKeyFromStorage(key: string) {
+        const loadedController = context
+            .getParkStorage()
+            .get(`RidePainter.${this.namespaceKey}`) as {
+            [keys: string]: any;
+        }[];
+
+        const wrongKey = Object.keys(loadedController[0]).indexOf(key);
+        loadedController.splice(wrongKey, 1);
+
+        context
+            .getParkStorage()
+            .set(`RidePainter.${this.namespaceKey}`, loadedController);
     }
 
     getActive() {

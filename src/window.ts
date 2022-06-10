@@ -50,6 +50,12 @@ export const themeWindow = (featureController: FeatureController) => {
         settingsController,
     } = featureController;
 
+    debug(
+        `themeWindow init, num rides: ${rideController.all
+            .get()
+            .map((ride) => ride.name)}`
+    );
+
     const rpc = new RidePaintController(featureController, 15);
     const tcs = new ThemeCreationController(themeController);
 
@@ -87,36 +93,41 @@ export const themeWindow = (featureController: FeatureController) => {
                     vertical({
                         width: 400,
                         content: [
-                            // TOP ROW: THEME PICKER
-                            themeSectionElements(themeController),
-                            // Theme creation section
-                            tcs.generateLayout(),
-                            // // SECOND ROW: MODE PICKER
-                            // modeSectionElements(modeController),
-                            // // THIRD ROW: GROUP BY
-                            // groupingSectionElements(groupingController),
-                            // // FOURTH ROW: RIDE/TYPE SELECTION
-                            // rideSelectionElements(rideController),
-                            // // SETTINGS
-                            // settingsSectionElements(settingsController),
-                            // stationStyleElements(
-                            //     stationController,
-                            //     rideController
-                            // ),
-                            // button({
-                            //     height: 30,
-                            //     padding: "5px",
-                            //     // width: "80%",
-                            //     text: "6. Paint selected rides",
-                            //     disabled: compute(
-                            //         rideController.selectedRides,
-                            //         (rides) => (rides?.length || -1) <= 0
-                            //     ),
-                            //     onClick: () =>
-                            //         ColourChange.colourRides(featureController),
-                            //     tooltip: `Nothing changing?
-                            //         Make sure to enable 'Allow repainting of already painted rides'`,
-                            // }),
+                            // TOP ROW: THEME PICKER & CREATOR
+                            horizontal({
+                                content: [
+                                    // THEME PICKER
+                                    themeSectionElements(themeController),
+                                    // THEME CREATOR
+                                    tcs.generateLayout(),
+                                ],
+                            }),
+                            // SECOND ROW: MODE PICKER
+                            modeSectionElements(modeController),
+                            // THIRD ROW: GROUP BY
+                            groupingSectionElements(groupingController),
+                            // FOURTH ROW: RIDE/TYPE SELECTION
+                            rideSelectionElements(rideController),
+                            // SETTINGS
+                            settingsSectionElements(settingsController),
+                            stationStyleElements(
+                                stationController,
+                                rideController
+                            ),
+                            button({
+                                height: 30,
+                                padding: "5px",
+                                // width: "80%",
+                                text: "6. Paint selected rides",
+                                disabled: compute(
+                                    rideController.selectedRides,
+                                    (rides) => (rides?.length || -1) <= 0
+                                ),
+                                onClick: () =>
+                                    ColourChange.colourRides(featureController),
+                                tooltip: `Nothing changing?
+                                    Make sure to enable 'Allow repainting of already painted rides'`,
+                            }),
                         ],
                     }),
 

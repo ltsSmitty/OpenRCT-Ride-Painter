@@ -7,7 +7,7 @@ export default class GroupingController extends BaseController<
     constructor() {
         super(groupings);
         this.controllerKeys = {
-            themeSelectedIndex: this.selectedIndex,
+            groupingSelectedIndex: this.selectedIndex,
         };
     }
 }

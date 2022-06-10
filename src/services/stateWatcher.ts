@@ -235,6 +235,7 @@ export default class StateWatcher implements IDisposable {
         if (this.isDisposed) return;
         debug(`window opened`);
         this.featureController.settingsController.subToSettingsChange();
+        this.featureController.themeController.subscribeToAdditionalThemes();
     }
 
     private onDayHook() {
