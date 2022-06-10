@@ -1,14 +1,11 @@
-import { ArrayStore, arrayStore } from 'openrct2-flexui';
+import { ArrayStore, arrayStore } from "openrct2-flexui";
 import { sharedStorageNamespace } from "../helpers/environment";
 import { Theme, themes } from "../themeSettings/themes";
 import BaseController from "./BaseController";
-
-// eslint-disable-next-line no-use-before-define
-type settingsKeys = Record<keyof ThemeController, string>;
-type LookupKeyType = Partial<settingsKeys>;
+import { debug } from "../helpers/logger";
 
 export default class ThemeController extends BaseController<Theme> {
-    lookupKeys: LookupKeyType;
+    lookupKeys;
 
     savedThemes!: ArrayStore<Theme>;
 
@@ -22,36 +19,70 @@ export default class ThemeController extends BaseController<Theme> {
         };
         this.setDefaults();
         this.loadThemesFromStorage();
+        this.subscribeToAdditionalThemes();
+        this.removeEmptyThemesFromDropdown();
     }
 
-    // getValue(value: keyof typeof this.lookupKeys) {
-    //     // the typeof lookupKeys is suggesting that it might be undefined, but it won't be.
-    //     // casting it to string to avoid i think a 'never' case
-    //     const thisKey = this.lookupKeys[value] as string;
-    //     return context.sharedStorage.get(thisKey, this[value].get());
-    // }
+    addNewThemeToModel(newTheme: Theme) {
+        // add the new theme into storage
+        const newThemeIndex = this.savedThemes.push(newTheme);
+        // save the new Theme[] into storage
+        this.setValue("savedThemes", this.savedThemes.get());
+        // swap the current theme to the new theme
+        this.selectedIndex.set(newThemeIndex);
+        this.selected.set(this.all.get()[newThemeIndex]);
+    }
 
-    // setValue<T>(key: keyof typeof this.lookupKeys, value: T) {
-    //     const thisKey = this.lookupKeys[key] as string;
-    //     context.sharedStorage.set(thisKey, value);
-    // }
+    removeEmptyThemesFromDropdown() {
+        // filter out ride without both a name and colours
+        const cleanSavedThemes = this.savedThemes
+            .get()
+            .filter(
+                (theme) =>
+                    theme.colours.themeColours.length > 0 &&
+                    theme.name.length > 0
+            );
+        // set that into storage
+        this.setValue("savedThemes", cleanSavedThemes);
+
+        // do the same filter for all themes
+        const allThemes = this.all.get();
+        const nonEmptyThemeArray = allThemes.filter(
+            (theme) =>
+                theme.colours.themeColours.length > 0 && theme.name.length > 0
+        );
+        this.all.set(nonEmptyThemeArray);
+    }
+
+    getValue(value: keyof typeof this.lookupKeys) {
+        // the typeof lookupKeys is suggesting that it might be undefined, but it won't be.
+        // casting it to string to avoid i think a 'never' case
+        const thisKey = this.lookupKeys[value] as string;
+        return context.sharedStorage.get(thisKey, this[value].get());
+    }
+
+    setValue<T>(key: keyof typeof this.lookupKeys, value: T) {
+        const thisKey = this.lookupKeys[key] as string;
+        context.sharedStorage.set(thisKey, value);
+    }
 
     setDefaults() {
+        // Load themes from storage
         this.savedThemes = arrayStore<Theme>([]);
     }
 
-    addCustomTheme(newTheme: Theme) {
-        // save the theme into storage
-        // reload the theme dropdown
-        // swap the current theme to the new theme
+    subscribeToAdditionalThemes() {
+        debug(`subscribing to savedThemes.`);
+        this.all.set([...themes, ...this.savedThemes.get()]);
+        this.savedThemes.subscribe((savedThemes) => {
+            debug(`savedThemes changed. adjusting ThemeController.all.`);
+            this.all.set([...themes, ...savedThemes]);
+        });
     }
 
-    loadThemesFromStorage() {}
-
-    saveThemeToStorage(newTheme: Theme) {
-        // get the currently saved Theme[] from storage
-        // push newTheme onto it
-        // set it with the newly added Theme[]
-        this.getValue(this.)
+    loadThemesFromStorage() {
+        this.savedThemes = arrayStore<Theme>(
+            this.getValue("savedThemes") || []
+        );
     }
 }
