@@ -249,12 +249,21 @@ class ThemeCreationController {
                                         },
                                     }),
                                     // DELETE THEME BUTTON
-                                    toggle({
+                                    button({
                                         text: "> Manage",
                                         width: buttonWidth,
                                         height: 25,
-                                        onChange: (t) => {
-                                            this.manageThemesActive.set(t);
+                                        onClick: () => {
+                                            // this.manageThemesActive.set(t);
+                                            if (!ui.getWindow("themeManager-2"))
+                                                ui.openWindow({
+                                                    classification:
+                                                        "themeManager-2",
+                                                    width: 200,
+                                                    height: 200,
+                                                    id: 2,
+                                                    title: `Manage Themes`,
+                                                });
                                         },
                                     }),
                                 ],
