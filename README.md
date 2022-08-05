@@ -12,7 +12,7 @@
 #### The Ride Painter plugin makes recolouring your park a breeze!
 
 <p align = 'center'>
-<img src="screenshots/plugin-window-example.jpeg" alt="Plugin window" width="700"/>
+<img src="screenshots/plugin-window-example.jpg" alt="Plugin window" width="700"/>
 <img src="screenshots/4 type examples.jpeg" alt="drawing" width="400"/>
 </p>
 
