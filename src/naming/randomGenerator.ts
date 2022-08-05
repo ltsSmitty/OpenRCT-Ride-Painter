@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // /* eslint-disable max-len */
 // function nameGen(type)
 // {

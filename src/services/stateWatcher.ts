@@ -232,6 +232,7 @@ export default class StateWatcher implements IDisposable {
    * Triggers every game tick. Does not trigger in pause mode.
    */
   private onGameTickUpdate(): void {
+    // eslint-disable-next-line no-useless-return
     if (this.isDisposed) return;
   }
 
