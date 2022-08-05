@@ -41,7 +41,7 @@ const config = {
         wrap_iife: true,
         // TODO change url to final.
         preamble:
-          "// Get the latest version: https://github.com/thesm17/OpenRCT-Ride-Painter",
+          "// Get the latest version: https://github.com/ltsSmitty/OpenRCT-Ride-Painter",
         beautify: isDev,
       },
       mangle: {

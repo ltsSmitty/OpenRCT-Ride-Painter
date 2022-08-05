@@ -1,8 +1,8 @@
 {
   "name": "ride-painter-ltssmitty",
-  "author": "thesm17",
+  "author": "ltsSmitty",
   "license": "MIT",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "",
   "main": "app.js",
   "scripts": {
@@ -14,12 +14,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thesm17/OpenRCT-Ride-Painter"
+    "url": "git+https://github.com/ltsSmitty/OpenRCT-Ride-Painter"
   },
   "bugs": {
-    "url": "https://github.com/thesm17/OpenRCT-Ride-Painter/issues"
+    "url": "https://github.com/ltsSmitty/OpenRCT-Ride-Painter/issues"
   },
-  "homepage": "https://github.com/thesm17/OpenRCT-Ride-Painter#readme",
+  "homepage": "https://github.com/ltsSmitty/OpenRCT-Ride-Painter#readme",
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^3.1.0",
