@@ -11,14 +11,17 @@
 
 #### The Ride Painter plugin makes recolouring your park a breeze!
 
-<img src="screenshots/plugin-window-example.png" alt="Plugin window" width="700"/> <img src="screenshots/4 type examples.jpeg" alt="drawing" width="400"/>
+<p align = 'center'>
+<img src="screenshots/plugin-window-example.jpeg" alt="Plugin window" width="700"/>
+<img src="screenshots/4 type examples.jpeg" alt="drawing" width="400"/>
+</p>
 
-## Changes
+## Changes new to 1.2.0
 
-- FEAT: Added sidebar to show currently selected rides
+- Feat: Added sidebar to show currently selected rides
   - Navigate to and paint individual rides from the plugin window.
-- FEAT: Change station styles for selected rides
-- FIX: Starting rides are no longer repainted accidentally if the toggle is selected
+- Feat: Change station styles for selected rides
+- Fix: Starting rides are no longer repainted accidentally if the toggle is selected
 
 ## Features
 
@@ -75,7 +78,7 @@ The plugin should work in multiplayer, though I have yet to test it. I'd love fe
 
 ## Future Plans
 
-- Almost finished: Ability for users to create their own themes and share them to others.
+- _Almost finished_: Ability for users to create their own themes and share them to others.
 - An 'undo' button to undo recent paints
 - Ability to paginate through selected rides in the right column
 
