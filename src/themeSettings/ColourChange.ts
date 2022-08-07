@@ -109,6 +109,9 @@ export default class ColourChange {
 
     const ridesToTheme = filterRidesToTheme(ridesToPaint);
 
+    // add the final colour to
+    rideController.rideHistory.pushRidesToPaintHistory(ridesToTheme);
+
     // group rides together so they're painted identically
     const groupedRides = currentGrouping.applyGrouping(ridesToTheme);
 

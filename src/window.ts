@@ -27,6 +27,7 @@ import stationStyleElements from "./Components/stationStyleSection";
 import FeatureController from "./controllers/FeatureController";
 import RidePaintController from "./Components/RideRepaintSection";
 import ThemeCreationController from "./Components/ThemeCreationSection";
+import ridePaintSection from "./Components/RidePaintSection";
 
 // Set up empty methods that will be overwritten inside StateWatcher
 export class WindowWatcher {
@@ -111,19 +112,20 @@ export const themeWindow = (featureController: FeatureController) => {
               // SETTINGS
               settingsSectionElements(settingsController),
               stationStyleElements(stationController, rideController),
-              button({
-                height: 30,
-                padding: "5px",
-                // width: "80%",
-                text: "6. Paint selected rides",
-                disabled: compute(
-                  rideController.selectedRides,
-                  (rides) => (rides?.length || -1) <= 0
-                ),
-                onClick: () => ColourChange.colourRides(featureController),
-                tooltip: `Nothing changing?
-                                    Make sure to enable 'Allow repainting of already painted rides'`,
-              }),
+              ridePaintSection(featureController),
+              // button({
+              //   height: 30,
+              //   padding: "5px",
+              //   // width: "80%",
+              //   text: "6. Paint selected rides",
+              //   disabled: compute(
+              //     rideController.selectedRides,
+              //     (rides) => (rides?.length || -1) <= 0
+              //   ),
+              //   onClick: () => ColourChange.colourRides(featureController),
+              //   tooltip: `Nothing changing?
+              //                       Make sure to enable 'Allow repainting of already painted rides'`,
+              // }),
             ],
           }),
 
